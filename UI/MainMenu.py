@@ -2,7 +2,8 @@ from datetime import datetime
 import tkinter as tk
 from tkinter import ttk
 from UI.TKinter_addons.Entry_Placeholder import EntryWithPlaceholder
-from UI.TKinter_addons.Text_modification import ChatText
+from UI.TKinter_addons.Text_chat import ChatText
+from UI.TKinter_addons.Text_status import StatusText
 from functools import partial
 from threading import Thread
 from UI.SettingsMenu import Settings
@@ -30,8 +31,8 @@ class MainMenu:
         self.left_frame1 = tk.Frame(self.root)
 
         # Creating widgets on the left frame
-        self.left_text_status = ChatText(self.left_frame1)
-        self.left_text_status.configure(wrap=tk.WORD, height=2, width=20)
+        self.left_text_status = StatusText(self.left_frame1)
+        self.left_text_status.configure(wrap=tk.WORD, height=3, width=20)
         self.left_text_status.vbar.pack_forget()
         self.left_entry_ip = EntryWithPlaceholder(self.left_frame1, 'Type ip...')
         self.left_entry_nickname = EntryWithPlaceholder(self.left_frame1, 'Type your nickname...')
@@ -46,7 +47,7 @@ class MainMenu:
         )
 
         # Placing widgets on the left frame
-        self.left_text_status.pack(fill=tk.X)
+        self.left_text_status.pack(fill=tk.X, pady=(0, 10))
         self.left_entry_nickname.pack(fill=tk.X)
         self.left_entry_ip.pack(fill=tk.X)
         self.left_label_port.pack(fill=tk.X)
@@ -101,4 +102,4 @@ class MainMenu:
                 'message': 'system-message'
             }
         )
-        self.left_text_status.update_client_status('connected', 127)
+        self.left_text_status.create_status('client', 'connected', 55)

@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter.scrolledtext import ScrolledText
 from datetime import datetime
+from ast import literal_eval
 
 
 class ChatText(ScrolledText):
@@ -55,21 +56,3 @@ class ChatText(ScrolledText):
         # going down if the user in the end of a text
         if scroll:
             self.yview_scroll(111, 'units')
-
-    def update_client_status(self, status: str, ping: int):
-        """This is for left status only!"""
-        self.configure(state=tk.NORMAL)
-        self.delete('1.0', tk.END)
-        self.create_message(
-            {'status': status},
-            datetime.now(),
-            'Status - {status}',
-            {'status': 'username'}
-        )
-        self.create_message(
-            {'ping': ping.__str__()},
-            datetime.now(),
-            'Your ping is - {ping}',
-            {'ping': 'system-message'},
-            False
-        )
