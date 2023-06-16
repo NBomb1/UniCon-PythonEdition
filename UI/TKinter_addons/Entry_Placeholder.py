@@ -13,6 +13,7 @@ class EntryWithPlaceholder(tk.Entry):
         self.bind("<FocusOut>", self._foc_out)
 
         self._put_placeholder()
+        self.configure()
 
     def _put_placeholder(self):
         self.insert(0, self.placeholder)

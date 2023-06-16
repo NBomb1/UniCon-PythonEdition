@@ -102,4 +102,4 @@ class MainMenu:
                 'message': 'system-message'
             }
         )
-        self.left_text_status.create_status('client', 'connected', 55)
+        self.left_text_status.create_status('mode is not chosen', 'online', 55)

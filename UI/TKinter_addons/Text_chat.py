@@ -23,11 +23,9 @@ class ChatText(ScrolledText):
         time = f"{'' if len(str(time.hour)) == 2 else '0'}{time.hour}:" \
                f"{'' if len(str(time.minute)) == 2 else '0'}{time.minute}:" \
                f"{'' if len(str(time.second)) == 2 else '0'}{time.second}"
-        text = 'scheme.format(' + (str(data).replace(': ', '=')[1:-1]) + ', time=time)'
+        text = scheme
         for i in data.keys():
-            text = text.replace(f'"{i}"=', f"{i}=")
-            text = text.replace(f"'{i}'=", f"{i}=")
-        text = eval(text) + ('\n' if new_line else '')
+            text = text.replace('{' + f'{i}' + '}', data.get(i))
 
         # inserting text to widget
         self.insert(tk.END, text)
