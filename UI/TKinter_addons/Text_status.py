@@ -1,11 +1,24 @@
 import tkinter as tk
 from tkinter.scrolledtext import ScrolledText
-from datetime import datetime
+
+# vocabulary
+# statuses
+online = 'online'
+offline = 'offline'
+connected = 'connected'
+disconnected = 'disconnected'
+reconnecting = 'reconnecting'
+hosting = 'hosting'
+# modes
+mode_is_not_chosen = 'mode is not chosen'
+client = 'client'
+host = 'host'
 
 
 class StatusText(ScrolledText):
     def __init__(self, master):
         super().__init__(master)
+
         # Creating ping text color
         # latency below 81 ms
         self.tag_configure("ping-good", background="green", foreground='white')
@@ -29,26 +42,29 @@ class StatusText(ScrolledText):
         self.tag_configure("mode-client", foreground='white', background='goldenrod')
         self.tag_configure("mode-host", foreground='white', background='black')
 
-        # disabling user text changing
+        # setting default looking ui
+        self.create_status('mode is not chosen', 'online', 55)
         self.configure(state=tk.DISABLED)
 
     def create_status(self, mode: str, status: str, ping: int | str | None):
         # checking typos
-        assert mode in ['mode is not chosen', 'client', 'host']
-        assert status in ['online', 'offline', 'connected', 'disconnected', 'reconnecting', 'hosting']
+        assert mode in [mode_is_not_chosen, client, host]
+        assert status in [online, offline, connected, disconnected, reconnecting, hosting]
 
         # preparation
         self.configure(state=tk.NORMAL)
         index = len(self.get('1.0', tk.END)) - len(self.get('1.0', tk.END).replace('\n', ''))
 
         # baking text
-        text = f"You are - {mode}\n" \
-               f"Status: {status}"
-        if status == 'connected':
+        text = (
+            f"You are - {mode}\n" if mode != mode_is_not_chosen else mode_is_not_chosen.capitalize() + '\n' +
+            f"Status: {status}"
+        )
+        if status == connected:
             text += f'\nYour ping: {ping}'
-        elif status == 'reconnecting':
-            text += f'\nReconnecting in: {ping}' if isinstance(ping, int) else '\nReconnecting'
-        elif status == 'disconnected':
+        elif status == reconnecting:
+            text += f'\nReconnecting in: {ping}' if isinstance(ping, int) else f'\nReconnecting{ping}'
+        elif status == disconnected:
             text += f' {ping}'
 
         # inserting text to widget
@@ -57,9 +73,10 @@ class StatusText(ScrolledText):
         # choosing colors
 
         # coloring
-        self.tag_add('mode-' + mode, '1.10', '1.99')
+        if mode != mode_is_not_chosen:
+            self.tag_add('mode-' + mode, '1.10', '1.99')
         self.tag_add('status-' + status, '2.8', '2.99')
-        if status == 'connected':
+        if status == connected:
             quality = (
                 'ping-good' if ping <= 80
                 else 'ping-middle' if ping <= 250

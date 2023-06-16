@@ -1,12 +1,15 @@
-from datetime import datetime
 import tkinter as tk
 from tkinter import ttk
 from UI.TKinter_addons.Entry_Placeholder import EntryWithPlaceholder
-from UI.TKinter_addons.Text_chat import ChatText
 from UI.TKinter_addons.Text_status import StatusText
+from UI.MainMenuTabs.TabChat import TabChat
+from UI.MainMenuTabs.TabParticipants import TabParticipants
+from UI.MainMenuTabs.TabFiles import TabFiles
+from UI.MainMenuTabs.TabLogs import TabLogs
+from UI.SettingsMenu import Settings
+from UI.window.WidnowCenter import center_main
 from functools import partial
 from threading import Thread
-from UI.SettingsMenu import Settings
 import settings
 
 
@@ -23,6 +26,7 @@ class MainMenu:
 
         self._left()
         self._right()
+        center_main(self.root)
 
         self.root.mainloop()
 
@@ -62,10 +66,10 @@ class MainMenu:
         self.right_notebook = ttk.Notebook(self.root)
 
         # Creating tabs
-        self.tab_chat = tk.Frame(self.right_notebook)
-        self.tab_participants = tk.Frame(self.right_notebook)
-        self.tab_files = tk.Frame(self.right_notebook)
-        self.tab_logs = tk.Frame(self.right_notebook)
+        self.tab_chat = TabChat(self.right_notebook)
+        self.tab_participants = TabParticipants(self.right_notebook)
+        self.tab_files = TabFiles(self.right_notebook)
+        self.tab_logs = TabLogs(self.right_notebook)
 
         # Adding tabs to tab manager
         self.right_notebook.add(self.tab_chat, text='Chat')
@@ -75,31 +79,3 @@ class MainMenu:
 
         # Placing tab manager
         self.right_notebook.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=5)
-
-        # Chat
-        self.chat_button_send = tk.Button(self.tab_chat, text='send')
-        self.chat_text = ChatText(self.tab_chat)
-        self.chat_text.configure(wrap=tk.WORD, height=20)
-        self.chat_entry_message = EntryWithPlaceholder(
-            self.tab_chat,
-            'Type your message...'
-        )
-
-        # Placing widgets
-        self.chat_text.pack(fill=tk.X, side=tk.TOP, anchor=tk.N)
-        self.chat_entry_message.pack(side=tk.LEFT, anchor=tk.N, fill=tk.X, expand=tk.YES, ipady=3, pady=(4, 0))
-        self.chat_button_send.pack(ipadx=10, pady=(4, 0))
-
-        self.chat_text.create_message(
-            {
-                'system': 'system',
-                'message': 'Chat is loaded successfully!'
-             },
-            datetime.now(),
-            '<{system}> {message}',
-            {
-                'system': 'username',
-                'message': 'system-message'
-            }
-        )
-        self.left_text_status.create_status('mode is not chosen', 'online', 55)
