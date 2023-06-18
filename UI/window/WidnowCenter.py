@@ -17,6 +17,7 @@ def center_main(win: tk.Tk):
 
 
 def center_child(child: tk.Toplevel, root: tk.Tk):
-    x = root.winfo_x() + root.winfo_width() / 2 - (400 / 2)
-    y = root.winfo_y() + root.winfo_height() / 2 - (300 / 2)
+    child.update_idletasks()
+    x = root.winfo_x() + root.winfo_width() / 2 - (child.winfo_width() / 2)
+    y = root.winfo_y() + root.winfo_height() / 2 - (child.winfo_height() / 2)
     child.geometry('%dx%d+%d+%d' % (child.winfo_width(), child.winfo_height(), x, y))

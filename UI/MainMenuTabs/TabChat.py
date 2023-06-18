@@ -9,20 +9,20 @@ class TabChat(tk.Frame):
         super().__init__(master)
 
         # Creating chat widgets
-        self.chat_button_send = tk.Button(self, text='send')
-        self.chat_text = ChatText(self)
-        self.chat_text.configure(wrap=tk.WORD, height=20)
-        self.chat_entry_message = EntryWithPlaceholder(
+        self.button_send = tk.Button(self, text='send')
+        self.text_chat = ChatText(self)
+        self.text_chat.configure(wrap=tk.WORD, height=20)
+        self.entry_message = EntryWithPlaceholder(
             self,
             'Type your message...'
         )
 
         # Placing widgets
-        self.chat_text.pack(fill=tk.X, side=tk.TOP, anchor=tk.N)
-        self.chat_entry_message.pack(side=tk.LEFT, anchor=tk.N, fill=tk.X, expand=tk.YES, ipady=3, pady=(4, 0))
-        self.chat_button_send.pack(ipadx=10, pady=(4, 0))
+        self.text_chat.pack(fill=tk.X, side=tk.TOP, anchor=tk.N)
+        self.entry_message.pack(side=tk.LEFT, anchor=tk.N, fill=tk.X, expand=tk.YES, ipady=3, pady=(4, 0))
+        self.button_send.pack(ipadx=10, pady=(4, 0))
 
-        self.chat_text.create_message(
+        self.text_chat.create_message(
             {
                 'system': 'system',
                 'message': 'Chat is loaded successfully!'
@@ -36,5 +36,5 @@ class TabChat(tk.Frame):
         )
 
         # setting by defaults
-        self.chat_entry_message.configure(state=tk.DISABLED)
-        self.chat_button_send.configure(state=tk.DISABLED)
+        self.entry_message.configure(state=tk.DISABLED)
+        self.button_send.configure(state=tk.DISABLED)

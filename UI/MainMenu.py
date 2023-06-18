@@ -6,10 +6,9 @@ from UI.MainMenuTabs.TabChat import TabChat
 from UI.MainMenuTabs.TabParticipants import TabParticipants
 from UI.MainMenuTabs.TabFiles import TabFiles
 from UI.MainMenuTabs.TabLogs import TabLogs
-from UI.SettingsMenu import Settings
+from UI.window.ChildWindows.Settings.SettingsMenu import Settings
 from UI.window.WidnowCenter import center_main
 from functools import partial
-from threading import Thread
 import settings
 
 
@@ -19,10 +18,6 @@ class MainMenu:
 
         self.root.title('1C PROJECT - ' + settings.MainInfo.date)
         self.root.wm_minsize(900, 450)
-
-        self.root.grid_columnconfigure(0, minsize=170)
-        self.root.grid_rowconfigure(0, weight=1)
-        self.root.grid_columnconfigure(2, weight=1)
 
         self._left()
         self._right()
@@ -37,12 +32,26 @@ class MainMenu:
         # Creating widgets on the left frame
         self.left_text_status = StatusText(self.left_frame1)
         self.left_text_status.configure(wrap=tk.WORD, height=3, width=20)
-        self.left_text_status.vbar.pack_forget()
         self.left_entry_ip = EntryWithPlaceholder(self.left_frame1, 'Type ip...')
         self.left_entry_nickname = EntryWithPlaceholder(self.left_frame1, 'Type your nickname...')
-        self.left_label_port = tk.Label(self.left_frame1, text='Port channel: ')
+        self.left_label_port = tk.Label(self.left_frame1, text='Port: ')
 
-        self.left_button_settings = tk.Button(self.left_frame1, text='Settings', command=partial(Settings, self.root))
+        self.left_button_connect = tk.Button(
+            self.left_frame1,
+            text='Connect to the server',
+            width=20
+        )
+        self.left_button_create_server = tk.Button(
+            self.left_frame1,
+            text='Create the server',
+            width=20
+        )
+        self.left_button_settings = tk.Button(
+            self.left_frame1,
+            text='Settings',
+            command=partial(Settings, self.root),
+            width=20
+        )
 
         self.left_spinbox_port = tk.Spinbox(
             self.left_frame1,
@@ -51,15 +60,17 @@ class MainMenu:
         )
 
         # Placing widgets on the left frame
-        self.left_text_status.pack(fill=tk.X, pady=(0, 10))
-        self.left_entry_nickname.pack(fill=tk.X)
-        self.left_entry_ip.pack(fill=tk.X)
-        self.left_label_port.pack(fill=tk.X)
-        self.left_spinbox_port.pack(fill=tk.X)
-        self.left_button_settings.pack(side=tk.BOTTOM, ipadx=5)
+        self.left_text_status.pack(fill=tk.X, pady=(5, 10), padx=(5, 0))
+        self.left_entry_nickname.pack(fill=tk.X, padx=(5, 0))
+        self.left_entry_ip.pack(fill=tk.X, padx=(5, 0))
+        self.left_label_port.pack(fill=tk.X, padx=(5, 0))
+        self.left_spinbox_port.pack(fill=tk.X, padx=(5, 0))
+        self.left_button_settings.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))
+        self.left_button_connect.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))
+        self.left_button_create_server.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))
 
         # Placing frames on the main screen
-        self.left_frame1.pack(side=tk.LEFT, fill=tk.Y, anchor=tk.W)
+        self.left_frame1.pack(side=tk.LEFT, fill=tk.Y)
 
     def _right(self):
         # Creating tab manager

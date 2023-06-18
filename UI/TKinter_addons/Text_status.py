@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter.scrolledtext import ScrolledText
 
 # vocabulary
 # statuses
@@ -13,9 +12,11 @@ hosting = 'hosting'
 mode_is_not_chosen = 'mode is not chosen'
 client = 'client'
 host = 'host'
+all_modes = [mode_is_not_chosen, client, host]
+all_statuses = [online, offline, connected, disconnected, reconnecting, hosting]
 
 
-class StatusText(ScrolledText):
+class StatusText(tk.Text):
     def __init__(self, master):
         super().__init__(master)
 
@@ -48,8 +49,8 @@ class StatusText(ScrolledText):
 
     def create_status(self, mode: str, status: str, ping: int | str | None):
         # checking typos
-        assert mode in [mode_is_not_chosen, client, host]
-        assert status in [online, offline, connected, disconnected, reconnecting, hosting]
+        assert mode in all_modes
+        assert status in all_statuses
 
         # preparation
         self.configure(state=tk.NORMAL)
