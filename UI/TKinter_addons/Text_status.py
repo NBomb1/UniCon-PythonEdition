@@ -47,7 +47,7 @@ class StatusText(tk.Text):
         self.create_status('mode is not chosen', 'online', 55)
         self.configure(state=tk.DISABLED)
 
-    def create_status(self, mode: str, status: str, ping: int | str | None):
+    def create_status(self, mode: str, status: str, ping: int or str or None):
         # checking typos
         assert mode in all_modes
         assert status in all_statuses

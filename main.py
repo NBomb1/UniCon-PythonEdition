@@ -4,7 +4,6 @@ Project started - 2023y 06m 12d
 Extra modules are used:
 packaging - 23.1
 """
-
 from UI.MainMenu import MainMenu
 
 

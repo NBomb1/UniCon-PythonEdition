@@ -6,28 +6,34 @@ from UI.MainMenuTabs.TabChat import TabChat
 from UI.MainMenuTabs.TabParticipants import TabParticipants
 from UI.MainMenuTabs.TabFiles import TabFiles
 from UI.MainMenuTabs.TabLogs import TabLogs
-from UI.window.ChildWindows.Settings.SettingsMenu import Settings
+from UI.ChildFrames.SettingsMenu import Settings
 from UI.window.WidnowCenter import center_main
-from functools import partial
 import settings
 
 
 class MainMenu:
     def __init__(self):
         self.root = tk.Tk()
-
-        self.root.title('1C PROJECT - ' + settings.MainInfo.date)
         self.root.wm_minsize(900, 450)
+        self.changeTitle("MainMenu")
+
+        # Main menu frame
+        self.mainFrame = tk.Frame(self.root)
+        self.mainFrame.pack(fill=tk.BOTH, expand=True)
+
+        # Settings frame
+        self.settingsFrame = Settings(self.mainFrame)
 
         self._left()
         self._right()
+
         center_main(self.root)
 
         self.root.mainloop()
 
     def _left(self):
         # Creating two frames that will contain all sorts of widgets
-        self.left_frame1 = tk.Frame(self.root)
+        self.left_frame1 = tk.Frame(self.mainFrame)
 
         # Creating widgets on the left frame
         self.left_text_status = StatusText(self.left_frame1)
@@ -49,7 +55,7 @@ class MainMenu:
         self.left_button_settings = tk.Button(
             self.left_frame1,
             text='Settings',
-            command=partial(Settings, self.root),
+            command=self.goSettings,
             width=20
         )
 
@@ -74,7 +80,7 @@ class MainMenu:
 
     def _right(self):
         # Creating tab manager
-        self.right_notebook = ttk.Notebook(self.root)
+        self.right_notebook = ttk.Notebook(self.mainFrame)
 
         # Creating tabs
         self.tab_chat = TabChat(self.right_notebook)
@@ -90,3 +96,29 @@ class MainMenu:
 
         # Placing tab manager
         self.right_notebook.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=5)
+
+    def changeTitle(self, name: str):
+        self.root.title('1C PROJECT - ' + settings.MainInfo.date + " - " + name)
+
+    def goSettings(self):
+        self.right_notebook.pack_forget()
+        self.settingsFrame.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=5)
+        self.changeTitle("Settings")
+        self.left_button_connect.pack_forget()
+        self.left_button_create_server.pack_forget()
+        self.left_button_settings.configure(
+            text="Return",
+            command=self.goMainFrame
+        )
+
+    def goMainFrame(self):
+        self.settingsFrame.pack_forget()
+        self.right_notebook.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=5)
+        self.changeTitle("MainMenu")
+        self.left_button_connect.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))
+        self.left_button_create_server.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))
+        self.left_button_settings.configure(
+            text="Settings",
+            command=self.goSettings
+        )
+
