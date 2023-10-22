@@ -8,6 +8,7 @@ from UI.MainMenuTabs.TabFiles import TabFiles
 from UI.MainMenuTabs.TabLogs import TabLogs
 from UI.ChildFrames.SettingsMenu import Settings
 from UI.window.WidnowCenter import center_main
+from Functions.ModuleHandler.moduleHandler import ModuleHandler
 import settings
 
 
@@ -26,6 +27,7 @@ class MainMenu:
 
         self._left()
         self._right()
+        self.module = ModuleHandler(self.root, self.right_notebook)
 
         center_main(self.root)
 

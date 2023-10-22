@@ -13,6 +13,7 @@ from random import randint
 from Functions.Network.MainChannel.Info import Info
 from Functions.Server.PreAuthAccount import PreAccount
 from Functions.Server.Account import Account
+from Functions.Server.ServerPrefences import ServerInformation
 
 
 class Authentication:
@@ -33,11 +34,11 @@ class Authentication:
             return None
 
     @staticmethod
-    def authentication(account: PreAccount, password: str) -> None:
+    def authentication(account: PreAccount, server: ServerInformation, s: socket.socket) -> None:
         if (
                 Authentication._1_PhaseRecognition(account.socket) and  # Определение
                 Authentication._2_PhaseBuiltInModuleCheck(account.socket) and  # Проверка версий
-                Authentication._3_PhasePasswordCheck(account.socket, password) and  # Ввод пароля
+                Authentication._3_PhasePasswordCheck(account.socket, server.password) and  # Ввод пароля
                 Authentication._4_PhaseAllModulesCheck(account.socket) and  # Проверка аддонов
                 Authentication._5_PhaseModuleConnection(account.socket)  # Подключение аддонов
         ):
@@ -51,14 +52,16 @@ class Authentication:
                 return
             id_ = Authentication.generate_random_id(8)
 
-            Account(
+            account.socket.send(Authentication._fillText(id_, Info.preAuthMessageLength))
+
+            server.handler.newAccount(Account(
                 socket=account.socket,
                 ip=account.ip,
                 port=account.port,
                 nickname=nickname,
                 pc_name=pc,
                 id_=id_
-            )
+            ))
 
     @staticmethod
     def _1_PhaseRecognition(s: socket.socket) -> bool:

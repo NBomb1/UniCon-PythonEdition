@@ -43,7 +43,8 @@ class ChatText(ScrolledText):
                 self.tag_add(
                     list(colorscheme.values())[i],
                     f"{index}.{text.find(data.get(list(colorscheme.keys())[i])) }",
-                    f"{index}.{text.find(data.get(list(colorscheme.keys())[i])) + len(data.get(list(colorscheme.keys())[i]))}"
+                    f"{index}."
+                    f"{text.find(data.get(list(colorscheme.keys())[i])) + len(data.get(list(colorscheme.keys())[i]))}"
                 )
             except TypeError as error:
                 print(error)

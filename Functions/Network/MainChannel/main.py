@@ -21,10 +21,7 @@ class MainChannel:
         password = Info.defaultPassword if password is None else password
         socket = s.socket(s.AF_INET, s.SOCK_STREAM)
         socket.bind((ip, port))
-        socket.listen(listeners + 1)
-        self.manager = ServerInformation(ip, port, password)
+        socket.listen(listeners)
+        self.manager = ServerInformation(ip, port, password, Handlers(socket, self.manager))
 
-        self._handler = Handlers(socket, password)
-        self._handler.handleIncomingConnections()
-
-        self._handler.RegisterConnectionHandler()
+        self.manager.handler.handleIncomingConnections()
