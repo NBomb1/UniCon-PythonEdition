@@ -4,10 +4,20 @@ import tkinter.ttk as ttk
 
 
 class Settings(ttk.Notebook):
+    # widgets
+    label_spinbox_from = None
+    label_port_from = None
+    labelframe_port = None
+    label_port_to = None
+    label_spinbox_to = None
+
     def __init__(self, master: tk.Widget):
         super().__init__(master)
 
         self.settingsFrame = tk.Frame()
+        self.fill_main()
+
+    def fill_main(self):
         self.add(self.settingsFrame, text="Main Settings")
 
         self.labelframe_port = tk.LabelFrame(self.settingsFrame, text='We can use ports')

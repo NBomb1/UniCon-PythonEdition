@@ -9,11 +9,12 @@ from UI.MainMenuTabs.TabLogs import TabLogs
 from UI.ChildFrames.SettingsMenu import Settings
 from UI.window.WidnowCenter import center_main
 from Functions.ModuleHandler.moduleHandler import ModuleHandler
+from Functions.ModuleHandler.moduleAPI import API
 import settings
 
 
 class MainMenu:
-    def __init__(self):
+    def __init__(self, log):
         self.root = tk.Tk()
         self.root.wm_minsize(900, 450)
         self.changeTitle("MainMenu")
@@ -27,7 +28,17 @@ class MainMenu:
 
         self._left()
         self._right()
-        self.module = ModuleHandler(self.root, self.right_notebook)
+        self.module = ModuleHandler(
+            API(
+                log,
+                self.root,
+                self.right_notebook,
+                self.settingsFrame,
+                self.left_frame1,
+                self.mainFrame,
+                self.noModule
+            )
+        )
 
         center_main(self.root)
 
@@ -90,11 +101,13 @@ class MainMenu:
         self.tab_files = TabFiles(self.right_notebook)
         self.tab_logs = TabLogs(self.right_notebook)
 
+        self.noModule = tk.Label(self.mainFrame, text="No modules were loaded.", font=40)
+
         # Adding tabs to tab manager
-        self.right_notebook.add(self.tab_chat, text='Chat')
-        self.right_notebook.add(self.tab_participants, text='Participants')
-        self.right_notebook.add(self.tab_files, text='Files')
-        self.right_notebook.add(self.tab_logs, text='Logs')
+        # self.right_notebook.add(self.tab_chat, text='Chat')
+        # self.right_notebook.add(self.tab_participants, text='Participants')
+        # self.right_notebook.add(self.tab_files, text='Files')
+        # self.right_notebook.add(self.tab_logs, text='Logs')
 
         # Placing tab manager
         self.right_notebook.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=5)
@@ -103,7 +116,6 @@ class MainMenu:
         self.root.title('1C PROJECT - ' + settings.MainInfo.date + " - " + name)
 
     def goSettings(self):
-        self.right_notebook.pack_forget()
         self.settingsFrame.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=5)
         self.changeTitle("Settings")
         self.left_button_connect.pack_forget()
@@ -112,10 +124,13 @@ class MainMenu:
             text="Return",
             command=self.goMainFrame
         )
+        if len(self.module.active):
+            self.right_notebook.pack_forget()
+        else:
+            self.noModule.pack_forget()
 
     def goMainFrame(self):
         self.settingsFrame.pack_forget()
-        self.right_notebook.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=5)
         self.changeTitle("MainMenu")
         self.left_button_connect.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))
         self.left_button_create_server.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))
@@ -123,4 +138,7 @@ class MainMenu:
             text="Settings",
             command=self.goSettings
         )
-
+        if len(self.module.active):
+            self.right_notebook.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=5)
+        else:
+            self.noModule.pack(anchor=tk.CENTER, expand=True)

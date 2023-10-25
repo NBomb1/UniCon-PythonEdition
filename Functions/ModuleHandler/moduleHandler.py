@@ -5,6 +5,8 @@ import tkinter as tk
 import tkinter.ttk as ttk
 
 from Functions.ModuleHandler.failedModule import FailedModule
+from Functions.ModuleHandler.activeModule import ActiveModule
+from Functions.ModuleHandler.moduleAPI import API
 
 
 class ModuleHandler:
@@ -12,9 +14,8 @@ class ModuleHandler:
     failed: list[FailedModule] = []
     active: list = []
 
-    def __init__(self, window: tk.Tk, notebook: ttk.Notebook):
-        self.window = window
-        self.notebook = notebook
+    def __init__(self, api: API):
+        self.api = api
 
         path1 = getcwd()  # getting path
         path1 += "\\Modules"
@@ -24,6 +25,10 @@ class ModuleHandler:
             file = path1 + "\\" + i
             if (module := self.load_module(file)) is not None:
                 self.activate_module(module, file)
+
+        if len(self.active) == 0:
+            self.api.noModule.pack(anchor=tk.CENTER, expand=True)
+            self.api.rightNotebook.pack_forget()
 
     def load_module(self, file: str):
         try:
@@ -38,13 +43,23 @@ class ModuleHandler:
 
     def activate_module(self, module: ModuleType, file: str):
         try:
-            self.active.append(
-                module.Module(
-                    self.window,
-                    self.notebook
-                )
+            active = module.Module(
+                self.api
             )
         except Exception as reason:
             self.failed.append(
                 FailedModule(file, "Activation error", reason)
             )
+            return
+        try:
+            self.active.append(
+                ActiveModule(
+                    active.name,
+                    active.version,
+                    active.author,
+                    active,
+                    module
+                )
+            )
+        except AttributeError as reason:
+            self.failed.append(FailedModule(file, "Not enough information", reason))
