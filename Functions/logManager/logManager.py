@@ -1,9 +1,7 @@
 import io
-from threading import Thread
 from os import getcwd, makedirs
 from datetime import datetime
 from inspect import getsourcefile
-import tkinter as tk
 
 import _tkinter
 

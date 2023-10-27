@@ -25,7 +25,7 @@ class TabChat(tk.Frame):
         self.text_chat.create_message(
             {
                 'system': 'system',
-                'message': 'Chat is loaded successfully!'
+                'message': 'Logs has been loaded successfully!'
              },
             datetime.now(),
             '<{system}> {message}',

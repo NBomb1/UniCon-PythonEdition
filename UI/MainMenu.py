@@ -107,7 +107,7 @@ class MainMenu:
         self.moduleLoaderError = tk.Label(self.mainFrame, text="No modules were loaded.", font=40)
 
         # Adding tabs to tab manager
-        # self.right_notebook.add(self.tab_chat, text='Chat')
+        # self.right_notebook.add(self.tab_chat, text='Logs')
         # self.right_notebook.add(self.tab_participants, text='Participants')
         # self.right_notebook.add(self.tab_files, text='Files')
         # self.right_notebook.add(self.tab_logs, text='Logs')
