@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
+
+from Functions.logManager.logManager import Logs
 from UI.TKinter_addons.Entry_Placeholder import EntryWithPlaceholder
 from UI.TKinter_addons.Text_status import StatusText
 from UI.MainMenuTabs.TabChat import TabChat
@@ -14,7 +16,7 @@ import settings
 
 
 class MainMenu:
-    def __init__(self, log):
+    def __init__(self, log: Logs):
         self.root = tk.Tk()
         self.root.wm_minsize(900, 450)
         self.changeTitle("MainMenu")
@@ -28,6 +30,7 @@ class MainMenu:
 
         self._left()
         self._right()
+
         self.module = ModuleHandler(
             API(
                 log,
@@ -36,7 +39,7 @@ class MainMenu:
                 self.settingsFrame,
                 self.left_frame1,
                 self.mainFrame,
-                self.noModule
+                self.moduleLoaderError
             )
         )
 
@@ -101,7 +104,7 @@ class MainMenu:
         self.tab_files = TabFiles(self.right_notebook)
         self.tab_logs = TabLogs(self.right_notebook)
 
-        self.noModule = tk.Label(self.mainFrame, text="No modules were loaded.", font=40)
+        self.moduleLoaderError = tk.Label(self.mainFrame, text="No modules were loaded.", font=40)
 
         # Adding tabs to tab manager
         # self.right_notebook.add(self.tab_chat, text='Chat')
@@ -127,7 +130,7 @@ class MainMenu:
         if len(self.module.active):
             self.right_notebook.pack_forget()
         else:
-            self.noModule.pack_forget()
+            self.moduleLoaderError.pack_forget()
 
     def goMainFrame(self):
         self.settingsFrame.pack_forget()
@@ -141,4 +144,4 @@ class MainMenu:
         if len(self.module.active):
             self.right_notebook.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=5)
         else:
-            self.noModule.pack(anchor=tk.CENTER, expand=True)
+            self.moduleLoaderError.pack(anchor=tk.CENTER, expand=True)

@@ -11,7 +11,7 @@ class API:
                  settings_notebook: ttk.Notebook,
                  left_frame: tk.Frame,
                  main_frame: tk.Frame,
-                 no_module: tk.Label
+                 moduleLoaderError: tk.Label
                  ):
         self.root = root
         self.rightNotebook = right_notebook
@@ -19,4 +19,4 @@ class API:
         self.logs = logs
         self.leftFrame = left_frame
         self.mainFrame = main_frame
-        self.noModule = no_module
+        self.moduleLoaderError = moduleLoaderError

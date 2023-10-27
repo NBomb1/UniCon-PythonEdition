@@ -11,8 +11,7 @@ from Functions.logManager.logManager import Logs
 def main():
     # setting up log manager
     logManager = Logs()
-    # logManager.registerId(0)
-    # logManager.registerFileLog(0)
+    logManager.registerId(0)
 
     MainMenu(logManager)  # Main code goes here
 

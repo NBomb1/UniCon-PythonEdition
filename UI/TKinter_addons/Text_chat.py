@@ -13,26 +13,22 @@ class ChatText(ScrolledText):
         self.tag_configure("message", foreground="red")
         self.configure(state=tk.DISABLED)
 
-    def create_message(self, data: dict, time: datetime, scheme: str, colorscheme: dict, new_line=True):
+    def create_message(self, data: dict, time: datetime, scheme: str, colorscheme: dict, new_line=True) -> int:
         # preparation
         scroll = (self.yview()[1] == 1)
         self.configure(state=tk.NORMAL)
         # length of all text minus length of text without '\n'
         index = len(self.get('1.0', tk.END)) - len(self.get('1.0', tk.END).replace('\n', ''))
 
-        # baking text
-        time = f"{'' if len(str(time.hour)) == 2 else '0'}{time.hour}:" \
-               f"{'' if len(str(time.minute)) == 2 else '0'}{time.minute}:" \
-               f"{'' if len(str(time.second)) == 2 else '0'}{time.second}"
+        # creating main default settings
+        data['time'] = str(time.time())
+
         text = scheme + ('\n' if new_line else '')
         for i in data.keys():
             text = text.replace('{' + f'{i}' + '}', data.get(i))
 
         # inserting text to widget
         self.insert(tk.END, text)
-
-        # creating main default settings
-        data['time'] = time
 
         if colorscheme.get('time') is None and (scheme.find('{time}') != -1):
             colorscheme['time'] = 'time'
@@ -50,9 +46,11 @@ class ChatText(ScrolledText):
                 print(error)
                 print('data = ', data)
                 print(list(colorscheme.keys())[i])
+                raise error
 
         # disabling user changing
         self.configure(state=tk.DISABLED)
         # going down if the user in the end of a text
         if scroll:
-            self.yview_scroll(111, 'units')
+            self.see(tk.END)
+        return len(text)

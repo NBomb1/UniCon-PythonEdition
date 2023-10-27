@@ -3,6 +3,9 @@ from threading import Thread
 from os import getcwd, makedirs
 from datetime import datetime
 from inspect import getsourcefile
+import tkinter as tk
+
+import _tkinter
 
 
 class Logs:
@@ -24,13 +27,10 @@ class Logs:
                      0)
 
     def sendLog(self, message: str, id_: int):
-        def calling():
-            for i in self.registeredFunctions[id_]:
-                i(message, id_)
-            if self.registeredFileLog.get(id_) is not None:
-                self.registeredFileLog[id_].write(f"[{datetime.now().__str__()}]: " + message + "\n")
-
-        Thread(target=calling).start()
+        for i in self.registeredFunctions[id_]:
+            i(message, id_)
+        if self.registeredFileLog.get(id_) is not None:
+            self.registeredFileLog[id_].write(f"[{datetime.now().__str__()}]: " + message + "\n")
 
     def registerFileLog(self, id_):
         if self.registeredFunctions.get(id_) is None:
@@ -54,6 +54,10 @@ class Logs:
 
     def closeFiles(self):
         for i in self.registeredFileLog.values():
-            self.sendLog(f'[LogManager] File ({i.name.replace(getcwd(), "")}) is closing.', 0)
+            try:
+                self.sendLog(f'[LogManager] File ({i.name.replace(getcwd(), "")}) is closing.', 0)
+            except _tkinter.TclError:
+                pass
+
             i.write(f"[{datetime.now().__str__()}]: [LogManager] File is closing. \n")
             i.close()
