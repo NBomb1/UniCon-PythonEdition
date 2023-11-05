@@ -6,6 +6,9 @@ Warning: Editing these variables can cause connection problems.
 from UI.Info import Info as UIInfo
 
 
+# {'version': 0}, 'text': 'ProjectSocketInterface16102023                                                                                                  ', 'text2': "{'Auth': '0.0.1', 'Security': '0.0.1', 'ModuleAuth': '0.0.1', 'MessageTransfer': '0.0.1', 'UI': '0.0.1'}
+
+
 class Info:
     AuthVersion = "0.0.1"
     SecurityVersion = "0.0.1"

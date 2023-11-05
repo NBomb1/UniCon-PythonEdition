@@ -1,6 +1,9 @@
 """
 Project started - 2023y 06m 12d
 
+Name Idea: Multifunctional network application - MNA
+ChatGPT's Idea: NetMaster
+
 Extra Modules are used:
 packaging - 23.1
 """
@@ -12,6 +15,8 @@ def main():
     # setting up log manager
     logManager = Logs()
     logManager.registerId(0)
+    logManager.registerId(-1)
+    # logManager.registerFileLog(0)
 
     MainMenu(logManager)  # Main code goes here
 

@@ -7,7 +7,7 @@ class ChatText(ScrolledText):
     """Can be used also for logs, not only for the chat."""
     def __init__(self, master):
         super().__init__(master)
-        self.tag_configure("system-message", background="green", foreground='white')
+        self.tag_configure("system-message", )
         self.tag_configure("username", foreground="green")
         self.tag_configure("time", foreground="blue")
         self.tag_configure("message", foreground="red")

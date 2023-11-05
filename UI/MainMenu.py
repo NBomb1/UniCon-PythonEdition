@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import simpledialog
 
+from Functions.Client.MainChannel import ClientMainChannel
+from Functions.Network.MainChannel.main import MainChannel
 from Functions.logManager.logManager import Logs
 from UI.TKinter_addons.Entry_Placeholder import EntryWithPlaceholder
 from UI.TKinter_addons.Text_status import StatusText
@@ -16,9 +19,13 @@ import settings
 
 
 class MainMenu:
+    server: MainChannel = None
+    client: ClientMainChannel = None
+
     def __init__(self, log: Logs):
+        self.logs = log
         self.root = tk.Tk()
-        self.root.wm_minsize(900, 450)
+        self.root.wm_minsize(925, 450)
         self.changeTitle("MainMenu")
 
         # Main menu frame
@@ -61,12 +68,14 @@ class MainMenu:
         self.left_button_connect = tk.Button(
             self.left_frame1,
             text='Connect to the server',
-            width=20
+            width=20,
+            command=self.startClient
         )
         self.left_button_create_server = tk.Button(
             self.left_frame1,
             text='Create the server',
-            width=20
+            width=20,
+            command=self.startServer
         )
         self.left_button_settings = tk.Button(
             self.left_frame1,
@@ -145,3 +154,42 @@ class MainMenu:
             self.right_notebook.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=5)
         else:
             self.moduleLoaderError.pack(anchor=tk.CENTER, expand=True)
+
+    def startServer(self):
+        try:
+            ip = self.left_entry_ip.get()
+            port = int(self.left_spinbox_port.get())
+            if ip in ['', self.left_entry_ip.placeholder]:
+                ip = '127.0.0.1'
+
+            self.server = MainChannel(self.logs, ip, port, 3, None)
+            self.left_entry_ip.configure(state=tk.DISABLED)
+            self.left_spinbox_port.configure(state=tk.DISABLED)
+            self.left_button_create_server.configure(state=tk.DISABLED)
+            self.left_button_connect.configure(state=tk.DISABLED)
+        except Exception as error:
+            self.root.bell()
+            self.logs.sendLog("Couldn't start the server. Reason: " + error.__str__(), -1)
+            raise error
+
+    def startClient(self):
+        try:
+            ip = self.left_entry_ip.get()
+            port = int(self.left_spinbox_port.get())
+            if ip in ['', self.left_entry_ip.placeholder]:
+                ip = '127.0.0.1'
+
+            self.client = ClientMainChannel(self.logs, ip, port, self.askPassword, None)
+            self.left_entry_ip.configure(state=tk.DISABLED)
+            self.left_spinbox_port.configure(state=tk.DISABLED)
+            self.left_button_create_server.configure(state=tk.DISABLED)
+            self.left_button_connect.configure(state=tk.DISABLED)
+        except Exception as error:
+            self.root.bell()
+            self.logs.sendLog("Couldn't start the server. Reason: " + error.__str__(), -1)
+            raise error
+
+    def askPassword(self) -> str:
+        string = simpledialog.askstring("Ask String", "Wrong Password")
+        print(string, type(string), len(string))
+        return string

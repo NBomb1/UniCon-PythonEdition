@@ -10,7 +10,7 @@ from Functions.ModuleHandler.moduleAPI import API
 
 class ModuleHandler:
     failed: list[FailedModule] = []
-    active: list = []
+    active: list[ActiveModule] = []
 
     def __init__(self, api: API):
         try:
@@ -67,7 +67,9 @@ class ModuleHandler:
                     active.version,
                     active.author,
                     active,
-                    module
+                    module,
+                    active.defaultNetworkAuth,
+                    active.isOnlyUI
                 )
             )
         except AttributeError as reason:

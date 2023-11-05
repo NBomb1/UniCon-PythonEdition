@@ -11,13 +11,16 @@ class Logs:
     registeredFileLog: dict[int: io.FileIO] = {}
     ver = "0.0.1"
 
-    def registerId(self, id_):
+    def registerId(self, id_, ignoreRegistered=False):
         if self.registeredFunctions.get(id_) is None:
             self.registeredFunctions[id_] = []
-        self.sendLog(f'[LogManager] Log with id {id_} has been registered.', 0)
+            self.sendLog(f'[LogManager] Log with id {id_} has been registered.', 0)
+        else:
+            if not ignoreRegistered:
+                self.sendLog(f"[LogManager] Log with id {id_} has already been registered!", 0)
 
     def registerHandler(self, id_: int, function: callable):
-        self.registerId(id_)
+        self.registerId(id_, True)
         self.registeredFunctions[id_].append(function)
         self.sendLog(
                      f'[LogManager] Function ({function.__name__}) '
