@@ -13,7 +13,6 @@ class Authentication:
         self.askPassword = askPassword
 
     def start(self):
-        self.password = 'asd'
         self.logs.sendLog("[MainChannel Client] Trying to pass 1st phase.", -1)
         self.sendMessage(Info.unique_message, Info.preAuthMessageLength)
 

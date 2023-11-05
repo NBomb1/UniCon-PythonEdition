@@ -43,6 +43,7 @@ class Authentication:
                 Authentication._4_PhaseAllModulesCheck(account.socket, logs) and  # Проверка аддонов
                 Authentication._5_PhaseModuleConnection(account.socket, logs)  # Подключение аддонов
         ):
+            # phase 6 -> Account information filling
             nickname = Authentication._getMessage(s)
             if nickname is None:
                 account.socket.close()

@@ -42,7 +42,10 @@ class Handlers:
                     for i in self._connectionFunctionTrigger:
                         i()  # getting all functions to call
                     logs.sendLog("[MainChannel] Making authentication...", -1)
-                    Authentication.authentication(account, self.server.password, account.socket, logs, self.newAccount)
+                    # Authentication.authentication(account, self.server.password, account.socket, logs, self.newAccount)
+                    threading.Thread(target=Authentication.authentication, daemon=True,
+                                     args=(account, self.server.password, account.socket, logs, self.newAccount)
+                                     ).start()
                 except socket.timeout:
                     account.socket.close()
 
