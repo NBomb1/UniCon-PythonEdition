@@ -1,4 +1,4 @@
-from Functions.Server.Account import Account
+from Functions.Network.Server.AccountAuthentication.Account import Account
 
 
 class AccountManager:

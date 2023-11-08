@@ -1,6 +1,6 @@
-from Functions.Client.AuthenticationPassing import Authentication
-from Functions.Network.MainChannel.Info import Info
-from Functions.logManager.logManager import Logs
+from Functions.Network.Client.AuthenticationPassing import Authentication
+from Functions.Network.Info import Info
+from Functions.Tools.logManager import Logs
 import socket as s
 
 

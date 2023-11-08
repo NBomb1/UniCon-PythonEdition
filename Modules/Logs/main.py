@@ -27,40 +27,16 @@ class Module:
         self.idLog: dict[int: ChatText] = {}
         api.rightNotebook.add(self.frame, text="Logs")
 
-        # Creating widgets
-        self.text_logs = ChatText(self.frame)
+        self._create_widgets()
+        self._place_widgets()
+        self._configure_widgets()
 
-        self.FrameChat = tk.Frame(self.frame)  # top
-        self.FrameButton = tk.Frame(self.frame)   # mid
-        self.FrameCombobox = tk.Frame(self.frame)  # low
-
-        self.idLog[self.currentId] = ChatText(self.FrameChat)
-        self.idLog[self.currentId].configure(wrap=tk.WORD, height=20, font=self.font)
-
-        self.button_save = tk.Button(self.FrameButton, text='Save', command=self.saveLogs)
-        self.button_clear = tk.Button(self.FrameButton, text='Clear', command=self.clearButtonConfirmation)
-        self.combobox_label = tk.Label(self.FrameCombobox, text='Logs ID')
-        self.combobox_ids = ttk.Combobox(self.FrameCombobox, state='r')
-
-        # Placing widgets
-        # self.text_logs.pack(fill=tk.BOTH)
-        self.combobox_label.pack()
-        self.idLog[self.currentId].pack(fill=tk.BOTH)
-
-        self.FrameChat.pack(fill=tk.BOTH)
-        self.FrameButton.pack(fill=tk.X, expand=True, anchor=tk.N)
-        self.FrameCombobox.pack(fill=tk.X, expand=True, anchor=tk.N, side=tk.BOTTOM)
-
-        self.button_save.pack(anchor=tk.NE, side=tk.LEFT, fill=tk.X, expand=True)
-        self.button_clear.pack(anchor=tk.NW, side=tk.RIGHT, fill=tk.X, expand=True)
-
-        self.combobox_ids.pack(side=tk.LEFT, anchor=tk.N, expand=True)
-
-        self.text_logs.configure(wrap=tk.WORD, height=20)
-        self.combobox_ids.bind("<<ComboboxSelected>>", self.on_combobox_selected)
-
+        # Finishing it
         api.logs.registerHandler(self.currentId, self.message)
         self.combobox_ids.set(self.currentId)
+        self.message("This is starting text logs.", self.currentId)
+
+        # Registering ids which weren't found
         Thread(target=self.registerIDs, daemon=True).start()
 
     def message(self, message: str, id_: int):
@@ -70,14 +46,13 @@ class Module:
             self.idLog[id_].delete("1.0", tk.END)
             self.idLog[id_].configure(state=tk.DISABLED)
             self.message("[Logs] All messages were forcefully cleared.", id_)
-            # self.text_logs.bell()
 
         self.limit += self.idLog[id_].create_message(
             {
                 'message': message
             },
             datetime.now(),
-            '<ID=' + str(id_) + ' {time}> {message}',
+            '<{time}> {message}',
             {
                 'message': 'system-message'
             }
@@ -134,7 +109,7 @@ class Module:
         currentId = int(self.combobox_ids.get())
         if currentId == self.currentId:
             return
-        self.idLog[currentId].pack(fill=tk.BOTH)
+        self.idLog[currentId].pack(fill=tk.BOTH, expand=True)
         self.idLog[self.currentId].pack_forget()
         self.currentId = currentId
 
@@ -149,3 +124,40 @@ class Module:
                     self.api.logs.registerHandler(i, self.message)
                     self.idLog[i].configure(wrap=tk.WORD, height=20, font=self.font)
                     self.message(f"[Logs] ID {i} have been found.", i)
+
+    def _create_widgets(self):
+        # Creating widgets
+        self.text_logs = ChatText(self.frame)
+
+        self.FrameChat = tk.Frame(self.frame)  # top
+        self.FrameButton = tk.Frame(self.frame)   # mid
+        self.FrameCombobox = tk.Frame(self.frame)  # low
+
+        self.idLog[self.currentId] = ChatText(self.FrameChat)
+        self.idLog[self.currentId].configure(wrap=tk.WORD, height=20, font=self.font)
+
+        self.button_save = tk.Button(self.FrameButton, text='Save', command=self.saveLogs)
+        self.button_clear = tk.Button(self.FrameButton, text='Clear', command=self.clearButtonConfirmation)
+        self.combobox_label = tk.Label(self.FrameCombobox, text='Logs ID')
+        self.combobox_ids = ttk.Combobox(self.FrameCombobox, state='r')
+
+    def _place_widgets(self):
+        # Placing widgets
+        self.combobox_label.pack()
+        self.combobox_ids.pack(side=tk.LEFT, anchor=tk.N, expand=True)
+
+        # Placing main frames
+        self.FrameChat.pack(fill=tk.BOTH, expand=True)
+        self.FrameButton.pack(fill=tk.X)
+        self.FrameCombobox.pack(fill=tk.X, pady=(0, 3))
+
+        # Each log id has text widget
+        self.idLog[self.currentId].pack(fill=tk.BOTH, expand=True)
+
+        # Log buttons
+        self.button_save.pack(side=tk.RIGHT, fill=tk.X, expand=True)
+        self.button_clear.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+    def _configure_widgets(self):
+        self.text_logs.configure(wrap=tk.WORD, height=20)
+        self.combobox_ids.bind("<<ComboboxSelected>>", self.on_combobox_selected)

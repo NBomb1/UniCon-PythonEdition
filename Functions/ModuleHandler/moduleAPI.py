@@ -1,6 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
-from Functions.logManager.logManager import Logs
+from Functions.Tools.logManager import Logs
 
 
 class API:

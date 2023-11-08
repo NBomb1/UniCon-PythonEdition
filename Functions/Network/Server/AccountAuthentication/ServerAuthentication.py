@@ -10,10 +10,10 @@ import socket
 from ast import literal_eval
 from random import randint
 
-from Functions.Network.MainChannel.Info import Info
-from Functions.Server.PreAuthAccount import PreAccount
-from Functions.Server.Account import Account
-from Functions.logManager.logManager import Logs
+from Functions.Network.Info import Info
+from Functions.Network.Server.AccountAuthentication.PreAuthAccount import PreAccount
+from Functions.Network.Server.AccountAuthentication.Account import Account
+from Functions.Tools.logManager import Logs
 
 
 class Authentication:
@@ -44,18 +44,24 @@ class Authentication:
                 Authentication._5_PhaseModuleConnection(account.socket, logs)  # Подключение аддонов
         ):
             # phase 6 -> Account information filling
+
+            # Getting nickname
             nickname = Authentication._getMessage(s)
             if nickname is None:
                 account.socket.close()
                 return
+
+            # Getting pc name
             pc = Authentication._getMessage(s)
             if pc is None:
                 account.socket.close()
                 return
             id_ = Authentication.generate_random_id(8)
 
-            account.socket.send(Authentication._fillText(id_, Info.preAuthMessageLength))
+            # Sending id to client
+            account.socket.send(Authentication._fillText(id_, Info.preAuthMessageLength).encode())
 
+            # Creating account
             newAccount(Account(
                 socket=account.socket,
                 ip=account.ip,
@@ -121,20 +127,30 @@ class Authentication:
         client_salt = urandom(128)
         # Sending the salt to the client
         s.send(client_salt)
+
+        # creating password hash
         hashed_password = hashlib.sha512(client_salt + password.encode()).hexdigest().encode()
-        print(hashed_password)
 
         # Receiving the hashed password from the client
-        for tries in range(3):
-            received_hashed_password = s.recv(Info.preAuthMessageLength)  # Hashed password is 128 characters long
+        # 4 tries because 1st goes to default password check
+        for tries in range(4):
+            # Getting password hash from client
+            try:
+                # Hashed password is 128 characters long
+                received_hashed_password = s.recv(Info.preAuthMessageLength)
+            except ConnectionAbortedError:  # Client can disconnect from server before logging in
+                received_hashed_password = None
+
+            # Checking is password is not given
             if received_hashed_password is None:
                 s.close()
                 logs.sendLog(
-                    f"[Authentication] Couldn't pass 3rd authentication phase. Connection has been closed.",
+                    f"[Authentication] Couldn't pass 3rd authentication phase. Client disconnected.",
                     -1
                 )
                 return False
 
+            # If given password hash is the same as our password hash
             if received_hashed_password == hashed_password:
                 logs.sendLog("[Authentication] Third phase has been passed.", -1)
                 s.send(Authentication._fillText("1", Info.preAuthMessageLength).encode())
@@ -142,6 +158,7 @@ class Authentication:
             else:
                 logs.sendLog(f"[Authentication] Couldn't pass 3rd authentication phase for {tries + 1} time.", -1)
                 s.send(Authentication._fillText("", Info.preAuthMessageLength).encode())
+
         logs.sendLog(f"[Authentication] Client couldn't pass 3rd phase. Closing connection...", -1)
         s.close()
         return False

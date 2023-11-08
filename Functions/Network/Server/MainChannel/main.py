@@ -1,7 +1,7 @@
 import socket as s
-from Functions.Network.MainChannel.Info import Info
-from Functions.Network.MainChannel.ServerHandlers import ServerInformation
-from Functions.logManager.logManager import Logs
+from Functions.Network.Info import Info
+from Functions.Network.Server.MainChannel.ServerHandlers import ServerInformation
+from Functions.Tools.logManager import Logs
 
 """
 1. Определение программы по уникальному сообщению +
@@ -18,7 +18,6 @@ class MainChannel:
 
     def __init__(self, logs: Logs, ip: str, port: int, listeners: int, password: str | None):
         self.logs = logs
-        self.logs.sendLog(f"[MainChannel] Starting server on {ip}:{port} with {listeners} listeners.", 0)
 
         if password is None:
             password = Info.defaultPassword
@@ -26,9 +25,8 @@ class MainChannel:
         else:
             self.logs.sendLog("[MainChannel] Using custom password.", -1)
 
-        self.logs.sendLog("[MainChannel] Creating socket...", -1)
         self.socket = s.socket(s.AF_INET, s.SOCK_STREAM)
-        self.logs.sendLog("[MainChannel] Creating server...", -1)
+        self.logs.sendLog(f"[MainChannel] Starting server on {ip}:{port} with {listeners} listeners.", 0)
         self.socket.bind((ip, port))
         self.socket.listen(listeners)
         self.manager = ServerInformation(ip, port, password, self.socket)

@@ -2,9 +2,9 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import simpledialog
 
-from Functions.Client.MainChannel import ClientMainChannel
-from Functions.Network.MainChannel.main import MainChannel
-from Functions.logManager.logManager import Logs
+from Functions.Network.Client.MainChannel import ClientMainChannel
+from Functions.Network.Server.MainChannel.main import MainChannel
+from Functions.Tools.logManager import Logs
 from UI.TKinter_addons.Entry_Placeholder import EntryWithPlaceholder
 from UI.TKinter_addons.Text_status import StatusText
 from UI.MainMenuTabs.TabChat import TabChat
@@ -16,6 +16,7 @@ from UI.window.WidnowCenter import center_main
 from Functions.ModuleHandler.moduleHandler import ModuleHandler
 from Functions.ModuleHandler.moduleAPI import API
 import settings
+import customtkinter
 
 
 class MainMenu:
@@ -25,6 +26,7 @@ class MainMenu:
     def __init__(self, log: Logs):
         self.logs = log
         self.root = tk.Tk()
+        # self.root = customtkinter.CTk()
         self.root.wm_minsize(925, 450)
         self.changeTitle("MainMenu")
 
@@ -35,8 +37,8 @@ class MainMenu:
         # Settings frame
         self.settingsFrame = Settings(self.mainFrame)
 
-        self._left()
-        self._right()
+        self._createLeftWidgets()
+        self._createRightWidgets()
 
         self.module = ModuleHandler(
             API(
@@ -51,10 +53,9 @@ class MainMenu:
         )
 
         center_main(self.root)
-
         self.root.mainloop()
 
-    def _left(self):
+    def _createLeftWidgets(self):
         # Creating two frames that will contain all sorts of widgets
         self.left_frame1 = tk.Frame(self.mainFrame)
 
@@ -63,6 +64,7 @@ class MainMenu:
         self.left_text_status.configure(wrap=tk.WORD, height=3, width=20)
         self.left_entry_ip = EntryWithPlaceholder(self.left_frame1, 'Type ip...')
         self.left_entry_nickname = EntryWithPlaceholder(self.left_frame1, 'Type your nickname...')
+        # self.left_label_port = customtkinter.CTkLabel(self.left_frame1, text='Port: ')
         self.left_label_port = tk.Label(self.left_frame1, text='Port: ')
 
         self.left_button_connect = tk.Button(
@@ -103,29 +105,29 @@ class MainMenu:
         # Placing frames on the main screen
         self.left_frame1.pack(side=tk.LEFT, fill=tk.Y)
 
-    def _right(self):
+    def _createRightWidgets(self):
         # Creating tab manager
         self.right_notebook = ttk.Notebook(self.mainFrame)
 
         # Creating tabs
-        self.tab_chat = TabChat(self.right_notebook)
-        self.tab_participants = TabParticipants(self.right_notebook)
-        self.tab_files = TabFiles(self.right_notebook)
-        self.tab_logs = TabLogs(self.right_notebook)
+        # self.tab_chat = TabChat(self.right_notebook)
+        # self.tab_participants = TabParticipants(self.right_notebook)
+        # self.tab_files = TabFiles(self.right_notebook)
+        # self.tab_logs = TabLogs(self.right_notebook)
 
         self.moduleLoaderError = tk.Label(self.mainFrame, text="No modules were loaded.", font=40)
 
         # Adding tabs to tab manager
-        # self.right_notebook.add(self.tab_chat, text='Logs')
+        # self.right_notebook.add(self.tab_chat, text='Chat')
         # self.right_notebook.add(self.tab_participants, text='Participants')
         # self.right_notebook.add(self.tab_files, text='Files')
         # self.right_notebook.add(self.tab_logs, text='Logs')
 
         # Placing tab manager
-        self.right_notebook.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=5)
+        self.right_notebook.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=(2, 0))
 
     def changeTitle(self, name: str):
-        self.root.title('1C PROJECT - ' + settings.MainInfo.date + " - " + name)
+        self.root.title('1C PROJECT - ' + name + " - " + settings.MainInfo.date)
 
     def goSettings(self):
         self.settingsFrame.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=5)
@@ -191,5 +193,4 @@ class MainMenu:
 
     def askPassword(self) -> str:
         string = simpledialog.askstring("Ask String", "Wrong Password")
-        print(string, type(string), len(string))
         return string

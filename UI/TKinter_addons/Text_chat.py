@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter.scrolledtext import ScrolledText
 from datetime import datetime
+from traceback import format_exc
 
 
 class ChatText(ScrolledText):
@@ -43,7 +44,7 @@ class ChatText(ScrolledText):
                     f"{text.find(data.get(list(colorscheme.keys())[i])) + len(data.get(list(colorscheme.keys())[i]))}"
                 )
             except TypeError as error:
-                print(error)
+                print(format_exc())
                 print('data = ', data)
                 print(list(colorscheme.keys())[i])
                 raise error

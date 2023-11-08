@@ -2,6 +2,7 @@ from os import listdir, path, getcwd
 import importlib
 from types import ModuleType
 import tkinter as tk
+from traceback import format_exc
 
 from Functions.ModuleHandler.failedModule import FailedModule
 from Functions.ModuleHandler.activeModule import ActiveModule
@@ -17,7 +18,7 @@ class ModuleHandler:
             self.api = api
             self.startModulesLoading()
         except Exception as error:
-            self.showModuleLoaderError("Error:\n" + error.__str__())
+            self.showModuleLoaderError("Error:\n" + error.__str__() + '\n' + format_exc())
 
     def startModulesLoading(self):
         path1 = getcwd()  # getting path
@@ -29,7 +30,12 @@ class ModuleHandler:
             if (module := self.loadSingleModule(file)) is not None:
                 self.activateSingleModule(module, file)
 
-        if len(self.active) == 0:
+        if len(self.failed) != 0:
+            errorText = '\n'.join(map(lambda obj: obj.path, self.failed))
+            self.showModuleLoaderError(f"Some modules ({len(self.failed)}) have internal error.\n"
+                                       f"{errorText}"
+                                       )
+        elif len(self.active) == 0:
             self.showModuleLoaderError("No modules found.")
 
     def loadSingleModule(self, file: str):
@@ -40,7 +46,7 @@ class ModuleHandler:
             return module
         except ImportError as reason:
             self.failed.append(
-                FailedModule(file, "Import error", reason)
+                FailedModule(file, "Import error", reason, format_exc())
             )
             self.api.logs.sendLog(f"[ModuleHandler] Couldn't load {load} module. {reason}", 0)
             return None
@@ -55,7 +61,7 @@ class ModuleHandler:
             self.api.logs.sendLog(f"[ModuleHandler] Module {format_} initialized.", 0)  # send log
         except Exception as reason:
             self.failed.append(
-                FailedModule(file, "Activation error", reason)
+                FailedModule(file, "Activation error", reason, format_exc())
             )
             self.api.logs.sendLog(f"[ModuleHandler] Module {format_} has an internal error.", 0)
             return
@@ -74,7 +80,7 @@ class ModuleHandler:
             )
         except AttributeError as reason:
             self.api.logs.sendLog(f"[ModuleHandler] Couldn't get info from {format_}.", 0)  # send log
-            self.failed.append(FailedModule(file, "Not enough information", reason))
+            self.failed.append(FailedModule(file, "Not enough information", reason, format_exc()))
 
     def showModuleLoaderError(self, message):
         self.api.rightNotebook.pack_forget()

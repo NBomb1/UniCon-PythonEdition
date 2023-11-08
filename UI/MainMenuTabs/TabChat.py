@@ -18,7 +18,7 @@ class TabChat(tk.Frame):
         )
 
         # Placing widgets
-        self.text_chat.pack(fill=tk.X, side=tk.TOP, anchor=tk.N)
+        self.text_chat.pack(fill=tk.BOTH, side=tk.TOP, expand=True)
         self.entry_message.pack(side=tk.LEFT, anchor=tk.N, fill=tk.X, expand=tk.YES, ipady=3, pady=(4, 0))
         self.button_send.pack(ipadx=10, pady=(4, 0))
 
