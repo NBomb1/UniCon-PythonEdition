@@ -1,5 +1,6 @@
 import tkinter as tk
 from datetime import datetime
+from os import getcwd
 from threading import Thread
 from time import sleep
 from tkinter import filedialog, ttk
@@ -16,15 +17,18 @@ class Module:
     defaultNetworkAuth = False
     isOnlyUI = True
     font = (None, 11, "normal")
+    currentId: int = -1
+    limit_constant = 3_000_000
+    limit = 0
+    idLog: dict[int: ChatText] = {}
 
     def __init__(self, api: API):
         self.api = api
-        self.currentId: int = -1
+        self._setupParameters()
+
         self.allIDs = [self.currentId]
         self.frame = tk.Frame(api.rightNotebook)
-        self.limit_constant = 3_000_000
-        self.limit = 0
-        self.idLog: dict[int: ChatText] = {}
+
         api.rightNotebook.add(self.frame, text="Logs")
 
         self._create_widgets()
@@ -124,6 +128,7 @@ class Module:
                     self.api.logs.registerHandler(i, self.message)
                     self.idLog[i].configure(wrap=tk.WORD, height=20, font=self.font)
                     self.message(f"[Logs] ID {i} have been found.", i)
+                    self.allIDs.sort()
 
     def _create_widgets(self):
         # Creating widgets
@@ -161,3 +166,11 @@ class Module:
     def _configure_widgets(self):
         self.text_logs.configure(wrap=tk.WORD, height=20)
         self.combobox_ids.bind("<<ComboboxSelected>>", self.on_combobox_selected)
+
+    def _setupParameters(self):
+        self.api.dataManager.create('Logs', getcwd() + '\\Modules\\Logs\\settings.yml')
+        if (a := self.api.dataManager.get("Logs").get('currentId')) is None:
+            self.api.dataManager.get("Logs").put("currentId", self.currentId)
+        else:
+            self.currentId = a
+

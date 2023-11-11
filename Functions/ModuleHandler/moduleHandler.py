@@ -35,6 +35,13 @@ class ModuleHandler:
             self.showModuleLoaderError(f"Some modules ({len(self.failed)}) have internal error.\n"
                                        f"{errorText}"
                                        )
+            for i in self.failed:
+                with open(getcwd() + '\\Modules Exception.txt', 'w') as file:
+                    text = f'Path: \n{i.path}\n\n' \
+                           f'Reason: \n{i.reason}\n\n' \
+                           f'CodeReason: \n{i.codeReason}\n\n' \
+                           f'FormatExc: \n{i.format_exc}' + "\n" * 10
+                    file.write(text)
         elif len(self.active) == 0:
             self.showModuleLoaderError("No modules found.")
 

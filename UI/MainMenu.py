@@ -4,6 +4,7 @@ from tkinter import simpledialog
 
 from Functions.Network.Client.MainChannel import ClientMainChannel
 from Functions.Network.Server.MainChannel.main import MainChannel
+from Functions.Tools.DataSettings.FileDataManager import DataManager
 from Functions.Tools.logManager import Logs
 from UI.TKinter_addons.Entry_Placeholder import EntryWithPlaceholder
 from UI.TKinter_addons.Text_status import StatusText
@@ -23,9 +24,10 @@ class MainMenu:
     server: MainChannel = None
     client: ClientMainChannel = None
 
-    def __init__(self, log: Logs):
+    def __init__(self, log: Logs, dataManager: DataManager):
         self.logs = log
         self.root = tk.Tk()
+        self.dataManager = dataManager
         # self.root = customtkinter.CTk()
         self.root.wm_minsize(925, 450)
         self.changeTitle("MainMenu")
@@ -48,7 +50,8 @@ class MainMenu:
                 self.settingsFrame,
                 self.left_frame1,
                 self.mainFrame,
-                self.moduleLoaderError
+                self.moduleLoaderError,
+                self.dataManager
             )
         )
 

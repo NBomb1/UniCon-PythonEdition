@@ -1,5 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
+
+from Functions.Tools.DataSettings.FileDataManager import DataManager
 from Functions.Tools.logManager import Logs
 
 
@@ -11,7 +13,8 @@ class API:
                  settings_notebook: ttk.Notebook,
                  left_frame: tk.Frame,
                  main_frame: tk.Frame,
-                 moduleLoaderError: tk.Label
+                 moduleLoaderError: tk.Label,
+                 dataManager: DataManager,
                  ):
         self.root = root
         self.rightNotebook = right_notebook
@@ -20,3 +23,4 @@ class API:
         self.leftFrame = left_frame
         self.mainFrame = main_frame
         self.moduleLoaderError = moduleLoaderError
+        self.dataManager = dataManager
