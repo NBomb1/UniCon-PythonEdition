@@ -1,4 +1,4 @@
-import tk
+import tkinter as tk
 
 from Functions.Tools.DataSettings.Widgets.Basic.EnhancedEntryWidget import EnhancedEntry
 
@@ -16,7 +16,7 @@ class StringEntry(EnhancedEntry):
     ):
         super().__init__(master, placeholder, color, maxLen, minLen, symbolExceptions, checkFunc)
 
-    def get(self) -> str:
+    def getData(self) -> str:
         return self.actualData
 
     def getCurrent(self) -> str:

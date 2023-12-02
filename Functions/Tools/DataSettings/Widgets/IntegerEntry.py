@@ -1,5 +1,6 @@
-import tk as tk
+import tkinter as tk
 
+from Functions.Tools.DataSettings.Checks import checkInteger
 from Functions.Tools.DataSettings.Widgets.Basic.EnhancedEntryWidget import EnhancedEntry
 
 
@@ -9,30 +10,27 @@ class IntegerEntry(EnhancedEntry):
             master: tk.Widget = None,
             placeholder: str = "PLACEHOLDER",
             color: str = 'grey',
-            maxLen: int = 80,
-            minLen: int = 3,
+            maxLen: int = 30,
+            minLen: int = 1,
             symbolExceptions: list[str] = None,
             checkFunc: list[callable] = None,
-            from_: int | None = None,
-            to_: int | None = None
+            from_: int = -999999999999,
+            to_: int = 999999999999
     ):
+        checkFunc = [] if checkFunc is None else checkFunc
         self.from_ = from_
         self.to_ = to_
         checkFunc.append(self._numberCheck)
 
         super().__init__(master, placeholder, color, maxLen, minLen, symbolExceptions, checkFunc)
 
-    def get(self) -> int:
+    def getData(self) -> int:
         return int(self.actualData)
 
     def getCurrent(self) -> str:
         return self._var.get()
 
-    def _numberCheck(self):
-        if not self._var.get().isnumeric():
-            return 'Is not number'
-        if self.to_ > int(self._var):
-            return 'Too big number'
-        if self.from_ > int(self._var):
-            return 'Too small number'
-        return ''
+    def _numberCheck(self, number: str):
+        return 'Is not number' if not checkInteger(number) else \
+               'Too big number' if self.to_ < int(number) else \
+               'Too small number' if self.from_ > int(number) else ''

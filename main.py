@@ -3,6 +3,8 @@ Project started - 2023y 06m 12d
 
 1 Name Idea: Multifunctional network application - MNA
 2 Name Idea: Modular network application - MNA
+3 Name Idea: Universal Network application - UNA
+4 Name Idea: Universal Connection - UniCon
 ChatGPT's Idea: NetMaster
 
 Extra Modules are used:

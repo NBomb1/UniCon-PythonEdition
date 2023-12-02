@@ -141,8 +141,8 @@ class Module:
         self.idLog[self.currentId] = ChatText(self.FrameChat)
         self.idLog[self.currentId].configure(wrap=tk.WORD, height=20, font=self.font)
 
-        self.button_save = tk.Button(self.FrameButton, text='Save', command=self.saveLogs)
-        self.button_clear = tk.Button(self.FrameButton, text='Clear', command=self.clearButtonConfirmation)
+        self.button_save = tk.Button(self.FrameButton, text='Save', command=self.saveLogs, width=1)
+        self.button_clear = tk.Button(self.FrameButton, text='Clear', command=self.clearButtonConfirmation, width=1)
         self.combobox_label = tk.Label(self.FrameCombobox, text='Logs ID')
         self.combobox_ids = ttk.Combobox(self.FrameCombobox, state='r')
 
@@ -173,4 +173,3 @@ class Module:
             self.api.dataManager.get("Logs").put("currentId", self.currentId)
         else:
             self.currentId = a
-

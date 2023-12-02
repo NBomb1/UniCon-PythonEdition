@@ -1,44 +1,67 @@
 import tkinter as tk
+from threading import Thread
+from time import sleep
+
 import settings
 import tkinter.ttk as ttk
 
+from Functions.Tools.DataSettings.FileDataManager import DataManager
+from Functions.Tools.DataSettings.Widgets.IntegerEntry import IntegerEntry
+from Functions.Tools.DataSettings.Widgets.NumberRange import NumberRange
+from Functions.Tools.DataSettings.Widgets.StringEntry import StringEntry
+
 
 class Settings(ttk.Notebook):
-    # widgets
-    label_spinbox_from = None
-    label_port_from = None
-    labelframe_port = None
-    label_port_to = None
-    label_spinbox_to = None
+    portRange = None
+    saveButton = None
+    integerEntry = None
+    stringEntry = None
 
-    def __init__(self, master: tk.Widget):
+    def __init__(self, master: tk.Widget, dataManager: DataManager):
         super().__init__(master)
 
+        self.dataManager = dataManager
+
         self.settingsFrame = tk.Frame()
+
         self.fill_main()
 
     def fill_main(self):
         self.add(self.settingsFrame, text="Main Settings")
+        self.integerEntry = IntegerEntry(self.settingsFrame, 'Integer')
+        self.stringEntry = StringEntry(self.settingsFrame, 'String')
 
-        self.labelframe_port = tk.LabelFrame(self.settingsFrame, text='We can use ports')
-        self.label_port_from = tk.Label(self.labelframe_port, text='from')
-        self.label_spinbox_from = ttk.Spinbox(
-            self.labelframe_port,
-            from_=settings.MainMenu.port_from,
-            to=settings.MainMenu.port_to
+        # new one system in practical use
+        self.portRange = NumberRange(
+            self.settingsFrame,
+            'Ports for use:',
+            minFrom=settings.MainMenu.port_from,
+            maxFrom=settings.MainMenu.port_to,
+            minTo=settings.MainMenu.port_from,
+            maxTo=settings.MainMenu.port_to,
+            startNumberFrom=settings.MainMenu.port_from,
+            startNumberTo=settings.MainMenu.port_to
         )
-        self.label_port_to = tk.Label(self.labelframe_port, text='to')
-        self.label_spinbox_to = ttk.Spinbox(
-            self.labelframe_port,
-            from_=settings.MainMenu.port_from,
-            to=settings.MainMenu.port_to,
-        )
-        self.label_spinbox_from.set(1025)
-        self.label_spinbox_to.set(settings.MainMenu.port_to)
+        self.portRange.connect(self.dataManager.get('main'), 'portRange')
+        self.integerEntry.connect(self.dataManager.get('main'), 'integerTest')
+        self.stringEntry.connect(self.dataManager.get('main'), 'stringTest')
 
-        self.label_port_from.pack()
-        self.label_spinbox_from.pack()
-        self.label_port_to.pack()
-        self.label_spinbox_to.pack()
-        
-        self.labelframe_port.pack(anchor=tk.CENTER, expand=True)
+        self.portRange.pack()
+        self.integerEntry.pack()
+        self.stringEntry.pack()
+        self.saveButton = tk.Button(self.settingsFrame, text='save', command=self.save)
+        self.saveButton.pack()
+
+    def save(self):
+        self.disableSaving()
+        self.portRange.save()
+        self.integerEntry.save()
+        self.stringEntry.save()
+        Thread(target=self.enableSaving, daemon=True).start()
+
+    def enableSaving(self):
+        sleep(settings.SettingsMenu.saveButtonWait)
+        self.saveButton.configure(state=tk.NORMAL)
+
+    def disableSaving(self):
+        self.saveButton.configure(state=tk.DISABLED)

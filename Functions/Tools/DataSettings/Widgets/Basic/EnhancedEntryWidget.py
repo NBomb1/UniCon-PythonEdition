@@ -1,9 +1,11 @@
 from Functions.Tools.DataSettings.Widgets.Basic.SaveWidgetData import SaveWidgetData
+from Functions.Tools.DataSettings.Widgets.Basic.ShowRedFlag import ShowRedFlag
+from Functions.Tools.DataSettings.Widgets.Basic.ToolTip import ToolTip
 from UI.TKinter_addons.Entry_Placeholder import EntryWithPlaceholder
 import tkinter as tk
 
 
-class EnhancedEntry(EntryWithPlaceholder, SaveWidgetData):
+class EnhancedEntry(EntryWithPlaceholder, SaveWidgetData, ShowRedFlag):
     """
     Uses for Settings Menu.
     Its Entry itself.
@@ -31,25 +33,38 @@ class EnhancedEntry(EntryWithPlaceholder, SaveWidgetData):
 
         super().__init__(master, placeholder, color)
 
+        self.ToolTip = ToolTip(self, '')
+
         self._var = tk.StringVar()
         self.configure(textvariable=self._var)
+        self._put_placeholder()
 
     def save(self) -> list[str]:
         """
         :return: list of refuse reasons.
         """
-        res = self.checkCorrectness()
-        if len(res):
+        res = []
+        if self.get() == self.placeholder and self.cget('fg') == self.placeholder_color:
+            res.append('No data given', )
+        else:
+            res.extend(self.checkCorrectness())
+
+        if not len(res):
             self.actualData = self._var.get()
-        if self.dataSaver is not None:
-            self.dataSaver(self.actualData)
+            if self.dataSaver is not None:
+                self.dataSaver(self.actualData)
+            self.showFlag(self, 'green')
+        else:
+            self.showFlag(self)
+            self.bell()
+        self.ToolTip.change_text('\n'.join(res))
         return res
 
     def checkCorrectness(self) -> list[str]:
         checkAll = [
             self.maxLenCheck,
             self.minLenCheck,
-            self.checkCorrectness
+            self.exceptionCheck
         ]
         checkAll.extend(self.checkFunc)
         for i in range(len(checkAll)):
@@ -58,11 +73,11 @@ class EnhancedEntry(EntryWithPlaceholder, SaveWidgetData):
         checkAll = list(filter(lambda x: x != '', checkAll))
         return checkAll
 
-    def maxLenCheck(self) -> str:
-        return '' if len(self._var.get()) <= self.maxLen else 'Too big size'
+    def maxLenCheck(self, string: str) -> str:
+        return '' if len(string) <= self.maxLen else 'Too big size'
 
-    def minLenCheck(self) -> str:
-        return '' if len(self._var.get()) >= self.minLen else 'Too low size'
+    def minLenCheck(self, string: str) -> str:
+        return '' if len(string) >= self.minLen else 'Too low size'
 
-    def exceptionCheck(self) -> str:
-        return '' if self._var.get() not in self.symbolExceptions else 'Restricted value'
+    def exceptionCheck(self, string: str) -> str:
+        return '' if string not in self.symbolExceptions else 'Restricted value'

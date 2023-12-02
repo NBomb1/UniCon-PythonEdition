@@ -17,7 +17,7 @@ from UI.window.WidnowCenter import center_main
 from Functions.ModuleHandler.moduleHandler import ModuleHandler
 from Functions.ModuleHandler.moduleAPI import API
 import settings
-import customtkinter
+# import customtkinter
 
 
 class MainMenu:
@@ -37,13 +37,12 @@ class MainMenu:
         self.mainFrame.pack(fill=tk.BOTH, expand=True)
 
         # Settings frame
-        self.settingsFrame = Settings(self.mainFrame)
+        self.settingsFrame = Settings(self.mainFrame, self.dataManager)
 
         self._createLeftWidgets()
         self._createRightWidgets()
 
-        self.module = ModuleHandler(
-            API(
+        self.api = API(
                 log,
                 self.root,
                 self.right_notebook,
@@ -53,7 +52,7 @@ class MainMenu:
                 self.moduleLoaderError,
                 self.dataManager
             )
-        )
+        self.module = ModuleHandler(self.api)
 
         center_main(self.root)
         self.root.mainloop()
@@ -130,7 +129,7 @@ class MainMenu:
         self.right_notebook.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=(2, 0))
 
     def changeTitle(self, name: str):
-        self.root.title('1C PROJECT - ' + name + " - " + settings.MainInfo.date)
+        self.root.title('1C PROJECT - ' + name + " - " + settings.MainInfo.startDate)
 
     def goSettings(self):
         self.settingsFrame.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=5)
