@@ -5,12 +5,12 @@ class DataFile:
     data: dict[str: object] = {}
 
     def __init__(self, path: str):
-        self._loadData(path)
-        self.file = open(path, 'w')
+        self.path = path
+        self._loadData()
 
-    def close(self):
-        yaml.dump(self.data, self.file)
-        self.file.close()
+    def save(self):
+        with open(self.path, mode='w') as file:
+            yaml.dump(self.data, file)
 
     def put(self, key: str, value: object):
         self.data[key] = value
@@ -18,10 +18,12 @@ class DataFile:
     def get(self, key: str) -> object:
         return self.data.get(key)
 
-    def _loadData(self, path: str):
+    def _loadData(self):
         try:
-            with open(path, mode='r') as file:
+            with open(self.path, mode='r') as file:
                 self.data = yaml.load(file, Loader=yaml.FullLoader)
                 self.data = self.data if self.data is not None else {}
         except FileNotFoundError:
             pass
+        except yaml.YAMLError:
+            raise FileExistsError("File doesn't have yaml syntax or corrupted.")

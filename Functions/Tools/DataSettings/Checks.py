@@ -1,5 +1,5 @@
 def checkInteger(number: str) -> bool:
-    """:returns True if number is integer"""
+    """returns True if number is integer"""
     try:
         int(number)
         return True

@@ -2,32 +2,32 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import simpledialog
 
+import customtkinter
+
+from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.Client.MainChannel import ClientMainChannel
-from Functions.Network.Server.MainChannel.main import MainChannel
+from Functions.Network.Server.MainChannel.main import ServerMainChannel
 from Functions.Tools.DataSettings.FileDataManager import DataManager
 from Functions.Tools.logManager import Logs
+from UI.MainMenuUIFunctions import MainMenuUIFunctions
 from UI.TKinter_addons.Entry_Placeholder import EntryWithPlaceholder
 from UI.TKinter_addons.Text_status import StatusText
-from UI.MainMenuTabs.TabChat import TabChat
-from UI.MainMenuTabs.TabParticipants import TabParticipants
-from UI.MainMenuTabs.TabFiles import TabFiles
-from UI.MainMenuTabs.TabLogs import TabLogs
 from UI.ChildFrames.SettingsMenu import Settings
-from UI.window.WidnowCenter import center_main
+from UI.window.WindowCenter import center_main
 from Functions.ModuleHandler.moduleHandler import ModuleHandler
 from Functions.ModuleHandler.moduleAPI import API
 import settings
-# import customtkinter
 
 
-class MainMenu:
-    server: MainChannel = None
+class MainMenu(MainMenuUIFunctions):
+    server: ServerMainChannel = None
     client: ClientMainChannel = None
 
     def __init__(self, log: Logs, dataManager: DataManager):
         self.logs = log
         self.root = tk.Tk()
         self.dataManager = dataManager
+        self.accountManager = AccountManager()
         # self.root = customtkinter.CTk()
         self.root.wm_minsize(925, 450)
         self.changeTitle("MainMenu")
@@ -35,6 +35,7 @@ class MainMenu:
         # Main menu frame
         self.mainFrame = tk.Frame(self.root)
         self.mainFrame.pack(fill=tk.BOTH, expand=True)
+        self.mainFrame.pack_propagate(False)  # not letting widgets expand self.root
 
         # Settings frame
         self.settingsFrame = Settings(self.mainFrame, self.dataManager)
@@ -111,88 +112,7 @@ class MainMenu:
         # Creating tab manager
         self.right_notebook = ttk.Notebook(self.mainFrame)
 
-        # Creating tabs
-        # self.tab_chat = TabChat(self.right_notebook)
-        # self.tab_participants = TabParticipants(self.right_notebook)
-        # self.tab_files = TabFiles(self.right_notebook)
-        # self.tab_logs = TabLogs(self.right_notebook)
-
         self.moduleLoaderError = tk.Label(self.mainFrame, text="No modules were loaded.", font=40)
-
-        # Adding tabs to tab manager
-        # self.right_notebook.add(self.tab_chat, text='Chat')
-        # self.right_notebook.add(self.tab_participants, text='Participants')
-        # self.right_notebook.add(self.tab_files, text='Files')
-        # self.right_notebook.add(self.tab_logs, text='Logs')
 
         # Placing tab manager
         self.right_notebook.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=(2, 0))
-
-    def changeTitle(self, name: str):
-        self.root.title('1C PROJECT - ' + name + " - " + settings.MainInfo.startDate)
-
-    def goSettings(self):
-        self.settingsFrame.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=5)
-        self.changeTitle("Settings")
-        self.left_button_connect.pack_forget()
-        self.left_button_create_server.pack_forget()
-        self.left_button_settings.configure(
-            text="Return",
-            command=self.goMainFrame
-        )
-        if len(self.module.active):
-            self.right_notebook.pack_forget()
-        else:
-            self.moduleLoaderError.pack_forget()
-
-    def goMainFrame(self):
-        self.settingsFrame.pack_forget()
-        self.changeTitle("MainMenu")
-        self.left_button_connect.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))
-        self.left_button_create_server.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))
-        self.left_button_settings.configure(
-            text="Settings",
-            command=self.goSettings
-        )
-        if len(self.module.active):
-            self.right_notebook.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=5)
-        else:
-            self.moduleLoaderError.pack(anchor=tk.CENTER, expand=True)
-
-    def startServer(self):
-        try:
-            ip = self.left_entry_ip.get()
-            port = int(self.left_spinbox_port.get())
-            if ip in ['', self.left_entry_ip.placeholder]:
-                ip = '127.0.0.1'
-
-            self.server = MainChannel(self.logs, ip, port, 3, None)
-            self.left_entry_ip.configure(state=tk.DISABLED)
-            self.left_spinbox_port.configure(state=tk.DISABLED)
-            self.left_button_create_server.configure(state=tk.DISABLED)
-            self.left_button_connect.configure(state=tk.DISABLED)
-        except Exception as error:
-            self.root.bell()
-            self.logs.sendLog("Couldn't start the server. Reason: " + error.__str__(), -1)
-            raise error
-
-    def startClient(self):
-        try:
-            ip = self.left_entry_ip.get()
-            port = int(self.left_spinbox_port.get())
-            if ip in ['', self.left_entry_ip.placeholder]:
-                ip = '127.0.0.1'
-
-            self.client = ClientMainChannel(self.logs, ip, port, self.askPassword, None)
-            self.left_entry_ip.configure(state=tk.DISABLED)
-            self.left_spinbox_port.configure(state=tk.DISABLED)
-            self.left_button_create_server.configure(state=tk.DISABLED)
-            self.left_button_connect.configure(state=tk.DISABLED)
-        except Exception as error:
-            self.root.bell()
-            self.logs.sendLog("Couldn't start the server. Reason: " + error.__str__(), -1)
-            raise error
-
-    def askPassword(self) -> str:
-        string = simpledialog.askstring("Ask String", "Wrong Password")
-        return string

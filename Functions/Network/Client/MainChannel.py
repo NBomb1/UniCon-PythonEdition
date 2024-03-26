@@ -1,4 +1,5 @@
-from Functions.Network.Client.AuthenticationPassing import Authentication
+from Functions.Network.Accounts.AccountAuthentication.Client.AuthenticationPassing import Authentication
+from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.Info import Info
 from Functions.Tools.logManager import Logs
 import socket as s
@@ -7,9 +8,10 @@ import socket as s
 class ClientMainChannel:
     socket: s = None
 
-    def __init__(self, logs: Logs, ip: str, port: int, askPassword: callable, password: str | None):
+    def __init__(self, logs: Logs, account: AccountManager, ip: str, port: int, askPassword: callable, password: str | None):
         self.logs = logs
         self.askPassword = askPassword
+        self.account = account
         logs.sendLog(f"Connecting to server {ip}:{port}", -1)
 
         if password is None:
@@ -18,8 +20,7 @@ class ClientMainChannel:
         else:
             self.logs.sendLog("[MainChannel Client] Using custom password.", -1)
 
-        self.logs.sendLog("[MainChannel Client] Creating socket...", -1)
         self.socket = s.socket()
         self.logs.sendLog("[MainChannel Client] Connecting to the server...", -1)
         self.socket.connect((ip, port))
-        Authentication(self.socket, self.logs, password, self.askPassword).start()
+        Authentication(self.socket, self.logs, password, self.askPassword, account).start()

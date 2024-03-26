@@ -27,16 +27,16 @@ class Module:
         self._setupParameters()
 
         self.allIDs = [self.currentId]
-        self.frame = tk.Frame(api.rightNotebook)
+        self.frame = tk.Frame(api.getRightNotebook())
 
-        api.rightNotebook.add(self.frame, text="Logs")
+        api.getRightNotebook().add(self.frame, text="Logs")
 
         self._create_widgets()
         self._place_widgets()
         self._configure_widgets()
 
         # Finishing it
-        api.logs.registerHandler(self.currentId, self.message)
+        api.getLogs().registerHandler(self.currentId, self.message)
         self.combobox_ids.set(self.currentId)
         self.message("This is starting text logs.", self.currentId)
 
@@ -89,7 +89,7 @@ class Module:
         self.idLog[self.currentId].configure(state=tk.NORMAL)
         self.idLog[self.currentId].delete("1.0", tk.END)
         self.idLog[self.currentId].configure(state=tk.DISABLED)
-        self.message("[Logs] All messages were cleared by user.", 0)
+        self.message("[Logs] All messages were cleared by user.", self.currentId)
 
     def saveLogs(self):
         copy = self.idLog[self.currentId].get("1.0", tk.END)
@@ -120,12 +120,12 @@ class Module:
     def registerIDs(self):
         for _ in range(0, 100):
             sleep(0.0001)
-            for i in self.api.logs.registeredFunctions.keys():
+            for i in self.api.getLogs().registeredFunctions.keys():
                 if i not in self.allIDs:
                     self.allIDs.append(i)
                     self.idLog[i] = ChatText(self.FrameChat)
                     self.combobox_ids.configure(values=self.allIDs)
-                    self.api.logs.registerHandler(i, self.message)
+                    self.api.getLogs().registerHandler(i, self.message)
                     self.idLog[i].configure(wrap=tk.WORD, height=20, font=self.font)
                     self.message(f"[Logs] ID {i} have been found.", i)
                     self.allIDs.sort()
@@ -168,8 +168,8 @@ class Module:
         self.combobox_ids.bind("<<ComboboxSelected>>", self.on_combobox_selected)
 
     def _setupParameters(self):
-        self.api.dataManager.create('Logs', getcwd() + '\\Modules\\Logs\\settings.yml')
-        if (a := self.api.dataManager.get("Logs").get('currentId')) is None:
-            self.api.dataManager.get("Logs").put("currentId", self.currentId)
+        self.api.getDataManager().create('Logs', getcwd() + '\\Modules\\Logs\\settings.yml')
+        if (a := self.api.getDataManager().get("Logs").get('currentId')) is None:
+            self.api.getDataManager().get("Logs").put("currentId", self.currentId)
         else:
             self.currentId = a

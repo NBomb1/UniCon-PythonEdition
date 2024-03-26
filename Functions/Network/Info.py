@@ -17,6 +17,7 @@ class Info:
 
     unique_message = "ProjectSocketInterface16102023"
     preAuthMessageLength = 128
+    preAuthGetAccountInfo = 8192
     defaultPassword = "*GT/;S*:s_.7_G[T8K)0vW6:6=YO+p?R{qU<)V/[hXy]~Rl5$0vC<D;yb#3tR?#gX4@y"
 
     @staticmethod

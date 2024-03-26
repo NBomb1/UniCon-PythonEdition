@@ -44,3 +44,12 @@ class EntryWithPlaceholder(tk.Entry):
         if mode:
             self.master.focus()
             self._foc_out()
+        else:
+            self._foc_in()
+
+    def get(self) -> str:
+        return super().get() if self.placeholder != super().get() else ''
+
+    def put(self, text: str):
+        self._foc_in()
+        self.insert(0, text)

@@ -76,6 +76,12 @@ class NumberRange(tk.LabelFrame, SaveWidgetData, ShowRedFlag):
         self.From.pack()
         self.LabelTo.pack()
         self.To.pack()
+        self._loadFunc(self.load)
+
+    def load(self, data: list[str, str]):
+        DataFrom_, DataTo = data
+        self.From.load(DataFrom_)
+        self.To.load(DataTo)
 
     def save(self) -> list[list[str], list[str]]:
         """

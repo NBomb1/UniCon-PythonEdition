@@ -12,15 +12,15 @@ class DataManager:
 
         self.settingDict[name] = DataFile(path)
 
-    def closeAll(self):
-        """Saves data and closes files."""
+    def saveAll(self):
+        """Saves data in all files."""
         for file in self.settingDict.values():
-            file.close()
+            file.save()
         self.settingDict.clear()
 
-    def close(self, name: str):
-        """Saves data and closes file."""
-        self.settingDict.pop(name).close()
+    def save(self, name: str):
+        """Saves data."""
+        self.settingDict.pop(name).save()
 
     def get(self, name: str) -> DataFile:
         """Gets datafile object."""

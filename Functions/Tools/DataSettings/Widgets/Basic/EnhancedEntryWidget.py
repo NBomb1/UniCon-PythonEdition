@@ -1,3 +1,5 @@
+from time import sleep
+
 from Functions.Tools.DataSettings.Widgets.Basic.SaveWidgetData import SaveWidgetData
 from Functions.Tools.DataSettings.Widgets.Basic.ShowRedFlag import ShowRedFlag
 from Functions.Tools.DataSettings.Widgets.Basic.ToolTip import ToolTip
@@ -37,7 +39,18 @@ class EnhancedEntry(EntryWithPlaceholder, SaveWidgetData, ShowRedFlag):
 
         self._var = tk.StringVar()
         self.configure(textvariable=self._var)
+
+        # self._foc_out()
+        self._loadFunc(self.load)
+
         self._put_placeholder()
+
+    def load(self, data: str):
+        self.actualData = data
+        self._foc_in()
+        self.delete("0", tk.END)
+        self.insert("1", str(data))
+        self._foc_out()
 
     def save(self) -> list[str]:
         """

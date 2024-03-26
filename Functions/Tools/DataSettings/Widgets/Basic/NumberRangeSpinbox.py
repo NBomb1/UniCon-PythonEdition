@@ -33,6 +33,11 @@ class NumberRangeBasic(SaveWidgetData, tk.Spinbox, ToolTip, ShowRedFlag):
 
         self.bind("<FocusIn>", self._foc_in)
 
+    def load(self, data: str):
+        self.actualData = data
+        self.delete("0", tk.END)
+        self.insert("1", str(data))
+
     def save(self) -> list[str]:
         """
         :return: list of refuse reasons.
@@ -73,6 +78,6 @@ class NumberRangeBasic(SaveWidgetData, tk.Spinbox, ToolTip, ShowRedFlag):
         if mode:
             self.master.focus()
 
-    def _foc_in(self, event):
+    def _foc_in(self, *args):
         if self.disable_focus:
             self.master.focus()
