@@ -1,7 +1,7 @@
 from Functions.Tools.DataSettings.DataFile import DataFile
 
 
-class DataManager:
+class FileDataManager:
     def __init__(self):
         self.settingDict: dict[str, DataFile] = {}
 

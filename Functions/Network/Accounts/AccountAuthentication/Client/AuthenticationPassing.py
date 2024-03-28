@@ -35,7 +35,8 @@ class Authentication:
             self.logs.sendLog(f"[MainChannel Client] Couldn't pass authentication phase. Reason: {fail}", -1)
 
     def sendMessage(self, message: str, count: int) -> int:
-        return self.socket.send((message + (" " * (count - len(message)))).encode())
+        # decoded non-english symbols can take more than 1 length of message
+        return self.socket.send((message + (" " * (count - len(message.encode())))).encode())
 
     def _getMessage(self, length=Info.preAuthMessageLength) -> str | None:
         try:

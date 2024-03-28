@@ -1,6 +1,9 @@
 from Functions.ModuleHandler.moduleAPI import API
+from Functions.Network.Accounts.AccountData import Account
 from Functions.Tools.ScrollableFrame import ScrollableFrame
 import tkinter as tk
+
+from Modules.Accounts.Design.AccountLeftSideInfo import LeftSideInfo
 
 
 class Module:
@@ -13,6 +16,7 @@ class Module:
     def __init__(self, api: API):
         self.api = api
         self.notebook = self.api.getRightNotebook()
+        self.triggerManager = self.api.getTriggerManager()
 
         self.frame = tk.Frame(self.api.getRightNotebook())
 
@@ -21,6 +25,7 @@ class Module:
         self.setup()
 
         self.notebook.tab(self.frame, state=tk.NORMAL)
+        self.triggerManager.accountAddedTrigger(self.createNewAccount)
 
     def setup(self):
         self.accountListFrame = ScrollableFrame(self.frame)
@@ -33,3 +38,6 @@ class Module:
 
         self.accountListFrame.inner_frame.configure(bg='yellow')
         self.accountInformationFrame.inner_frame.configure(bg='red')
+
+    def createNewAccount(self, account: Account):
+        LeftSideInfo(self.accountListFrame.inner_frame, account)

@@ -5,7 +5,7 @@ from time import sleep
 import settings
 import tkinter.ttk as ttk
 
-from Functions.Tools.DataSettings.FileDataManager import DataManager
+from Functions.Tools.DataSettings.FileDataManager import FileDataManager
 from Functions.Tools.DataSettings.Widgets.IntegerEntry import IntegerEntry
 from Functions.Tools.DataSettings.Widgets.NumberRange import NumberRange
 from Functions.Tools.DataSettings.Widgets.StringEntry import StringEntry
@@ -17,7 +17,7 @@ class Settings(ttk.Notebook):
     integerEntry = None
     stringEntry = None
 
-    def __init__(self, master: tk.Widget, dataManager: DataManager):
+    def __init__(self, master: tk.Widget, dataManager: FileDataManager):
         super().__init__(master)
 
         self.dataManager = dataManager

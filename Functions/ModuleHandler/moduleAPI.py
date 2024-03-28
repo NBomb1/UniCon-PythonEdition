@@ -1,7 +1,8 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 
-from Functions.Tools.DataSettings.FileDataManager import DataManager
+from Functions.Network.TriggerManager import TriggerManager
+from Functions.Tools.DataSettings.FileDataManager import FileDataManager
 from Functions.Tools.logManager import Logs
 from Functions.Exceptions.API import APIException
 
@@ -15,7 +16,8 @@ class API:
                  left_frame: tk.Frame,
                  main_frame: tk.Frame,
                  moduleLoaderError: tk.Label,
-                 dataManager: DataManager,
+                 dataManager: FileDataManager,
+                 triggerManager: TriggerManager
                  ):
         self.__root = root
         self.__rightNotebook = right_notebook
@@ -25,6 +27,7 @@ class API:
         self.__mainFrame = main_frame
         self.__moduleLoaderError = moduleLoaderError
         self.__dataManager = dataManager
+        self.__triggerManager = triggerManager
 
     def getRoot(self) -> tk.Tk:
         if self.__root is None:
@@ -61,7 +64,12 @@ class API:
             raise APIException.ObjectIsNull("ModuleLoaderError is None")
         return self.__moduleLoaderError
 
-    def getDataManager(self) -> DataManager:
+    def getDataManager(self) -> FileDataManager:
         if self.__dataManager is None:
             raise APIException.ObjectIsNull("DataManager is None")
         return self.__dataManager
+
+    def getTriggerManager(self) -> TriggerManager:
+        if self.__triggerManager is None:
+            raise APIException.ObjectIsNull("TriggerManager is None")
+        return self.__triggerManager

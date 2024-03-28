@@ -18,6 +18,7 @@ class Account:
         self.pc_name = pc_name
         self.id = id_
         self.salt = salt  # for server only
+        self.ping = -1
 
     def update_ping(self, ping: int):
         self.ping = ping

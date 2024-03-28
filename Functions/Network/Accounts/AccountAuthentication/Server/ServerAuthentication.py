@@ -49,8 +49,9 @@ class Authentication:
         ):
 
             # Обмен данных
-            if (data := Authentication._4_PhaseDataShare(account.socket, logs, accountManager)) is not None:
-                pass
+            if (data := Authentication._4_PhaseDataShare(account.socket, logs, accountManager)) is None:
+                s.close()
+                return
                 # Authentication._5_PhaseAllModulesCheck(account.socket, logs) # Проверка аддонов
                 # Authentication._6_PhaseModuleConnection(account.socket, logs)  # Подключение аддонов
 
@@ -192,7 +193,7 @@ class Authentication:
         logs.sendLog("[Authentication] Sixth phase has been passed.", -1)
         return True
 
-
+    @staticmethod
     def _passInfo(s: socket.socket) -> bool:
         s.send(Authentication._fillText('pass', Info.preAuthMessageLength).encode())
         return True

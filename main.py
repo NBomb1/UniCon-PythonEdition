@@ -20,6 +20,7 @@ Goals:
 1. Finish account module and related things.
 2. Pass all authentication phases.
 3. Function execution before program closes.
+4. Delete Trigger Manager and add accountManager to api.
 """
 
 from datetime import datetime
@@ -29,7 +30,7 @@ from traceback import format_exc
 from Functions.Tools.MultipleStartRestriction import MultipleStartRestriction
 from UI.MainMenu import MainMenu
 from Functions.Tools.logManager import Logs
-from Functions.Tools.DataSettings.FileDataManager import DataManager
+from Functions.Tools.DataSettings.FileDataManager import FileDataManager
 from UI.ProgramStartError import ProgramStartError
 
 
@@ -41,7 +42,7 @@ def main():
         #     raise Exception("Program has already been started!")
         # startCheck.lock_file()
 
-        dataManager = DataManager()
+        dataManager = FileDataManager()
         dataManager.create("main", getcwd() + '\\settings.yml')
         dataManager.get('main').put('lastStart', datetime.now().timestamp())
 

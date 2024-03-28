@@ -7,7 +7,8 @@ import customtkinter
 from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.Client.MainChannel import ClientMainChannel
 from Functions.Network.Server.MainChannel.main import ServerMainChannel
-from Functions.Tools.DataSettings.FileDataManager import DataManager
+from Functions.Network.TriggerManager import TriggerManager
+from Functions.Tools.DataSettings.FileDataManager import FileDataManager
 from Functions.Tools.logManager import Logs
 from UI.MainMenuUIFunctions import MainMenuUIFunctions
 from UI.TKinter_addons.Entry_Placeholder import EntryWithPlaceholder
@@ -23,7 +24,7 @@ class MainMenu(MainMenuUIFunctions):
     server: ServerMainChannel = None
     client: ClientMainChannel = None
 
-    def __init__(self, log: Logs, dataManager: DataManager):
+    def __init__(self, log: Logs, dataManager: FileDataManager):
         self.logs = log
         self.root = tk.Tk()
         self.dataManager = dataManager
@@ -43,6 +44,8 @@ class MainMenu(MainMenuUIFunctions):
         self._createLeftWidgets()
         self._createRightWidgets()
 
+        self.triggerManager = TriggerManager(self.accountManager)
+
         self.api = API(
                 log,
                 self.root,
@@ -51,7 +54,8 @@ class MainMenu(MainMenuUIFunctions):
                 self.left_frame1,
                 self.mainFrame,
                 self.moduleLoaderError,
-                self.dataManager
+                self.dataManager,
+                self.triggerManager
             )
         self.module = ModuleHandler(self.api)
 
