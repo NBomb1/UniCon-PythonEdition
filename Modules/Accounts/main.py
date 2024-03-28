@@ -8,9 +8,9 @@ from Modules.Accounts.Design.AccountLeftSideInfo import LeftSideInfo
 
 class Module:
     version = "0.0.1"
-    name = "Logs"
+    name = "Accounts"
     author = "ArT"
-    defaultNetworkAuth = False
+    defaultNetworkAuth = True
     isOnlyUI = True
 
     def __init__(self, api: API):
@@ -30,11 +30,10 @@ class Module:
     def setup(self):
         self.accountListFrame = ScrollableFrame(self.frame)
 
-        self.accountListFrame.pack_propagate(False)
-
         self.accountInformationFrame = ScrollableFrame(self.frame)
-        self.accountListFrame.pack(side=tk.LEFT, fill=tk.Y, ipadx=80)
+        self.accountListFrame.pack(side=tk.LEFT, fill=tk.Y)
         self.accountInformationFrame.pack(expand=True, fill=tk.BOTH)
+        self.accountListFrame.canvas.configure(width=200)
 
         self.accountListFrame.inner_frame.configure(bg='yellow')
         self.accountInformationFrame.inner_frame.configure(bg='red')

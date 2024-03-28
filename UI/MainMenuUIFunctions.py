@@ -85,7 +85,7 @@ class MainMenuUIFunctions:
     def startServer(self):
         try:
             # Getting data
-            nickname = self.left_entry_nickname.get()
+            nickname = self.left_entry_nickname.get().lstrip(' ').rstrip(' ')
             ip = self.left_entry_ip.get()
             port = int(self.left_spinbox_port.get())
 
@@ -97,6 +97,7 @@ class MainMenuUIFunctions:
                 self.left_entry_ip.put('127.0.0.1')
 
             self.server = ServerMainChannel(self.logs, self.accountManager, ip, port, 3, None)
+            self.left_entry_nickname.put(nickname)
             self.lockInteraction()
         except Exception as error:
             self.root.bell()
@@ -105,7 +106,7 @@ class MainMenuUIFunctions:
 
     def startClient(self):
         try:
-            nickname = self.left_entry_nickname.get()
+            nickname = self.left_entry_nickname.get().lstrip(' ').rstrip(' ')
             ip = self.left_entry_ip.get()
             port = int(self.left_spinbox_port.get())
             if len(nickname) < 3:
@@ -117,6 +118,7 @@ class MainMenuUIFunctions:
             self.accountManager.setSelfAccount(SelfAccount(nickname))
 
             self.client = ClientMainChannel(self.logs, self.accountManager, ip, port, self.askPassword, None)
+            self.left_entry_nickname.put(nickname)
             self.lockInteraction()
         except Exception as error:
             self.root.bell()

@@ -52,4 +52,5 @@ class EntryWithPlaceholder(tk.Entry):
 
     def put(self, text: str):
         self._foc_in()
+        self.delete(0, tk.END)
         self.insert(0, text)
