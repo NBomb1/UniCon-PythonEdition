@@ -2,7 +2,7 @@ import socket as s
 
 from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.Info import Info
-from Functions.Network.Server.MainChannel.ServerHandlers import ServerInformation
+from Functions.Network.MainChannel.Server.ServerHandlers import ServerInformation
 from Functions.Tools.logManager import Logs
 
 """

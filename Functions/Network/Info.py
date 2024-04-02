@@ -13,6 +13,7 @@ class Info:
     AuthVersion = "0.0.1"
     SecurityVersion = "0.0.1"
     ModuleAuth = "0.0.1"
+    PingManager = "0.0.1"
     MessageTransfer = "0.0.1"
 
     unique_message = "ProjectSocketInterface16102023"
@@ -26,6 +27,7 @@ class Info:
             "Auth": Info.AuthVersion,
             "Security": Info.SecurityVersion,
             "ModuleAuth": Info.ModuleAuth,
+            "PingManager": Info.PingManager,
             "MessageTransfer": Info.MessageTransfer,
             "UI": UIInfo.version
         }

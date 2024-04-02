@@ -9,9 +9,10 @@ class SelfAccount:
     ping: int = None
     salt: bytes = None  # needs for modules and ect.
 
-    def __init__(self, nickname: str):
+    def __init__(self, nickname: str, tags=None):
         self.nickname = nickname
         self.pc_name = s.gethostname()
+        self.tags = tags if tags is not None else []
 
     def updateNickname(self, nickname: str):
         self.nickname = nickname

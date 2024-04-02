@@ -10,7 +10,6 @@ class LeftSideInfo:
     pingFont = (None, 9, 'normal')
 
     def __init__(self, root: tk.Frame, account: Account):
-        print('bruh')
         self.root = root
         self.account = account
 
@@ -20,7 +19,13 @@ class LeftSideInfo:
         self.pc_name = tk.Label(self.mainFrame, font=self.pcFont, fg='#AFAFAF', width=20)
         self.ping = tk.Label(self.mainFrame, font=self.pingFont)
 
-        self.mainFrame.pack(ipady=10, fill=tk.X)
+        if 'Owner' in self.account.tags:
+            self.photo = tk.PhotoImage(file=r'Modules\Accounts\crown.gif')
+            self.photo = self.photo.subsample(2, 2)
+            self.crown = tk.Label(self.mainFrame, width=self.photo.width(), height=self.photo.height(), image=self.photo)
+            self.crown.pack()
+
+        self.mainFrame.pack(pady=(0, 3), padx=1, fill=tk.X)
 
         self.nickname.pack()
         self.pc_name.pack()

@@ -38,7 +38,8 @@ class Authentication:
             return None
 
     @staticmethod
-    def authentication(account: PreAccount, password: str, s: socket.socket, logs: Logs, accountManager: AccountManager) -> None:
+    def authentication(account: PreAccount, password: str, s: socket.socket, logs: Logs,
+                       accountManager: AccountManager) -> None:
         client_salt = urandom(128)
         if (
                 Authentication._1_PhaseRecognition(account.socket, logs) and  # Определение
@@ -65,7 +66,8 @@ class Authentication:
                 id_=data['id'],
                 salt=client_salt
             ))
-            logs.sendLog(f"[MainChannel] Authentication from {account.socket.getpeername()[0]} went successfully", -1)
+            logs.sendLog(f"[MainChannel] Authentication from "
+                         f"{s.getpeername()[0]}:{s.getpeername()[1]} went successfully", -1)
 
     @staticmethod
     def _1_PhaseRecognition(s: socket.socket, logs: Logs) -> bool:
@@ -79,10 +81,12 @@ class Authentication:
         if message != Info.unique_message:  # checking if those aren't same
             s.send(Authentication._fillText("!!Connection restriction", Info.preAuthMessageLength).encode())
             s.close()
-            logs.sendLog("[Authentication] Couldn't pass 1st authentication phase.", -1)
+            logs.sendLog(f"[Authentication] Couldn't pass 1st authentication phase. "
+                         f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
             return False
 
-        logs.sendLog("[Authentication] First phase has been passed.", -1)
+        logs.sendLog("[Authentication] First phase has been passed."
+                     f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
         return True
 
     @staticmethod
@@ -91,13 +95,15 @@ class Authentication:
         message = Authentication._getMessage(s)
         if message is None:
             s.close()
-            logs.sendLog("[Authentication] Couldn't pass 2nd authentication phase.", -1)
+            logs.sendLog("[Authentication] Couldn't pass 2nd authentication phase."
+                         f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
             return False
         try:
             message = literal_eval(message.replace(" ", ''))  # making it type of dict
         except ValueError:
             s.close()
-            logs.sendLog("[Authentication] Couldn't pass 2nd authentication phase.", -1)
+            logs.sendLog("[Authentication] Couldn't pass 2nd authentication phase."
+                         f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
             return False
 
         modules = Info.getBuiltInModules()  # getting our module versions
@@ -109,10 +115,12 @@ class Authentication:
         if send:  # checking if there are any issues with module versions
             s.send(send.__str__())  # sending our module versions
             s.close()  # and closing connection
-            logs.sendLog("[Authentication] Couldn't pass 2nd authentication phase.", -1)
+            logs.sendLog("[Authentication] Couldn't pass 2nd authentication phase."
+                         f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
             return False
 
-        logs.sendLog("[Authentication] Second phase has been passed.", -1)
+        logs.sendLog("[Authentication] Second phase has been passed."
+                     f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
         return True
 
     @staticmethod
@@ -138,23 +146,26 @@ class Authentication:
             if received_hashed_password is None:
                 s.close()
                 logs.sendLog(
-                    f"[Authentication] Couldn't pass 3rd authentication phase. Client disconnected.",
-                    -1
-                )
+                    f"[Authentication] Couldn't pass 3rd authentication phase. Client disconnected."
+                    f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
                 return False
 
             # If given password hash is the same as our password hash
             if received_hashed_password == hashed_password:
-                logs.sendLog("[Authentication] Third phase has been passed.", -1)
+                logs.sendLog("[Authentication] Third phase has been passed."
+                             f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
                 s.send(Authentication._fillText("1", Info.preAuthMessageLength).encode())
                 return True
             else:
-                logs.sendLog(f"[Authentication] Couldn't pass 3rd authentication phase for {tries + 1} time.", -1)
+                logs.sendLog(f"[Authentication] Couldn't pass 3rd authentication phase for {tries + 1} time."
+                             f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
                 s.send(Authentication._fillText("", Info.preAuthMessageLength).encode())
 
-        logs.sendLog(f"[Authentication] Client couldn't pass 3rd phase. Closing connection...", -1)
+        logs.sendLog(f"[Authentication] Client couldn't pass 3rd phase. Closing connection..."
+                     f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
         s.close()
         return False
+
     @staticmethod
     def _4_PhaseDataShare(s: socket.socket, logs: Logs, accountManager: AccountManager) -> dict | None:
         # 1. Getting pc_name and nickname
@@ -176,7 +187,8 @@ class Authentication:
         accountInfo = accountManager.getAllInfoAccount().__str__()
         s.send(Authentication._fillText(accountInfo, Info.preAuthGetAccountInfo).encode())
 
-        logs.sendLog("[Authentication] Forth phase has been passed.", -1)
+        logs.sendLog("[Authentication] Forth phase has been passed."
+                     f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
         return {
             'id': id_,
             'nickname': nickname,
@@ -185,12 +197,14 @@ class Authentication:
 
     @staticmethod
     def _5_PhaseAllModulesCheck(s: socket.socket, logs: Logs) -> bool:
-        logs.sendLog("[Authentication] Fifth phase has been passed.", -1)
+        logs.sendLog("[Authentication] Fifth phase has been passed."
+                     f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
         return True
 
     @staticmethod
     def _6_PhaseModuleConnection(s: socket.socket, logs: Logs) -> bool:
-        logs.sendLog("[Authentication] Sixth phase has been passed.", -1)
+        logs.sendLog("[Authentication] Sixth phase has been passed."
+                     f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
         return True
 
     @staticmethod

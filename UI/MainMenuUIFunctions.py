@@ -7,8 +7,9 @@ from Functions.Exceptions.Server import DataCollectionException
 from Functions.ModuleHandler.moduleHandler import ModuleHandler
 from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.Accounts.SelfAccount import SelfAccount
-from Functions.Network.Client.MainChannel import ClientMainChannel
-from Functions.Network.Server.MainChannel.main import ServerMainChannel
+from Functions.Network.MainChannel.Client.MainChannel import ClientMainChannel
+from Functions.Network.MainChannel.Server.main import ServerMainChannel
+from Functions.Network.TriggerManager import TriggerManager
 from Functions.Tools.logManager import Logs
 from UI.ChildFrames.SettingsMenu import Settings
 from UI.TKinter_addons.Entry_Placeholder import EntryWithPlaceholder
@@ -17,6 +18,9 @@ from UI.TKinter_addons.Entry_Placeholder import EntryWithPlaceholder
 class MainMenuUIFunctions:
     # accountManager
     accountManager: AccountManager
+
+    # triggerManager
+    triggerManager: TriggerManager
 
     # window
     root: tk.Tk
@@ -52,7 +56,7 @@ class MainMenuUIFunctions:
     client: ClientMainChannel
 
     def changeTitle(self, name: str):
-        self.root.title('1C PROJECT - ' + name + " - " + settings.MainInfo.startDate)
+        self.root.title('Unicon - ' + name + " - " + settings.MainInfo.startDate)
 
     def goSettings(self):
         self.settingsFrame.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=5)
@@ -96,9 +100,12 @@ class MainMenuUIFunctions:
                 ip = '127.0.0.1'
                 self.left_entry_ip.put('127.0.0.1')
 
+            self.accountManager.setSelfAccount(SelfAccount(nickname))
+            self.accountManager.getSelfAccount().tags.append('Owner')
             self.server = ServerMainChannel(self.logs, self.accountManager, ip, port, 3, None)
             self.left_entry_nickname.put(nickname)
             self.lockInteraction()
+            self.triggerManager.serverStarted(self.server)
         except Exception as error:
             self.root.bell()
             self.logs.sendLog("Couldn't start the server. Reason: " + error.__str__(), -1)
@@ -109,8 +116,10 @@ class MainMenuUIFunctions:
             nickname = self.left_entry_nickname.get().lstrip(' ').rstrip(' ')
             ip = self.left_entry_ip.get()
             port = int(self.left_spinbox_port.get())
+
             if len(nickname) < 3:
                 raise DataCollectionException.UsernameException("No nickname was given.")
+
             if ip in ['', self.left_entry_ip.placeholder]:
                 ip = '127.0.0.1'
                 self.left_entry_ip.put('127.0.0.1')
@@ -120,6 +129,7 @@ class MainMenuUIFunctions:
             self.client = ClientMainChannel(self.logs, self.accountManager, ip, port, self.askPassword, None)
             self.left_entry_nickname.put(nickname)
             self.lockInteraction()
+            self.triggerManager.clientConnected(self.client)
         except Exception as error:
             self.root.bell()
             self.logs.sendLog("Couldn't connect to the server. Reason: " + error.__str__(), -1)

@@ -1,5 +1,6 @@
 """
 Project started - 2023y 06m 12d
+1C Project
 
 1 Name Idea: Multifunctional network application - MNA
 2 Name Idea: Modular network application - MNA
@@ -21,6 +22,7 @@ Goals:
 2. Pass all authentication phases.
 3. Function execution before program closes.
 4. Delete Trigger Manager and add accountManager to api.
+5. Check for Authentication scripts and move some code to Tools.
 """
 
 from datetime import datetime

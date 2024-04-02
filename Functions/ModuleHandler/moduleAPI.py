@@ -4,7 +4,7 @@ import tkinter.ttk as ttk
 from Functions.Network.TriggerManager import TriggerManager
 from Functions.Tools.DataSettings.FileDataManager import FileDataManager
 from Functions.Tools.logManager import Logs
-from Functions.Exceptions.API import APIException
+from Functions.Exceptions.APIException import APIException
 
 
 class API:

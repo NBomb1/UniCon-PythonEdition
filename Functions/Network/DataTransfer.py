@@ -1,5 +1,7 @@
 import socket
 
+"""Is not done yet."""
+
 
 class MessageTransfer:
     types = []

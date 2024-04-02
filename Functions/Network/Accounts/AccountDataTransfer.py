@@ -8,12 +8,15 @@ class AccountDataTransfer:
 
     def getAllInfoAccount(self) -> list[dict[str: str]]:
         info = []
-        for account in self.participants:
+        temp = [self.selfAccount]
+        temp.extend(self.participants)
+        for account in temp:
             info.append(
                 {
                     'id': account.id,
                     'pc_name': account.pc_name,
-                    'nickname': account.nickname
+                    'nickname': account.nickname,
+                    'tags': account.tags
                 }
             )
         return info

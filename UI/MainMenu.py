@@ -1,12 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
-from tkinter import simpledialog
-
-import customtkinter
 
 from Functions.Network.Accounts.AccountDataManager import AccountManager
-from Functions.Network.Client.MainChannel import ClientMainChannel
-from Functions.Network.Server.MainChannel.main import ServerMainChannel
+from Functions.Network.MainChannel.Client.MainChannel import ClientMainChannel
+from Functions.Network.MainChannel.Server.main import ServerMainChannel
 from Functions.Network.TriggerManager import TriggerManager
 from Functions.Tools.DataSettings.FileDataManager import FileDataManager
 from Functions.Tools.logManager import Logs
