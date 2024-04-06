@@ -9,6 +9,7 @@ from Functions.Tools.DataSettings.FileDataManager import FileDataManager
 from Functions.Tools.DataSettings.Widgets.IntegerEntry import IntegerEntry
 from Functions.Tools.DataSettings.Widgets.NumberRange import NumberRange
 from Functions.Tools.DataSettings.Widgets.StringEntry import StringEntry
+from Functions.Tools.DataSettings.Widgets.checkWidget import CheckButton
 
 
 class Settings(ttk.Notebook):
@@ -16,8 +17,15 @@ class Settings(ttk.Notebook):
     saveButton = None
     integerEntry = None
     stringEntry = None
+    checkButton = None
 
-    def __init__(self, master: tk.Widget, dataManager: FileDataManager):
+    def __init__(self,
+                 master: tk.Widget,
+                 dataManager: FileDataManager,
+                 nickname: StringEntry
+                 ):
+        self.nicknameWidget = nickname
+
         super().__init__(master)
 
         self.dataManager = dataManager
@@ -25,9 +33,11 @@ class Settings(ttk.Notebook):
         self.settingsFrame = tk.Frame()
 
         self.fill_main()
+        self.completeCheckButton()
 
     def fill_main(self):
         self.add(self.settingsFrame, text="Main Settings")
+        self.checkButton = CheckButton(self.settingsFrame, 'Save nickname')
         self.integerEntry = IntegerEntry(self.settingsFrame, 'Integer')
         self.stringEntry = StringEntry(self.settingsFrame, 'String')
 
@@ -45,7 +55,9 @@ class Settings(ttk.Notebook):
         self.portRange.connect(self.dataManager.get('main'), 'portRange')
         self.integerEntry.connect(self.dataManager.get('main'), 'integerTest')
         self.stringEntry.connect(self.dataManager.get('main'), 'stringTest')
+        self.checkButton.connect(self.dataManager.get('main'), 'checkButton')
 
+        self.checkButton.pack()
         self.portRange.pack()
         self.integerEntry.pack()
         self.stringEntry.pack()
@@ -57,6 +69,7 @@ class Settings(ttk.Notebook):
         self.portRange.save()
         self.integerEntry.save()
         self.stringEntry.save()
+        self.checkButton.save()
         Thread(target=self.enableSaving, daemon=True).start()
 
     def enableSaving(self):
@@ -65,3 +78,9 @@ class Settings(ttk.Notebook):
 
     def disableSaving(self):
         self.saveButton.configure(state=tk.DISABLED)
+
+    def completeCheckButton(self):
+        if self.checkButton.v.get():
+            nickname = self.dataManager.get('main').get('nickname')
+            if nickname is not None:
+                self.nicknameWidget.put(nickname)

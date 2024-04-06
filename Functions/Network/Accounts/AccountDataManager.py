@@ -7,8 +7,13 @@ class AccountManager(AccountDataTransfer):
     _NewAccountTrigger = []
     participants: list[Account] = []
     selfAccount: SelfAccount
+    maxConnections: int
 
     def add(self, account: Account):
+        if len(self.participants) >= self.maxConnections:
+            account.socket.close()
+            return
+
         self.participants.append(account)
         for func in self._NewAccountTrigger:
             func(account)
@@ -34,3 +39,12 @@ class AccountManager(AccountDataTransfer):
 
     def setSelfAccount(self, selfAccount: SelfAccount):
         self.selfAccount = selfAccount
+
+    def setMaxConnections(self, maxConnections: int):
+        self.maxConnections = maxConnections
+
+    def getMaxConnections(self):
+        return self.maxConnections
+
+    def getParticipants(self):
+        return self.participants

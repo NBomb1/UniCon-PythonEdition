@@ -6,9 +6,9 @@ from Functions.Network.MainChannel.Client.MainChannel import ClientMainChannel
 from Functions.Network.MainChannel.Server.main import ServerMainChannel
 from Functions.Network.TriggerManager import TriggerManager
 from Functions.Tools.DataSettings.FileDataManager import FileDataManager
+from Functions.Tools.DataSettings.Widgets.StringEntry import StringEntry
 from Functions.Tools.logManager import Logs
 from UI.MainMenuUIFunctions import MainMenuUIFunctions
-from UI.TKinter_addons.Entry_Placeholder import EntryWithPlaceholder
 from UI.TKinter_addons.Text_status import StatusText
 from UI.ChildFrames.SettingsMenu import Settings
 from UI.window.WindowCenter import center_main
@@ -35,11 +35,11 @@ class MainMenu(MainMenuUIFunctions):
         self.mainFrame.pack(fill=tk.BOTH, expand=True)
         self.mainFrame.pack_propagate(False)  # not letting widgets expand self.root
 
-        # Settings frame
-        self.settingsFrame = Settings(self.mainFrame, self.dataManager)
-
         self._createLeftWidgets()
         self._createRightWidgets()
+
+        # Settings frame
+        self.settingsFrame = Settings(self.mainFrame, self.dataManager, self.left_entry_nickname)
 
         self.triggerManager = TriggerManager(self.accountManager)
 
@@ -57,7 +57,6 @@ class MainMenu(MainMenuUIFunctions):
         self.module = ModuleHandler(self.api)
 
         center_main(self.root)
-        self.root.mainloop()
 
     def _createLeftWidgets(self):
         # Creating two frames that will contain all sorts of widgets
@@ -66,8 +65,8 @@ class MainMenu(MainMenuUIFunctions):
         # Creating widgets on the left frame
         self.left_text_status = StatusText(self.left_frame1)
         self.left_text_status.configure(wrap=tk.WORD, height=3, width=20)
-        self.left_entry_ip = EntryWithPlaceholder(self.left_frame1, 'Type ip...')
-        self.left_entry_nickname = EntryWithPlaceholder(self.left_frame1, 'Type your nickname...')
+        self.left_entry_ip = StringEntry(self.left_frame1, 'Type ip...')
+        self.left_entry_nickname = StringEntry(self.left_frame1, 'Type your nickname...')
         # self.left_label_port = customtkinter.CTkLabel(self.left_frame1, text='Port: ')
         self.left_label_port = tk.Label(self.left_frame1, text='Port: ')
 

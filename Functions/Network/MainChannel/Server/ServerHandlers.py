@@ -9,7 +9,12 @@ from Functions.Tools.logManager import Logs
 
 
 class ServerInformation:
-    def __init__(self, ip: str, port: int, password: str, s: socket.socket, accountManager: AccountManager):
+    def __init__(self,
+                 ip: str,
+                 port: int,
+                 password: str,
+                 s: socket.socket,
+                 accountManager: AccountManager):
         self.ip = ip
         self.port = port
         self.accountManager = accountManager
@@ -39,7 +44,7 @@ class Handlers:
                         return  # stop working
                     logs.sendLog(f"[MainChannel] Got new connection from {account.ip}:{account.port}", -1)
                     for i in self._connectionFunctionTrigger:
-                        i()  # getting all functions to call
+                        i(account)  # getting all functions to call
                     logs.sendLog("[MainChannel] Starting authentication...", -1)
 
                     threading.Thread(

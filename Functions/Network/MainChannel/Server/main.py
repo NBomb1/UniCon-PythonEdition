@@ -19,11 +19,11 @@ class ServerMainChannel:
     socket: s.socket = None
     manager: ServerInformation = None
 
-    def __init__(self, logs: Logs, accountManager: AccountManager, ip: str, port: int, listeners: int, password: str | None):
+    def __init__(self, logs: Logs, accountManager: AccountManager, ip: str, port: int, maxCon: int, password: str | None):
         self.logs = logs
         self.accountManager = accountManager
-        self.logs.sendLog(f"[MainChannel] Starting server on {ip}:{port} with {listeners} listeners.", 0)
-        self.logs.sendLog(f"[MainChannel] Starting server on {ip}:{port} with {listeners} listeners.", -1)
+        self.logs.sendLog(f"[MainChannel] Starting server on {ip}:{port} with {maxCon} max connections.", 0)
+        self.logs.sendLog(f"[MainChannel] Starting server on {ip}:{port} with {maxCon} max connections.", -1)
 
         if password is None:
             password = Info.defaultPassword
@@ -33,7 +33,8 @@ class ServerMainChannel:
 
         self.socket = s.socket(s.AF_INET, s.SOCK_STREAM)
         self.socket.bind((ip, port))
-        self.socket.listen(listeners)
+        self.socket.listen()
+        self.accountManager.setMaxConnections(maxCon)
         self.manager = ServerInformation(ip, port, password, self.socket, accountManager)
 
         self.logs.sendLog("[MainChannel] Creating new connection handler...", -1)

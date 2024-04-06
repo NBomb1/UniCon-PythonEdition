@@ -15,21 +15,23 @@ Extra libraries:
 No
 
 """
+from functools import partial
+
+from Functions.Closing.ClosingProcess import closing
 
 """
 Goals:
 1. Finish account module and related things.
 2. Pass all authentication phases.
 3. Function execution before program closes.
-4. Delete Trigger Manager and add accountManager to api.
-5. Check for Authentication scripts and move some code to Tools.
+4. Check for Authentication scripts and move some code to Tools.
+5. Mark selfAccount in module Account.
 """
 
 from datetime import datetime
 from os import getcwd
 from traceback import format_exc
 
-from Functions.Tools.MultipleStartRestriction import MultipleStartRestriction
 from UI.MainMenu import MainMenu
 from Functions.Tools.logManager import Logs
 from Functions.Tools.DataSettings.FileDataManager import FileDataManager
@@ -38,13 +40,8 @@ from UI.ProgramStartError import ProgramStartError
 
 def main():
     # setting up log manager
+    dataManager = FileDataManager()
     try:
-        # startCheck = MultipleStartRestriction()
-        # if not startCheck.checkIsLocked():
-        #     raise Exception("Program has already been started!")
-        # startCheck.lock_file()
-
-        dataManager = FileDataManager()
         dataManager.create("main", getcwd() + '\\settings.yml')
         dataManager.get('main').put('lastStart', datetime.now().timestamp())
 
@@ -54,14 +51,18 @@ def main():
         # logManager.registerFileLog(0)
         # logManager.registerFileLog(-1)
 
-        MainMenu(logManager, dataManager)  # Main code goes here
+        mainMenu = MainMenu(logManager, dataManager)  # Main code goes here
+        mainMenu.root.protocol("WM_DELETE_WINDOW", partial(closing, mainMenu))
+        mainMenu.root.mainloop()
 
         logManager.closeFiles()
 
         dataManager.get('main').put('lastClose', datetime.now().timestamp())
-        dataManager.saveAll()
     except Exception:
+        print(format_exc())
         ProgramStartError(format_exc())
+    finally:
+        dataManager.saveAll()
 
 
 if __name__ == '__main__':

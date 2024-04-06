@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import simpledialog, ttk
 
 import settings
+from Functions.Exceptions.Authentication import Client
 from Functions.Exceptions.Server import DataCollectionException
 from Functions.ModuleHandler.moduleHandler import ModuleHandler
 from Functions.Network.Accounts.AccountDataManager import AccountManager
@@ -126,13 +127,17 @@ class MainMenuUIFunctions:
 
             self.accountManager.setSelfAccount(SelfAccount(nickname))
 
-            self.client = ClientMainChannel(self.logs, self.accountManager, ip, port, self.askPassword, None)
             self.left_entry_nickname.put(nickname)
+            self.client = ClientMainChannel(self.logs, self.accountManager, ip, port, self.askPassword, None)
             self.lockInteraction()
             self.triggerManager.clientConnected(self.client)
+        except Client.PhaseFailedException as error:
+            self.root.bell()
+            self.logs.sendLog("Couldn't connect to the server. Reason: " + error.__str__(), 0)
         except Exception as error:
             self.root.bell()
             self.logs.sendLog("Couldn't connect to the server. Reason: " + error.__str__(), -1)
+            self.logs.sendLog("Couldn't connect to the server. Reason: " + error.__str__(), 0)
             raise error
 
     def askPassword(self) -> str:

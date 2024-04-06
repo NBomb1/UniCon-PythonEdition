@@ -40,6 +40,11 @@ class Authentication:
     @staticmethod
     def authentication(account: PreAccount, password: str, s: socket.socket, logs: Logs,
                        accountManager: AccountManager) -> None:
+        if len(accountManager.getParticipants()) >= accountManager.getMaxConnections():
+            s.send(Authentication._fillText('The server is full.', Info.preAuthMessageLength).encode())
+            s.close()
+            logs.sendLog('[Authentication] Restriction: The server is full.', -1)
+            return
         client_salt = urandom(128)
         if (
                 Authentication._1_PhaseRecognition(account.socket, logs) and  # Определение

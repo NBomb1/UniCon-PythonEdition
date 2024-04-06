@@ -36,6 +36,7 @@ class Authentication:
             self.logs.sendLog('[Authentication client] Connection established!', -1)
         except Client.PhaseFailedException as fail:
             self.logs.sendLog(f"[Authentication client] Couldn't pass authentication phase. Reason: {fail}", -1)
+            raise fail
 
     def sendMessage(self, message: str, count: int) -> int:
         # decoded non-english symbols can take more than 1 length of message

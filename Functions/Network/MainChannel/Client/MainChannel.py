@@ -23,4 +23,5 @@ class ClientMainChannel:
         self.socket = s.socket()
         self.logs.sendLog("[MainChannel Client] Connecting to the server...", -1)
         self.socket.connect((ip, port))
+        self.account.setMaxConnections(50)
         Authentication(self.socket, self.logs, password, self.askPassword, account).start()
