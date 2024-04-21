@@ -9,11 +9,13 @@ from Modules.Accounts.Design.AccountLeftSideInfo import LeftSideInfo
 
 
 class Module:
+    id_ = "Qzc2rFEcJf0s3&d#qj1kC$A7P!~lG}tUu9vWb4xLh5KgZiope^mD(R)=O*wyXT6B"
     version = "0.0.1"
     name = "Accounts"
     author = "ArT"
     defaultNetworkAuth = True
     isOnlyUI = True
+    allAccounts: dict[Account, LeftSideInfo] = {}
 
     def __init__(self, api: API):
         self.api = api
@@ -43,10 +45,15 @@ class Module:
         self.accountInformationFrame.inner_frame.configure(bg='red')
 
     def createNewAccount(self, account: Account):
-        LeftSideInfo(self.accountListFrame.inner_frame, account)
+        self.allAccounts[account] = LeftSideInfo(self.accountListFrame.inner_frame, account)
+        if isinstance(account, Account):
+            account.add_on_ping_update_function(self.pingUpdated)
 
     def serverStarted(self, serverInfo: ServerMainChannel):
         self.createNewAccount(serverInfo.accountManager.getSelfAccount())
 
     def clientConnected(self, serverInfo: ClientMainChannel):
         self.createNewAccount(serverInfo.account.getSelfAccount())
+
+    def pingUpdated(self, account: Account):
+        self.allAccounts[account].updateInfo()

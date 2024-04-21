@@ -1,7 +1,5 @@
-import socket
-
 from Functions.Exceptions.APIException import APIException
-from Functions.Network.ModuleConnector.ConnectionInfo import ConnectionInfo
+from Functions.Network.ModuleConnector.Server.ConnectionInfo import ConnectionInfo
 
 
 class ModuleConnector:

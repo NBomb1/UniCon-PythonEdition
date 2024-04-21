@@ -11,15 +11,17 @@ from UI.TKinter_addons.Text_chat import ChatText
 
 
 class Module:
+    id_ = 'v1tsW@Joi3z^+98K[p7DhMRX4f6Ngx9p]EFC=|x0h5L]uQoSXwGM%6Zefi[cd1bu'
     version = "0.0.1"
     name = "Logs"
     author = "ArT"
     defaultNetworkAuth = False
     isOnlyUI = True
+
     font = (None, 11, "normal")
     currentId: int = -1
-    limit_constant = 3_000_000
-    limit = 0
+    limit_constant = 3_000_000  # limit for check
+    limit = 0  # current number
     idLog: dict[int: ChatText] = {}
 
     def __init__(self, api: API):

@@ -11,9 +11,11 @@ from ast import literal_eval
 from random import randint
 
 from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.DataTransfer import MessageTransfer
 from Functions.Network.Info import Info
 from Functions.Network.Accounts.AccountAuthentication.Server.PreAuthAccount import PreAccount
 from Functions.Network.Accounts.AccountData import Account
+from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager
 from Functions.Tools.logManager import Logs
 
 
@@ -32,22 +34,27 @@ class Authentication:
         try:
             message = s.recv(Info.preAuthMessageLength).decode()
             return message  # getting special message
-        except socket.timeout:
+        except socket.timeout or ConnectionResetError or OSError:
             return None
         except ConnectionResetError:
             return None
 
     @staticmethod
     def authentication(account: PreAccount, password: str, s: socket.socket, logs: Logs,
-                       accountManager: AccountManager) -> None:
+                       accountManager: AccountManager, mcm: ConnectorManager) -> None:
+        #  checking if the server is full
         if len(accountManager.getParticipants()) >= accountManager.getMaxConnections():
             s.send(Authentication._fillText('The server is full.', Info.preAuthMessageLength).encode())
             s.close()
             logs.sendLog('[Authentication] Restriction: The server is full.', -1)
             return
+
+        # Checking for special code
+        if Authentication._1_PhaseRecognition(account, mcm, logs):  # Определение
+            return
+
         client_salt = urandom(128)
         if (
-                Authentication._1_PhaseRecognition(account.socket, logs) and  # Определение
                 Authentication._passInfo(s) and  # Успешное прохождение 1 фазы
                 Authentication._2_PhaseBuiltInModuleCheck(account.socket, logs) and  # Проверка версий
                 Authentication._passInfo(s) and  # Успешное прохождение 2 фазы
@@ -63,7 +70,7 @@ class Authentication:
 
             # Creating account
             accountManager.add(Account(
-                socket=account.socket,
+                socket=MessageTransfer(accountManager, account.socket),
                 ip=account.ip,
                 port=account.port,
                 nickname=data['nickname'],
@@ -75,24 +82,25 @@ class Authentication:
                          f"{s.getpeername()[0]}:{s.getpeername()[1]} went successfully", -1)
 
     @staticmethod
-    def _1_PhaseRecognition(s: socket.socket, logs: Logs) -> bool:
+    def _1_PhaseRecognition(account: PreAccount, mcm: ConnectorManager, logs: Logs) -> bool | None:
         """Phase 1 - Recognition: We do not accept connections from others programs."""
-        message = Authentication._getMessage(s)
+        message = Authentication._getMessage(account.socket)
         if message is None:
-            s.close()
-            return False
+            account.socket.close()
+            return True
         message = message.replace(' ', '')  # formatting to built-in len default
-
-        if message != Info.unique_message:  # checking if those aren't same
-            s.send(Authentication._fillText("!!Connection restriction", Info.preAuthMessageLength).encode())
-            s.close()
+        if mcm.server.checkSpecialCode(message, account.socket):
+            return True
+        elif message != Info.unique_message:  # checking if those aren't same
+            account.socket.send(Authentication._fillText("!!Connection restriction", Info.preAuthMessageLength).encode())
             logs.sendLog(f"[Authentication] Couldn't pass 1st authentication phase. "
-                         f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
-            return False
+                         f"{account.socket.getpeername()[0]}:{account.socket.getpeername()[1]}", -1)
+            account.socket.close()
+            return True
 
         logs.sendLog("[Authentication] First phase has been passed."
-                     f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
-        return True
+                     f"{account.socket.getpeername()[0]}:{account.socket.getpeername()[1]}", -1)
+        return False
 
     @staticmethod
     def _2_PhaseBuiltInModuleCheck(s: socket.socket, logs: Logs) -> bool:

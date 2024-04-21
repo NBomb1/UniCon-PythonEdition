@@ -1,3 +1,4 @@
+from Functions.Network.Accounts.AccountAuthentication.Server.PreAuthAccount import PreAccount
 from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.MainChannel.Client.MainChannel import ClientMainChannel
 from Functions.Network.MainChannel.Server.main import ServerMainChannel
@@ -6,6 +7,8 @@ from Functions.Network.MainChannel.Server.main import ServerMainChannel
 class TriggerManager:
     serverStartedFunctions = []
     clientConnectedFunctions = []
+    beforeAuthConnectionTrigger = []
+    beforeAuthConnectionTrigger_Temporary = []
 
     def __init__(self, accountManager: AccountManager):
         self.accountManager = accountManager
@@ -26,3 +29,18 @@ class TriggerManager:
     def clientConnected(self, serverInfo: ClientMainChannel):
         for func in self.clientConnectedFunctions:
             func(serverInfo)
+
+    def beforeAuthConnectionTemporaryTrigger(self, func: callable):
+        self.beforeAuthConnectionTrigger_Temporary.append(func)
+
+    def beforeAuthConnection(self, preAccount: PreAccount):
+        for i in self.beforeAuthConnectionTrigger_Temporary:
+            res = i(preAccount)
+            if res or res is None:
+                self.beforeAuthConnectionTrigger_Temporary.remove(i)
+        for i in self.beforeAuthConnectionTrigger:
+            i(preAccount)
+        if preAccount.delete:
+            preAccount.socket.close()
+
+

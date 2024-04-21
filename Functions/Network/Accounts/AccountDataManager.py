@@ -1,3 +1,5 @@
+import socket
+
 from Functions.Network.Accounts.AccountData import Account
 from Functions.Network.Accounts.AccountDataTransfer import AccountDataTransfer
 from Functions.Network.Accounts.SelfAccount import SelfAccount
@@ -11,7 +13,7 @@ class AccountManager(AccountDataTransfer):
 
     def add(self, account: Account):
         if len(self.participants) >= self.maxConnections:
-            account.socket.close()
+            account.socket.socket.close()
             return
 
         self.participants.append(account)
@@ -48,3 +50,12 @@ class AccountManager(AccountDataTransfer):
 
     def getParticipants(self):
         return self.participants
+
+    def findBySocket(self, s: socket.socket) -> Account:
+        for i in self.participants:
+            if i.socket.socket == s:
+                return i
+            for socketList in i.extraConnections.values():
+                for socket_ in socketList:
+                    if socket_ == s:
+                        return i

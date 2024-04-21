@@ -4,14 +4,16 @@ from ast import literal_eval
 
 from Functions.Network.Accounts.AccountData import Account
 from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.DataTransfer import MessageTransfer
 from Functions.Network.Info import Info
 from Functions.Tools.logManager import Logs
 from Functions.Exceptions.Authentication import Client
 
 
 class Authentication:
-    def __init__(self, socket: s.socket, logs: Logs, password: str, askPassword: callable, account: AccountManager):
-        self.socket = socket
+    def __init__(self, messageTransfer: MessageTransfer, logs: Logs, password: str, askPassword: callable, account: AccountManager):
+        self.messageTransfer = messageTransfer
+        self.socket = messageTransfer.socket
         self.logs = logs
         self.password = password
         self.askPassword = askPassword
@@ -33,9 +35,10 @@ class Authentication:
             self._4_PhaseDataShare()
             # Phase 5 is not available now
             # Phase 6 is not available now
-            self.logs.sendLog('[Authentication client] Connection established!', -1)
+            self.logs.sendLog('[Authentication Client] Connection established!', -1)
+            self.messageTransfer.handleMessages()
         except Client.PhaseFailedException as fail:
-            self.logs.sendLog(f"[Authentication client] Couldn't pass authentication phase. Reason: {fail}", -1)
+            self.logs.sendLog(f"[Authentication Client] Couldn't pass authentication phase. Reason: {fail}", -1)
             raise fail
 
     def sendMessage(self, message: str, count: int) -> int:
@@ -55,15 +58,15 @@ class Authentication:
             return None
 
     def _1_PhaseRecognition(self):
-        self.logs.sendLog("[Authentication client] Trying to pass 1st phase.", -1)
+        self.logs.sendLog("[Authentication Client] Trying to pass 1st phase.", -1)
         self.sendMessage(Info.unique_message, Info.preAuthMessageLength)
 
     def _2_PhaseBuiltInModuleCheck(self):
-        self.logs.sendLog("[Authentication client] Trying to pass 2nd phase.", -1)
+        self.logs.sendLog("[Authentication Client] Trying to pass 2nd phase.", -1)
         self.sendMessage(Info.getBuiltInModules().__str__(), Info.preAuthMessageLength)
 
     def _3_PhasePasswordCheck(self):
-        self.logs.sendLog("[Authentication client] Trying to pass 3rd phase.", -1)
+        self.logs.sendLog("[Authentication Client] Trying to pass 3rd phase.", -1)
         salt = self.socket.recv(Info.preAuthMessageLength)  # receiving salt
         self.account.getSelfAccount().setSalt(salt)
 
@@ -75,7 +78,7 @@ class Authentication:
                 self.socket.send(hashlib.sha512(salt + (self.askPassword()).encode()).hexdigest().encode())
             except TypeError:
                 self.socket.close()
-                self.logs.sendLog("[Authentication client] Connection closed.", -1)
+                self.logs.sendLog("[Authentication Client] Connection closed.", -1)
 
     def _4_PhaseDataShare(self):
         # sending nickname and pc name
@@ -92,14 +95,15 @@ class Authentication:
         try:
             accounts: list[dict[str:str]] = literal_eval(accounts)
         except ValueError:
-            self.logs.sendLog('[Authentication client] Something went wrong due getting an account info.', -1)
+            self.logs.sendLog('[Authentication Client] Something went wrong due getting an account info.', -1)
             self.socket.close()
         for i in accounts:
+            self.logs.sendLog(f"[Authentication Client] Adding {i['nickname']} with {i['tags']}", -1)
             self.account.add(
                 Account(
-                    None,
-                    None,
-                    None,
+                    self.messageTransfer,
+                    self.messageTransfer.socket.getpeername()[0],
+                    self.messageTransfer.socket.getpeername()[1],
                     i['nickname'],
                     i['pc_name'],
                     i['id'],

@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 
+from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager
 from Functions.Network.TriggerManager import TriggerManager
 from Functions.Tools.DataSettings.FileDataManager import FileDataManager
 from Functions.Tools.logManager import Logs
@@ -8,6 +9,9 @@ from Functions.Exceptions.APIException import APIException
 
 
 class API:
+    """
+    API 1ST GENERATION
+    """
     def __init__(self,
                  logs: Logs,
                  root: tk.Tk,
@@ -17,7 +21,8 @@ class API:
                  main_frame: tk.Frame,
                  moduleLoaderError: tk.Label,
                  dataManager: FileDataManager,
-                 triggerManager: TriggerManager
+                 triggerManager: TriggerManager,
+                 connectorManager: ConnectorManager
                  ):
         self.__root = root
         self.__rightNotebook = right_notebook
@@ -28,6 +33,7 @@ class API:
         self.__moduleLoaderError = moduleLoaderError
         self.__dataManager = dataManager
         self.__triggerManager = triggerManager
+        self.__connectorManager = connectorManager
 
     def getRoot(self) -> tk.Tk:
         if self.__root is None:
@@ -73,3 +79,8 @@ class API:
         if self.__triggerManager is None:
             raise APIException.ObjectIsNull("TriggerManager is None")
         return self.__triggerManager
+
+    def getConnectorManager(self) -> ConnectorManager:
+        if self.__connectorManager is None:
+            raise APIException.ObjectIsNull("ConnectorManager is None")
+        return self.__connectorManager

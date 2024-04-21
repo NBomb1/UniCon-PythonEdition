@@ -5,11 +5,13 @@ from tkinter import simpledialog, ttk
 import settings
 from Functions.Exceptions.Authentication import Client
 from Functions.Exceptions.Server import DataCollectionException
+from Functions.ModuleHandler.moduleAPI import API
 from Functions.ModuleHandler.moduleHandler import ModuleHandler
 from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.Accounts.SelfAccount import SelfAccount
 from Functions.Network.MainChannel.Client.MainChannel import ClientMainChannel
 from Functions.Network.MainChannel.Server.main import ServerMainChannel
+from Functions.Network.PingManager import PingManager
 from Functions.Network.TriggerManager import TriggerManager
 from Functions.Tools.logManager import Logs
 from UI.ChildFrames.SettingsMenu import Settings
@@ -17,6 +19,15 @@ from UI.TKinter_addons.Entry_Placeholder import EntryWithPlaceholder
 
 
 class MainMenuUIFunctions:
+    # pingManager
+    pingManager: PingManager.Module
+
+    # api
+    api: API
+
+    # Module Handler
+    module: ModuleHandler
+
     # accountManager
     accountManager: AccountManager
 
@@ -46,9 +57,6 @@ class MainMenuUIFunctions:
 
     # Label
     moduleLoaderError: tk.Label
-
-    # Module Handler
-    module: ModuleHandler
 
     # Logs manager
     logs: Logs
@@ -103,10 +111,20 @@ class MainMenuUIFunctions:
 
             self.accountManager.setSelfAccount(SelfAccount(nickname))
             self.accountManager.getSelfAccount().tags.append('Owner')
-            self.server = ServerMainChannel(self.logs, self.accountManager, ip, port, 3, None)
+            self.server = ServerMainChannel(
+                self.logs,
+                self.accountManager,
+                ip,
+                port,
+                3,
+                None,
+                self.triggerManager.beforeAuthConnection,
+                self.api.getConnectorManager()
+            )
             self.left_entry_nickname.put(nickname)
             self.lockInteraction()
             self.triggerManager.serverStarted(self.server)
+            self.pingManager.getInfo(self.accountManager, True)
         except Exception as error:
             self.root.bell()
             self.logs.sendLog("Couldn't start the server. Reason: " + error.__str__(), -1)
@@ -128,9 +146,18 @@ class MainMenuUIFunctions:
             self.accountManager.setSelfAccount(SelfAccount(nickname))
 
             self.left_entry_nickname.put(nickname)
-            self.client = ClientMainChannel(self.logs, self.accountManager, ip, port, self.askPassword, None)
-            self.lockInteraction()
+            self.client = ClientMainChannel(
+                self.logs,
+                self.accountManager,
+                ip,
+                port,
+                self.api.getConnectorManager(),
+                self.askPassword,
+                None,
+            )
             self.triggerManager.clientConnected(self.client)
+            self.pingManager.getInfo(self.accountManager, False)
+            self.lockInteraction()
         except Client.PhaseFailedException as error:
             self.root.bell()
             self.logs.sendLog("Couldn't connect to the server. Reason: " + error.__str__(), 0)

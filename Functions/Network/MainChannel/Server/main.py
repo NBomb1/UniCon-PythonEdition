@@ -3,6 +3,7 @@ import socket as s
 from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.Info import Info
 from Functions.Network.MainChannel.Server.ServerHandlers import ServerInformation
+from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager
 from Functions.Tools.logManager import Logs
 
 """
@@ -19,7 +20,18 @@ class ServerMainChannel:
     socket: s.socket = None
     manager: ServerInformation = None
 
-    def __init__(self, logs: Logs, accountManager: AccountManager, ip: str, port: int, maxCon: int, password: str | None):
+    def __init__(self,
+                 logs: Logs,
+                 accountManager: AccountManager,
+                 ip: str,
+                 port: int,
+                 maxCon: int,
+                 password: str | None,
+                 beforeAuth: callable,
+                 mcm: ConnectorManager
+                 ):
+        self.mcm = mcm
+        self.beforeAuth = beforeAuth
         self.logs = logs
         self.accountManager = accountManager
         self.logs.sendLog(f"[MainChannel] Starting server on {ip}:{port} with {maxCon} max connections.", 0)
@@ -35,7 +47,8 @@ class ServerMainChannel:
         self.socket.bind((ip, port))
         self.socket.listen()
         self.accountManager.setMaxConnections(maxCon)
-        self.manager = ServerInformation(ip, port, password, self.socket, accountManager)
+        self.manager = ServerInformation(ip, port, password, self.socket, accountManager, self.beforeAuth, self.mcm)
+        self.mcm.setServer()
 
         self.logs.sendLog("[MainChannel] Creating new connection handler...", -1)
         self.manager.handler.handleIncomingConnections(logs)

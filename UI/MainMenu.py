@@ -1,9 +1,12 @@
 import tkinter as tk
+from os import getcwd
 from tkinter import ttk
 
 from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.MainChannel.Client.MainChannel import ClientMainChannel
 from Functions.Network.MainChannel.Server.main import ServerMainChannel
+from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager
+from Functions.Network.PingManager import PingManager
 from Functions.Network.TriggerManager import TriggerManager
 from Functions.Tools.DataSettings.FileDataManager import FileDataManager
 from Functions.Tools.DataSettings.Widgets.StringEntry import StringEntry
@@ -41,7 +44,9 @@ class MainMenu(MainMenuUIFunctions):
         # Settings frame
         self.settingsFrame = Settings(self.mainFrame, self.dataManager, self.left_entry_nickname)
 
+        self.module = ModuleHandler(self.logs, self.moduleLoaderError, self.right_notebook, self.root)
         self.triggerManager = TriggerManager(self.accountManager)
+        self.mcm = ConnectorManager(self.module, self.accountManager)
 
         self.api = API(
                 log,
@@ -52,9 +57,15 @@ class MainMenu(MainMenuUIFunctions):
                 self.mainFrame,
                 self.moduleLoaderError,
                 self.dataManager,
-                self.triggerManager
+                self.triggerManager,
+                self.mcm
             )
-        self.module = ModuleHandler(self.api)
+        self.module.api = self.api
+        self.pingManager: PingManager.Module = self.module.activateSingleModule(
+            PingManager,
+            getcwd() + '\\Functions\\Network\\PingManager\\PingManager.py'
+        )
+        self.module.startLoading()
 
         center_main(self.root)
 
