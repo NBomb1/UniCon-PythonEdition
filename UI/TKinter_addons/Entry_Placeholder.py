@@ -2,12 +2,14 @@ import tkinter as tk
 
 
 class EntryWithPlaceholder(tk.Entry):
+    emptySymbols = '‎ ‎ ‎ '
+
     def __init__(self, master=None, placeholder="PLACEHOLDER", color='grey'):
         super().__init__(master)
 
         self.disable_focus = False
 
-        self.placeholder = placeholder
+        self.placeholder = placeholder + self.emptySymbols
         self.placeholder_color = color
         self.default_fg_color = self['fg']
 

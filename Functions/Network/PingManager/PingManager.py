@@ -50,9 +50,7 @@ class Module:
 
         def echo():
             while True:
-                self.logs.sendLog('[PingManager] Ping!', -1)
                 s.socket.send(s.socket.recv(16))
-                self.logs.sendLog('[PingManager] Pong!', -1)
 
         Thread(target=echo, daemon=True).start()
 
@@ -61,14 +59,12 @@ class Module:
 
         def pingHandler():
             while True:
-                self.logs.sendLog('[PingManager] Ping!', -1)
                 code = urandom(16)
                 start = datetime.now()
                 socket.send(code)
                 if socket.recv(16) == code:
                     res = int((datetime.now() - start).total_seconds() * 1000)
                     info.account.update_ping(res)
-                    self.logs.sendLog(f'[PingManager] Pong {res}!', -1)
                 else:
                     socket.close()
                     info.account.socket.socket.close()

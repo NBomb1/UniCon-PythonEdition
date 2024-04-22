@@ -25,7 +25,6 @@ Goals:
 2. Pass all authentication phases.
 3. Function execution before program closes.
 4. Check for Authentication scripts and move some code to Tools.
-5. Mark selfAccount in module Account.
 """
 
 from datetime import datetime

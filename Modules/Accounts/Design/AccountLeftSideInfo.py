@@ -53,10 +53,7 @@ class LeftSideInfo:
     def updateInfo(self):
         self.nickname.configure(text=f'{self.account.nickname}')
         self.pc_name.configure(text=f'{self.account.pc_name}')
-        if random.randint(1, 5) == 1:
-            self.ping.configure(text=f'5000')
-        else:
-            self.ping.configure(text=f'Ping: {self.account.ping}')
+        self.ping.configure(text=f'Ping: {self.account.ping}')
 
     def on_enter(self, event):
         event.widget.config(cursor="hand2")

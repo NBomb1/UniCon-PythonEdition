@@ -1,4 +1,5 @@
 import io
+import threading
 from os import getcwd, makedirs
 from datetime import datetime
 from inspect import getsourcefile
@@ -28,10 +29,12 @@ class Logs:
                      0)
 
     def sendLog(self, message: str, id_: int):
-        for i in self.registeredFunctions[id_]:
-            i(message, id_)
-        if self.registeredFileLog.get(id_) is not None:
-            self.registeredFileLog[id_].write(f"[{datetime.now().__str__()}]: " + message + "\n")
+        def sendLog():
+            for i in self.registeredFunctions[id_]:
+                i(message, id_)
+            if self.registeredFileLog.get(id_) is not None:
+                self.registeredFileLog[id_].write(f"[{datetime.now().__str__()}]: " + message + "\n")
+        threading.Thread(target=sendLog, daemon=True).start()
 
     def registerFileLog(self, id_):
         if self.registeredFunctions.get(id_) is None:
