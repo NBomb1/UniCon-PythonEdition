@@ -82,5 +82,5 @@ class Settings(ttk.Notebook):
     def completeCheckButton(self):
         if self.checkButton.v.get():
             nickname = self.dataManager.get('main').get('nickname')
-            if nickname is not None:
+            if nickname != '':
                 self.nicknameWidget.put(nickname)

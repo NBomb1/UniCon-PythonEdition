@@ -33,8 +33,7 @@ class EntryWithPlaceholder(tk.Entry):
             self['fg'] = self.default_fg_color
 
     def _foc_out(self, *args):
-        if not self.get():
-            self._put_placeholder()
+        self._put_placeholder()
 
     def change_placeholder_text(self, text):
         self._foc_in()
@@ -45,7 +44,7 @@ class EntryWithPlaceholder(tk.Entry):
         self.disable_focus = mode
         if mode:
             self.master.focus()
-            self._foc_out()
+            # self._foc_out()
         else:
             self._foc_in()
 

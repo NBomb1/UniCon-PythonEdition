@@ -7,17 +7,23 @@ import settings
 
 class ShowRedFlag:
     @staticmethod
+    # bgAfterChange='#FF2B2A'
+    # fgAfterChange='white'
+    #         bgAfterChange=None,
+    #         fgAfterChange=None
     def showFlag(
             widget: tk.Widget,
-            bgAfterChange='#FF2B2A',
-            fgAfterChange='white',
+            bgWhileChange='#FF2B2A',
+            fgWhileChange='white',
+            bgAfterChange=None,
+            fgAfterChange=None
     ):
         ShowRedFlag.disableFocus(widget, True)
-        bgOrigin = widget.cget('bg')
-        fgOrigin = widget.cget('fg')
+        bgOrigin = widget.cget('bg') if bgAfterChange is None else bgAfterChange
+        fgOrigin = widget.cget('fg') if fgAfterChange is None else fgAfterChange
 
-        widget.configure(bg=bgAfterChange)
-        widget.configure(fg=fgAfterChange)
+        widget.configure(bg=bgWhileChange)
+        widget.configure(fg=fgWhileChange)
 
         def func():
             sleep(settings.SettingsMenu.widgetsWait)

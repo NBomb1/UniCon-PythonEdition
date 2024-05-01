@@ -57,7 +57,11 @@ class EnhancedEntry(EntryWithPlaceholder, SaveWidgetData, ShowRedFlag):
         :return: list of refuse reasons.
         """
         res = []
-        if self.get() == self.placeholder and self.cget('fg') == self.placeholder_color:
+        if (
+                (self.get() == self.placeholder and self.cget('fg') == self.placeholder_color)
+                or
+                self.get() == ''
+        ):
             res.append('No data given', )
         else:
             res.extend(self.checkCorrectness())
@@ -68,8 +72,12 @@ class EnhancedEntry(EntryWithPlaceholder, SaveWidgetData, ShowRedFlag):
                 self.dataSaver(self.actualData)
             self.showFlag(self, 'green')
         else:
-            self.showFlag(self)
+            # self._foc_out()
             self.bell()
+            if self.get():
+                self.showFlag(self)
+            else:
+                self.showFlag(self, fgAfterChange=self.placeholder_color)
         self.ToolTip.change_text('\n'.join(res))
         return res
 
