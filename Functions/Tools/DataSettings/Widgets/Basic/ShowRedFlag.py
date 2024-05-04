@@ -30,7 +30,6 @@ class ShowRedFlag:
             widget.configure(bg=bgOrigin)
             widget.configure(fg=fgOrigin)
             ShowRedFlag.disableFocus(widget, False)
-
         Thread(target=func, daemon=True).start()
 
     @staticmethod

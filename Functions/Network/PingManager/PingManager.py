@@ -1,3 +1,4 @@
+import random
 from datetime import datetime
 from os import urandom
 from threading import Thread
@@ -62,12 +63,14 @@ class Module:
                 code = urandom(16)
                 start = datetime.now()
                 socket.send(code)
-                if socket.recv(16) == code:
+                if (recv := socket.recv(16)) == code:
                     res = int((datetime.now() - start).total_seconds() * 1000)
                     info.account.update_ping(res)
                 else:
                     socket.close()
                     info.account.socket.socket.close()
+                    print('closing connection!!!!', recv)
                     return
                 sleep(2)
+
         Thread(target=pingHandler, daemon=True).start()

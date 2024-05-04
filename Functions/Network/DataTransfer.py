@@ -1,6 +1,7 @@
 import socket
 import threading
 from ast import literal_eval
+from time import sleep
 
 from Functions.Exceptions.DataTransfer import DataTransfer
 
@@ -11,11 +12,13 @@ class MessageTransfer:
     types = []
     registeredFunctions: dict[str, list[callable]] = {}
     account = None
+    sendMessages: list[bytes] = []
 
     def __init__(self, accountManager, s: socket.socket):
         self.accountManager = accountManager
         self.socket = s
         self.registerType('ModuleConnector')
+        self.senderHandler()
 
     def registerType(self, type_: str):
         if type_ not in self.types:
@@ -33,7 +36,8 @@ class MessageTransfer:
         kwargs['type'] = type_
         message = len(kwargs.__str__()).__str__() + kwargs.__str__()
 
-        self.socket.send(message.encode())
+        self.sendMessages.append(message.encode())
+        # self.socket.send(message.encode())
 
     def _receiveMessage(self):
         length = ''
@@ -62,4 +66,14 @@ class MessageTransfer:
 
         self.account = self.accountManager.findBySocket(self.socket)
         assert self.account is not None
-        threading.Thread(target=handler).start()
+        threading.Thread(target=handler, daemon=True).start()
+
+    def senderHandler(self):
+        def handler():
+            while True:
+                for i in self.sendMessages:
+                    self.socket.send(i)
+                    self.sendMessages.remove(i)
+                sleep(0.001)
+
+        threading.Thread(target=handler, daemon=True).start()

@@ -1,3 +1,4 @@
+import datetime
 import tkinter as tk
 
 
@@ -19,7 +20,7 @@ class EntryWithPlaceholder(tk.Entry):
         self._put_placeholder()
 
     def _put_placeholder(self):
-        if not self.get():
+        if not len(self.get()) and self.cget('fg') != 'white':
             self.insert(0, self.placeholder)
             self['fg'] = self.placeholder_color
 
@@ -43,8 +44,8 @@ class EntryWithPlaceholder(tk.Entry):
     def disableFocus(self, mode: bool):
         self.disable_focus = mode
         if mode:
-            self.master.focus()
-            # self._foc_out()
+            # self.master.focus()
+            self._foc_out()
         else:
             self._foc_in()
 
