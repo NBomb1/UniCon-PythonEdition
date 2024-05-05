@@ -155,6 +155,8 @@ class MainMenuUIFunctions:
                 self.askPassword,
                 None,
             )
+            # self.client.messageTransfer.registerFunction('close', self.accountManager.disconnectedFromServer)
+            self.accountManager.selfAccountDisconnectedTrigger(self.selfClientDisconnected)
             self.triggerManager.clientConnected(self.client)
             self.pingManager.getInfo(self.accountManager, False)
             self.lockInteraction()
@@ -184,3 +186,8 @@ class MainMenuUIFunctions:
         self.left_spinbox_port.configure(state=tk.NORMAL)
         self.left_button_create_server.configure(state=tk.NORMAL)
         self.left_button_connect.configure(state=tk.NORMAL)
+
+    def selfClientDisconnected(self, msg: dict):
+        self.logs.sendLog(f'Got disconnected from server. Reason: {msg["reason"]}', -1)
+        self.logs.sendLog(f'All info {msg}', -1)
+        self.unlockInteraction()

@@ -69,7 +69,7 @@ class Authentication:
                 # Authentication._6_PhaseModuleConnection(account.socket, logs)  # Подключение аддонов
 
             # Creating account
-            accountManager.add(Account(
+            account = Account(
                 socket=MessageTransfer(accountManager, account.socket),
                 ip=account.ip,
                 port=account.port,
@@ -77,7 +77,13 @@ class Authentication:
                 pc_name=data['pc_name'],
                 id_=data['id'],
                 salt=client_salt
-            ))
+            )
+            account.socket.registerType('ModuleConnector')
+            account.socket.registerType('close')
+
+            account.socket.senderHandler()
+
+            accountManager.add(account)
             logs.sendLog(f"[MainChannel] Authentication from "
                          f"{s.getpeername()[0]}:{s.getpeername()[1]} went successfully", -1)
 

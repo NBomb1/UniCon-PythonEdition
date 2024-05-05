@@ -45,3 +45,6 @@ class Account:
 
     def updateNickname(self, nickname: str):
         self.nickname = nickname
+
+    def addExtraConnection(self, moduleId: str, s: MessageTransfer):
+        self.extraConnections.setdefault(moduleId, []).append(s)

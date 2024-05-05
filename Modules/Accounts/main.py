@@ -29,9 +29,13 @@ class Module:
         self.setup()
 
         self.notebook.tab(self.frame, state=tk.NORMAL)
-        self.triggerManager.accountAddedTrigger(self.createNewAccount)
-        self.triggerManager.serverStartedTrigger(self.serverStarted)
-        self.triggerManager.clientConnectedTrigger(self.clientConnected)
+
+        # Setting triggers
+        self.triggerManager.accountAddedTrigger(self.createNewAccount)  # started as server
+        self.triggerManager.serverStartedTrigger(self.serverStarted)  # started as client
+        self.triggerManager.clientConnectedTrigger(self.clientConnected)  # client connected
+        self.triggerManager.accountRemovedTrigger(self.clientDisconnected)  # client disconnected
+        # self.triggerManager.accountRemovedTrigger(self.clientDisconnected)  # client disconnected
 
     def setup(self):
         self.accountListFrame = ScrollableFrame(self.frame)
@@ -53,7 +57,10 @@ class Module:
         self.createNewAccount(serverInfo.accountManager.getSelfAccount())
 
     def clientConnected(self, serverInfo: ClientMainChannel):
-        self.createNewAccount(serverInfo.account.getSelfAccount())
+        self.createNewAccount(serverInfo.accountManager.getSelfAccount())
 
     def pingUpdated(self, account: Account):
         self.allAccounts[account].updateInfo()
+
+    def clientDisconnected(self, account: Account):
+        self.allAccounts.get(account).mainFrame.destroy()

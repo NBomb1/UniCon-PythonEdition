@@ -51,7 +51,9 @@ class Module:
 
         def echo():
             while True:
-                s.socket.send(s.socket.recv(16))
+                msg = s.socket.recv(16)
+                sleep(random.randint(1, 10) / 1000)
+                s.socket.send(msg.upper() if random.randint(0, 5) == 1 else msg)
 
         Thread(target=echo, daemon=True).start()
 
@@ -67,9 +69,12 @@ class Module:
                     res = int((datetime.now() - start).total_seconds() * 1000)
                     info.account.update_ping(res)
                 else:
-                    socket.close()
-                    info.account.socket.socket.close()
                     print('closing connection!!!!', recv)
+                    self.accountManager.kickAccount(
+                        self.accountManager.getSelfAccount(),
+                        info.account,
+                        'PingManager got wrong info'
+                    )
                     return
                 sleep(2)
 

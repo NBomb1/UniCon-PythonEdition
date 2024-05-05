@@ -16,6 +16,9 @@ class TriggerManager:
     def accountAddedTrigger(self, func: callable):
         self.accountManager.addNewAccountFunction(func)
 
+    def accountRemovedTrigger(self, func: callable):
+        self.accountManager.accountDisconnectedTrigger(func)
+
     def serverStartedTrigger(self, func: callable):
         self.serverStartedFunctions.append(func)
 

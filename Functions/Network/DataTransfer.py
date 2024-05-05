@@ -17,8 +17,6 @@ class MessageTransfer:
     def __init__(self, accountManager, s: socket.socket):
         self.accountManager = accountManager
         self.socket = s
-        self.registerType('ModuleConnector')
-        self.senderHandler()
 
     def registerType(self, type_: str):
         if type_ not in self.types:
@@ -30,14 +28,16 @@ class MessageTransfer:
         else:
             self.registeredFunctions[type_].append(func)
 
-    def send_message(self, type_: str, **kwargs):
+    def send_message(self, type_: str, thread=True, **kwargs):
         if type_ not in self.types:
             raise DataTransfer.TypeDoesntExistError(f"Type {type_} doesn't exists.")
         kwargs['type'] = type_
         message = len(kwargs.__str__()).__str__() + kwargs.__str__()
 
-        self.sendMessages.append(message.encode())
-        # self.socket.send(message.encode())
+        if thread:
+            self.sendMessages.append(message.encode())
+        else:
+            self.socket.send(message.encode())
 
     def _receiveMessage(self):
         length = ''
@@ -59,9 +59,13 @@ class MessageTransfer:
                 message = self._receiveMessage()
                 message = literal_eval(message)
                 assert message['type'] is not None
+                assert message['type'] in self.types
+                if (funcList := self.registeredFunctions.get(message['type'])) is None:
+                    print(f'No functions were registered for type {message["type"]}')
+                    return
                 message['_socket'] = self.socket
                 message['_account'] = self.account
-                for func in self.registeredFunctions.get(message['type']):
+                for func in funcList:
                     func(message)
 
         self.account = self.accountManager.findBySocket(self.socket)

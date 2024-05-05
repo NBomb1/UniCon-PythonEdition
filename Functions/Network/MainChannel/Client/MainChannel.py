@@ -22,7 +22,7 @@ class ClientMainChannel:
     ):
         self.logs = logs
         self.askPassword = askPassword
-        self.account = account
+        self.accountManager = account
         self.mc = mc
         logs.sendLog(f"Connecting to server {ip}:{port}", -1)
 
@@ -37,6 +37,12 @@ class ClientMainChannel:
         self.socket.connect((ip, port))
         self.messageTransfer = MessageTransfer(account, self.socket)
 
-        self.account.setMaxConnections(50)
+        self.messageTransfer.registerType('ModuleConnector')
+        self.messageTransfer.registerType('close')
+
+        self.messageTransfer.senderHandler()
+
+        self.accountManager.setMaxConnections(50)
         Authentication(self.messageTransfer, self.logs, password, self.askPassword, account).start()
+        self.messageTransfer.registerFunction('close', self.accountManager._disconnectedFromServer)  # it's ok
         mc.setClient(self.messageTransfer)
