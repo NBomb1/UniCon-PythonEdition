@@ -51,9 +51,10 @@ class Module:
 
         def echo():
             while True:
-                msg = s.socket.recv(16)
-                sleep(random.randint(1, 10) / 1000)
-                s.socket.send(msg.upper() if random.randint(0, 5) == 1 else msg)
+                # msg = s.socket.recv(16)
+                # s.socket.send(msg.upper() if random.randint(0, 5) == 1 else msg)
+                # s.socket.send(msg)
+                s.socket.send(s.socket.recv(16))
 
         Thread(target=echo, daemon=True).start()
 
@@ -61,21 +62,29 @@ class Module:
         socket = info.socket.socket
 
         def pingHandler():
-            while True:
-                code = urandom(16)
-                start = datetime.now()
-                socket.send(code)
-                if (recv := socket.recv(16)) == code:
-                    res = int((datetime.now() - start).total_seconds() * 1000)
-                    info.account.update_ping(res)
-                else:
-                    print('closing connection!!!!', recv)
-                    self.accountManager.kickAccount(
-                        self.accountManager.getSelfAccount(),
-                        info.account,
-                        'PingManager got wrong info'
-                    )
-                    return
-                sleep(2)
+            try:
+                while True:
+                    code = urandom(16)
+                    start = datetime.now()
+                    socket.send(code)
+                    if (recv := socket.recv(16)) == code:
+                        res = int((datetime.now() - start).total_seconds() * 1000)
+                        info.account.update_ping(res)
+                    else:
+                        print('closing connection!!!!', recv)
+                        self.accountManager.kickAccount(
+                            self.accountManager.getSelfAccount(),
+                            info.account,
+                            'PingManager got wrong info'
+                        )
+                        return
+                    sleep(2)
+            except ConnectionResetError:
+                print('kicking an account')
+                self.accountManager.kickAccount(
+                    self.accountManager.getSelfAccount(),
+                    info.account,
+                    'Client disconnected from ping channel',
+                )
 
         Thread(target=pingHandler, daemon=True).start()

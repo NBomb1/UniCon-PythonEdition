@@ -1,5 +1,6 @@
 import tkinter as tk
 from datetime import datetime
+from functools import partial
 from os import getcwd
 from threading import Thread
 from time import sleep
@@ -23,6 +24,7 @@ class Module:
     limit_constant = 3_000_000  # limit for check
     limit = 0  # current number
     idLog: dict[int: ChatText] = {}
+    messageList: list[callable] = []
 
     def __init__(self, api: API):
         self.api = api
@@ -42,10 +44,15 @@ class Module:
         self.combobox_ids.set(self.currentId)
         self.message("This is starting text logs.", self.currentId)
 
+        self.handleMessages()
+
         # Registering ids which weren't found
         Thread(target=self.registerIDs, daemon=True).start()
 
     def message(self, message: str, id_: int):
+        self.messageList.append(partial(self.message_, message, id_))
+
+    def message_(self, message: str, id_: int):
         if self.limit * 1.5 >= self.limit_constant:
             self.limit = 0
             self.idLog[id_].configure(state=tk.NORMAL)
@@ -84,6 +91,15 @@ class Module:
                 sleep(1)
 
         Thread(target=timer, daemon=True).start()
+
+    def handleMessages(self):
+        def loop():
+            while True:
+                for func in self.messageList:
+                    func()
+                    self.messageList.remove(func)
+                sleep(0.01)
+        Thread(target=loop, daemon=True).start()
 
     def clearButton(self):
         self.button_clear.configure(command=self.clearButtonConfirmation, text='Clear')

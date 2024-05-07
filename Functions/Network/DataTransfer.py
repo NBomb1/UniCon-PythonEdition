@@ -28,6 +28,14 @@ class MessageTransfer:
         else:
             self.registeredFunctions[type_].append(func)
 
+    def _send(self, text: bytes) -> bool:
+        """Returns true if message was sent successfully"""
+        try:
+            self.socket.send(text)
+            return True
+        except ConnectionResetError:
+            return False
+
     def send_message(self, type_: str, thread=True, **kwargs):
         if type_ not in self.types:
             raise DataTransfer.TypeDoesntExistError(f"Type {type_} doesn't exists.")
@@ -37,7 +45,7 @@ class MessageTransfer:
         if thread:
             self.sendMessages.append(message.encode())
         else:
-            self.socket.send(message.encode())
+            self._send(message.encode())
 
     def _receiveMessage(self):
         length = ''
@@ -76,7 +84,7 @@ class MessageTransfer:
         def handler():
             while True:
                 for i in self.sendMessages:
-                    self.socket.send(i)
+                    self._send(i)
                     self.sendMessages.remove(i)
                 sleep(0.001)
 
