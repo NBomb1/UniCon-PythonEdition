@@ -33,10 +33,12 @@ class MessageTransfer:
         try:
             self.socket.send(text)
             return True
-        except ConnectionResetError:
+        except ConnectionResetError:  # client disconnected
+            return False
+        except OSError:  # client was disconnected in code, but code didn't stop
             return False
 
-    def send_message(self, type_: str, thread=True, **kwargs):
+    def send_message(self, type_: str, thread=True, **kwargs) -> None | bool:
         if type_ not in self.types:
             raise DataTransfer.TypeDoesntExistError(f"Type {type_} doesn't exists.")
         kwargs['type'] = type_
@@ -45,7 +47,7 @@ class MessageTransfer:
         if thread:
             self.sendMessages.append(message.encode())
         else:
-            self._send(message.encode())
+            return self._send(message.encode())
 
     def _receiveMessage(self):
         length = ''

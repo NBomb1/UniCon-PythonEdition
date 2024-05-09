@@ -31,7 +31,7 @@ class Account:
         self.id = id_
         self.salt = salt  # for server only
         self.ping = -1  # updates
-        self.tags = tags if tags is not None else []  # can be used as special perms
+        self.tags = tags if tags is not None else []  # can be used for special perms
         self.extraConnections: dict[str, list[socket.socket]] = {}
 
     def update_ping(self, ping: int):
@@ -42,6 +42,9 @@ class Account:
 
     def add_on_ping_update_function(self, func):
         self.on_ping_update_functions.append(func)
+
+    def remove_on_ping_update_function(self, func):
+        self.on_ping_update_functions.remove(func)
 
     def updateNickname(self, nickname: str):
         self.nickname = nickname

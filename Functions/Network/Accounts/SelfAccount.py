@@ -8,6 +8,7 @@ class SelfAccount:
     id: str = None
     ping: int = None
     salt: bytes = None  # needs for modules and ect.
+    on_ping_update_functions = []
 
     def __init__(self, nickname: str, tags=None):
         self.nickname = nickname
@@ -17,8 +18,17 @@ class SelfAccount:
     def updateNickname(self, nickname: str):
         self.nickname = nickname
 
-    def updatePing(self, ping: int):
-        self.ping = ping
+    def update_ping(self, ping: int):
+        if self.ping != ping:
+            self.ping = ping
+            for func in self.on_ping_update_functions:
+                func(self)
+
+    def add_on_ping_update_function(self, func):
+        self.on_ping_update_functions.append(func)
+
+    def remove_on_ping_update_function(self, func):
+        self.on_ping_update_functions.remove(func)
 
     def setId(self, id: str):
         if self.id is not None:

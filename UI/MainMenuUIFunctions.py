@@ -7,6 +7,7 @@ from Functions.Exceptions.Authentication import Client
 from Functions.Exceptions.Server import DataCollectionException
 from Functions.ModuleHandler.moduleAPI import API
 from Functions.ModuleHandler.moduleHandler import ModuleHandler
+from Functions.Network.Accounts.AccountAuthentication.Server.ServerAuthentication import Authentication
 from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.Accounts.SelfAccount import SelfAccount
 from Functions.Network.MainChannel.Client.MainChannel import ClientMainChannel
@@ -111,6 +112,7 @@ class MainMenuUIFunctions:
 
             self.accountManager.setSelfAccount(SelfAccount(nickname))
             self.accountManager.getSelfAccount().tags.append('Owner')
+            self.accountManager.getSelfAccount().setId(Authentication.generate_random_id(8))
             self.server = ServerMainChannel(
                 self.logs,
                 self.accountManager,
