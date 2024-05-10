@@ -1,8 +1,10 @@
 import io
 import threading
+from functools import partial
 from os import getcwd, makedirs
 from datetime import datetime
 from inspect import getsourcefile
+from time import sleep
 
 import _tkinter
 
@@ -10,7 +12,11 @@ import _tkinter
 class Logs:
     registeredFunctions: dict[int: list[callable]] = {}  # contains id log and functions
     registeredFileLog: dict[int: io.FileIO] = {}
-    ver = "0.0.1"
+    logsMessages: list[callable] = []
+    ver = "0.0.2"
+
+    def __init__(self):
+        self.handler()
 
     def registerId(self, id_, ignoreRegistered=False):
         if self.registeredFunctions.get(id_) is None:
@@ -28,13 +34,25 @@ class Logs:
                      f'from ({getsourcefile(function).replace(getcwd(), "")}) has been registered - id: {id_}.',
                      0)
 
+    def _sendLog(self, message: str, id_: int, time: datetime):
+        for i in self.registeredFunctions[id_]:
+            i(message, id_)
+        if self.registeredFileLog.get(id_) is not None:
+            self.registeredFileLog[id_].write(f"[{time.__str__()}]: " + message + "\n")
+
     def sendLog(self, message: str, id_: int):
-        def sendLog():
-            for i in self.registeredFunctions[id_]:
-                i(message, id_)
-            if self.registeredFileLog.get(id_) is not None:
-                self.registeredFileLog[id_].write(f"[{datetime.now().__str__()}]: " + message + "\n")
-        threading.Thread(target=sendLog, daemon=True).start()
+        print(message)
+        self.logsMessages.append(partial(self._sendLog, message, id_, datetime.now()))
+
+    def handler(self):
+        def cycle():
+            while True:
+                # '' if not self.logsMessages else print(self.logsMessages)
+                if self.logsMessages:
+                    self.logsMessages.pop(0)()
+                sleep(0.001)
+
+        threading.Thread(target=cycle, daemon=True).start()
 
     def registerFileLog(self, id_):
         if self.registeredFunctions.get(id_) is None:

@@ -14,6 +14,7 @@ class RightSideInfo:
     accountPing: tk.Label = None
     accountName: tk.Label = None
     accountTags: tk.Label = None
+    accountCons: tk.Label = None
     accountIdLabel: tk.Label = None
     accountPcNameLabel: tk.Label = None
     accountPingLabel: tk.Label = None
@@ -21,6 +22,7 @@ class RightSideInfo:
     accountTagsLabel: tk.Label = None
     accountConsLabel: tk.Label = None
     font = (None, 13)
+    isShowing = False
 
     def createWidgets(self, root: tk.Widget):
         self.frameMainInfo = tk.Frame(root)
@@ -80,6 +82,13 @@ class RightSideInfo:
         self.updateName(account.nickname)
         self.updatePing(account.ping)
         self.updateTags(account.tags)
+        self.updateConnections(account.extraConnections)
+
+        self.current = account
+
+        if self.isShowing:
+            return
+        self.isShowing = True
         self.accountNameLabel.grid(column=0, row=0, sticky=tk.W)
         self.accountPingLabel.grid(column=0, row=1, sticky=tk.W)
         self.accountPcNameLabel.grid(column=0, row=2, sticky=tk.W)
@@ -93,7 +102,6 @@ class RightSideInfo:
         self.accountId.grid(column=1, row=3, sticky=tk.E)
         self.accountTags.grid(column=1, row=4, sticky=tk.E)
         self.accountCons.grid(column=1, row=5, sticky=tk.E)
-        self.current = account
 
     def checkCurrent(self, account: Account):
         return account == self.current

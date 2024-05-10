@@ -1,3 +1,5 @@
+from threading import Thread
+
 from Functions.Network.DataTransfer import MessageTransfer
 
 
@@ -64,4 +66,4 @@ class Account:
 
     def accountHasBeenUpdated(self):
         for func in self.accountUpdated:
-            func(self)
+            Thread(target=func, args=(self, ), daemon=True).start()
