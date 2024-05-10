@@ -14,7 +14,7 @@ class ConnectorManager:
         self.accountManager = accountManager
 
     def setClient(self, messageTransfer: MessageTransfer):
-        self.client = ClientModuleConnectorManager(messageTransfer, self.moduleHandler)
+        self.client = ClientModuleConnectorManager(messageTransfer, self.moduleHandler, self.accountManager)
         self.server = None
 
     def setServer(self):

@@ -62,7 +62,7 @@ class Module(RightSideInfo):
     def createNewAccount(self, account: Account):
         self.allAccounts[account] = LeftSideInfo(self.accountListFrame.inner_frame, account, self.show)
         if isinstance(account, Account):
-            account.add_on_ping_update_function(self.pingUpdated)
+            account.addUpdatedAccount(self.pingUpdated)
 
     def serverStarted(self, serverInfo: ServerMainChannel):
         self.createNewAccount(serverInfo.accountManager.getSelfAccount())

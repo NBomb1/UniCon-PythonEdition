@@ -13,6 +13,9 @@ class AccountManager(AccountDataTransfer):
     selfAccount: SelfAccount
     maxConnections: int
 
+    def __init__(self, logs):
+        self.logs = logs
+
     def add(self, account: Account):
         """Adds new account. Calls trigger functions."""
         if len(self.participants) >= self.maxConnections:
@@ -108,7 +111,7 @@ class AccountManager(AccountDataTransfer):
         self._selfDisconnectTrigger.append(func)
 
     def _disconnectedFromServer(self, msg: dict[str, str]):
-    # def disconnectedFromServer(self, *args, **kwargs):
+        # def disconnectedFromServer(self, *args, **kwargs):
         """
         Calls all trigger functions if YOU disconnected from server.
         """

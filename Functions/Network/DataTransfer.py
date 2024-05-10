@@ -16,6 +16,7 @@ class MessageTransfer:
 
     def __init__(self, accountManager, s: socket.socket):
         self.accountManager = accountManager
+        self.logs = accountManager.logs
         self.socket = s
 
     def registerType(self, type_: str):
@@ -86,7 +87,10 @@ class MessageTransfer:
         def handler():
             while True:
                 for i in self.sendMessages:
+                    print('before sending:', i, '\n', self.sendMessages)
+                    self.logs.sendLog(i.decode(), -2)
                     self._send(i)
+                    print(self.sendMessages)
                     self.sendMessages.remove(i)
                 sleep(0.001)
 

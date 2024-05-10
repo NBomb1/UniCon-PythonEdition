@@ -112,3 +112,8 @@ class ModuleHandler:
         self.root.bell()
         self.moduleLoaderError.pack_forget()
         self.rightNotebook.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=(2, 0))
+
+    def findById(self, id_: str) -> ActiveModule:
+        for i in self.active:
+            if i.id_ == id_:
+                return i

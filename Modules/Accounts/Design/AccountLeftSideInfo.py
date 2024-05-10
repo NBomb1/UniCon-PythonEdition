@@ -2,6 +2,7 @@ import random
 import tkinter as tk
 
 from Functions.Network.Accounts.AccountData import Account
+from Functions.Network.Accounts.SelfAccount import SelfAccount
 
 
 class LeftSideInfo:
@@ -25,6 +26,8 @@ class LeftSideInfo:
             self.photo = self.photo.subsample(2, 2)
             self.crown = tk.Label(self.mainFrame, width=self.photo.width(), height=self.photo.height(), image=self.photo)
             self.crown.pack()
+        if isinstance(self.account, SelfAccount):
+            self.nickname.configure(fg='green')
 
         self.mainFrame.pack(pady=(0, 3), padx=1, fill=tk.X)
 

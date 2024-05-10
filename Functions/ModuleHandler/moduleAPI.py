@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 
+from Functions.ModuleHandler.moduleHandler import ModuleHandler
 from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager
 from Functions.Network.TriggerManager import TriggerManager
 from Functions.Tools.DataSettings.FileDataManager import FileDataManager
@@ -22,7 +23,8 @@ class API:
                  moduleLoaderError: tk.Label,
                  dataManager: FileDataManager,
                  triggerManager: TriggerManager,
-                 connectorManager: ConnectorManager
+                 connectorManager: ConnectorManager,
+                 moduleHandler: ModuleHandler
                  ):
         self.__root = root
         self.__rightNotebook = right_notebook
@@ -34,6 +36,7 @@ class API:
         self.__dataManager = dataManager
         self.__triggerManager = triggerManager
         self.__connectorManager = connectorManager
+        self.moduleHandler = moduleHandler
 
     def getRoot(self) -> tk.Tk:
         if self.__root is None:
@@ -69,6 +72,11 @@ class API:
         if self.__moduleLoaderError is None:
             raise APIException.ObjectIsNull("ModuleLoaderError is None")
         return self.__moduleLoaderError
+
+    def getModuleHandler(self) -> ModuleHandler:
+        if self.moduleHandler is None:
+            raise APIException.ObjectIsNull("ModuleLoaderError is None")
+        return self.moduleHandler
 
     def getDataManager(self) -> FileDataManager:
         if self.__dataManager is None:

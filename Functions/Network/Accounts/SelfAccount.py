@@ -1,6 +1,8 @@
 from Functions.Exceptions.Account import Account
 import socket as s
 
+from Functions.Network.DataTransfer import MessageTransfer
+
 
 class SelfAccount:
     nickname: str
@@ -8,7 +10,8 @@ class SelfAccount:
     id: str = None
     ping: int = None
     salt: bytes = None  # needs for modules and ect.
-    on_ping_update_functions = []
+    accountUpdated: list[callable] = []
+    extraConnections: dict[str, list[MessageTransfer]] = {}
 
     def __init__(self, nickname: str, tags=None):
         self.nickname = nickname
@@ -17,18 +20,12 @@ class SelfAccount:
 
     def updateNickname(self, nickname: str):
         self.nickname = nickname
+        self.accountHasBeenUpdated()
 
     def update_ping(self, ping: int):
         if self.ping != ping:
             self.ping = ping
-            for func in self.on_ping_update_functions:
-                func(self)
-
-    def add_on_ping_update_function(self, func):
-        self.on_ping_update_functions.append(func)
-
-    def remove_on_ping_update_function(self, func):
-        self.on_ping_update_functions.remove(func)
+            self.accountHasBeenUpdated()
 
     def setId(self, id: str):
         if self.id is not None:
@@ -39,3 +36,21 @@ class SelfAccount:
         if self.salt is not None:
             raise Account.InfoUpdateException("Can't change salt that was filled once.")
         self.salt = salt
+
+    def addUpdatedAccount(self, func: callable):
+        self.accountUpdated.append(func)
+
+    def removeUpdatedAccount(self, func: callable):
+        self.accountUpdated.append(func)
+
+    def accountHasBeenUpdated(self):
+        for func in self.accountUpdated:
+            func(self)
+
+    def addExtraConnection(self, moduleId: str, s: MessageTransfer):
+        self.extraConnections.setdefault(moduleId, [s])
+        self.accountHasBeenUpdated()
+
+    def removeExtraConnection(self, moduleId: str, s: MessageTransfer):
+        self.extraConnections.setdefault(moduleId, [s])
+        self.accountHasBeenUpdated()

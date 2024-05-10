@@ -1,4 +1,3 @@
-from Functions.ModuleHandler.activeModule import ActiveModule
 from Functions.Network.DataTransfer import MessageTransfer
 
 
@@ -11,6 +10,7 @@ class Account:
     id: str
     ping: int
     on_ping_update_functions = []
+    accountUpdated: list[callable] = []
 
     def __init__(
             self,
@@ -32,22 +32,36 @@ class Account:
         self.salt = salt  # for server only
         self.ping = -1  # updates
         self.tags = tags if tags is not None else []  # can be used for special perms
-        self.extraConnections: dict[str, list[socket.socket]] = {}
+        self.extraConnections: dict[str, list[MessageTransfer]] = {}
 
     def update_ping(self, ping: int):
         if self.ping != ping:
             self.ping = ping
-            for func in self.on_ping_update_functions:
-                func(self)
+            self.accountHasBeenUpdated()
 
-    def add_on_ping_update_function(self, func):
-        self.on_ping_update_functions.append(func)
-
-    def remove_on_ping_update_function(self, func):
-        self.on_ping_update_functions.remove(func)
+    def addTag(self, tag: str):
+        if tag in self.tags:
+            raise Exception(f"tag {tag} is already in list!\nlist: {self.tags}")
+        self.tags.append(tag)
 
     def updateNickname(self, nickname: str):
         self.nickname = nickname
+        self.accountHasBeenUpdated()
 
     def addExtraConnection(self, moduleId: str, s: MessageTransfer):
-        self.extraConnections.setdefault(moduleId, []).append(s)
+        self.extraConnections.setdefault(moduleId, [s])
+        self.accountHasBeenUpdated()
+
+    def removeExtraConnection(self, moduleId: str, s: MessageTransfer):
+        self.extraConnections.setdefault(moduleId, [s])
+        self.accountHasBeenUpdated()
+
+    def addUpdatedAccount(self, func: callable):
+        self.accountUpdated.append(func)
+
+    def removeUpdatedAccount(self, func: callable):
+        self.accountUpdated.append(func)
+
+    def accountHasBeenUpdated(self):
+        for func in self.accountUpdated:
+            func(self)

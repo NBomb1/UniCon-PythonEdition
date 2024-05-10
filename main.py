@@ -47,6 +47,7 @@ def main():
         logManager = Logs()
         logManager.registerId(0)
         logManager.registerId(-1)
+        logManager.registerId(-2)
         # logManager.registerFileLog(0)
         # logManager.registerFileLog(-1)
 

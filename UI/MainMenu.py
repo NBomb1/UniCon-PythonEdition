@@ -28,7 +28,7 @@ class MainMenu(MainMenuUIFunctions):
         self.logs = log
         self.root = tk.Tk()
         self.dataManager = dataManager
-        self.accountManager = AccountManager()
+        self.accountManager = AccountManager(self.logs)
         # self.root = customtkinter.CTk()
         self.root.wm_minsize(925, 450)
         self.changeTitle("MainMenu")
@@ -58,7 +58,8 @@ class MainMenu(MainMenuUIFunctions):
                 self.moduleLoaderError,
                 self.dataManager,
                 self.triggerManager,
-                self.mcm
+                self.mcm,
+                self.module
             )
         self.module.api = self.api
         self.pingManager: PingManager.Module = self.module.activateSingleModule(

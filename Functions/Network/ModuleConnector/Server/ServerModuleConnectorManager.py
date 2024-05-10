@@ -21,7 +21,7 @@ class ModuleConnectorManager:
                 i.setMessageTransfer(MessageTransfer(self.accountManager, s))
                 i.func(i)
                 self.__waitingForConnections.remove(i)
-                i.account.addExtraConnection(i.specialCode, i.socket)
+                i.account.addExtraConnection(i.moduleId, i.socket)
                 return True
         return False
 

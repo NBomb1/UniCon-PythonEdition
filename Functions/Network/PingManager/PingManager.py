@@ -51,10 +51,11 @@ class Module:
 
         def echo():
             while True:
-                # msg = s.socket.recv(16)
+                msg = s.socket.recv(16)
+                sleep(random.randint(1, 100) / 1000)
                 # s.socket.send(msg.upper() if random.randint(0, 5) == 1 else msg)
-                # s.socket.send(msg)
-                s.socket.send(s.socket.recv(16))
+                s.socket.send(msg)
+                # s.socket.send(s.socket.recv(16))
 
         Thread(target=echo, daemon=True).start()
 

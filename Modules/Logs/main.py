@@ -98,7 +98,7 @@ class Module:
                 for func in self.messageList:
                     func()
                     self.messageList.remove(func)
-                sleep(0.01)
+                sleep(0.001)
         Thread(target=loop, daemon=True).start()
 
     def clearButton(self):
