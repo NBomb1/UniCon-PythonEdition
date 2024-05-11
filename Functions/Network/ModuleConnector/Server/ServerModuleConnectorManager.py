@@ -22,6 +22,7 @@ class ModuleConnectorManager:
                 i.func(i)
                 self.__waitingForConnections.remove(i)
                 i.account.addExtraConnection(i.moduleId, i.socket)
+                self.accountManager.getSelfAccount().addExtraConnection(i.moduleId, i.socket)
                 return True
         return False
 

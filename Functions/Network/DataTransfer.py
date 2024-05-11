@@ -9,15 +9,15 @@ from Functions.Exceptions.DataTransfer import DataTransfer
 
 
 class MessageTransfer:
-    types = []
-    registeredFunctions: dict[str, list[callable]] = {}
-    account = None
-    sendMessages: list[bytes] = []
 
     def __init__(self, accountManager, s: socket.socket):
+        self.types = []
+        self.registeredFunctions: dict[str, list[callable]] = {}
+        self.account = None
         self.accountManager = accountManager
         self.logs = accountManager.logs
         self.socket = s
+        self.sendMessages: list[bytes] = []
 
     def registerType(self, type_: str):
         if type_ not in self.types:
@@ -47,6 +47,7 @@ class MessageTransfer:
 
         if thread:
             self.sendMessages.append(message.encode())
+            print(f'message: {message}\nfor port: {self.socket.getpeername()[1]}')
         else:
             return self._send(message.encode())
 
@@ -86,12 +87,12 @@ class MessageTransfer:
     def senderHandler(self):
         def handler():
             while True:
-                for i in self.sendMessages:
-                    print('before sending:', i, '\n', self.sendMessages)
-                    self.logs.sendLog(i.decode(), -2)
-                    self._send(i)
-                    print(self.sendMessages)
-                    self.sendMessages.remove(i)
+                try:
+                    for i in self.sendMessages:
+                        self.logs.sendLog(i.decode(), -2)
+                        self._send(i)
+                        self.sendMessages.remove(i)
+                except Exception as error:
+                    print('ERROR! - \n', error, '\ninfo: ', i, '\nlist: ', self.sendMessages)
                 sleep(0.001)
-
         threading.Thread(target=handler, daemon=True).start()

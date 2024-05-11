@@ -68,7 +68,7 @@ class RightSideInfo:
         text = ''
         for i in obj:
             text += self.api.getModuleHandler().findById(i).name + f' - {len(obj[i])}\n'
-        self.accountCons.configure(text=text if text else 'None')
+        self.accountCons.configure(text=text.rstrip('\n') if text else 'None')
 
     def show(self, account: Account):
         if self.current == account:

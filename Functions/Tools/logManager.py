@@ -41,7 +41,6 @@ class Logs:
             self.registeredFileLog[id_].write(f"[{time.__str__()}]: " + message + "\n")
 
     def sendLog(self, message: str, id_: int):
-        print(message)
         self.logsMessages.append(partial(self._sendLog, message, id_, datetime.now()))
 
     def handler(self):

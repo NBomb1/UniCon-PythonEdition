@@ -43,7 +43,7 @@ class Account:
 
     def addTag(self, tag: str):
         if tag in self.tags:
-            raise Exception(f"tag {tag} is already in list!\nlist: {self.tags}")
+            raise Exception(f"tag {tag} is already in list!\nlist: {self.tags}\ntag: '{tag}'")
         self.tags.append(tag)
 
     def updateNickname(self, nickname: str):
@@ -51,11 +51,11 @@ class Account:
         self.accountHasBeenUpdated()
 
     def addExtraConnection(self, moduleId: str, s: MessageTransfer):
-        self.extraConnections.setdefault(moduleId, [s])
+        self.extraConnections.setdefault(moduleId, []).append(s)
         self.accountHasBeenUpdated()
 
     def removeExtraConnection(self, moduleId: str, s: MessageTransfer):
-        self.extraConnections.setdefault(moduleId, [s])
+        self.extraConnections.get(moduleId).remove(s)
         self.accountHasBeenUpdated()
 
     def addUpdatedAccount(self, func: callable):

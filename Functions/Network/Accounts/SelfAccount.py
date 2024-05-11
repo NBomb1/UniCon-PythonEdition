@@ -48,9 +48,9 @@ class SelfAccount:
             func(self)
 
     def addExtraConnection(self, moduleId: str, s: MessageTransfer):
-        self.extraConnections.setdefault(moduleId, [s])
+        self.extraConnections.setdefault(moduleId, []).append(s)
         self.accountHasBeenUpdated()
 
     def removeExtraConnection(self, moduleId: str, s: MessageTransfer):
-        self.extraConnections.setdefault(moduleId, [s])
+        self.extraConnections.get(moduleId).remove(s)
         self.accountHasBeenUpdated()
