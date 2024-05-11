@@ -1,6 +1,5 @@
 from Functions.ModuleHandler.moduleAPI import API
 from Functions.Network.Accounts.AccountData import Account
-from Functions.Network.MainChannel.Client.MainChannel import ClientMainChannel
 from Functions.Network.MainChannel.Server.main import ServerMainChannel
 from Functions.Tools.ScrollableFrame import ScrollableFrame
 import tkinter as tk

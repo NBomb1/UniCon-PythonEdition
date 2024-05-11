@@ -1,5 +1,3 @@
-from time import sleep
-
 from Functions.Tools.DataSettings.Widgets.Basic.SaveWidgetData import SaveWidgetData
 from Functions.Tools.DataSettings.Widgets.Basic.ShowRedFlag import ShowRedFlag
 from Functions.Tools.DataSettings.Widgets.Basic.ToolTip import ToolTip

@@ -1,4 +1,3 @@
-import random
 import tkinter as tk
 
 from Functions.Network.Accounts.AccountData import Account
