@@ -60,8 +60,7 @@ class Module(RightSideInfo):
 
     def createNewAccount(self, account: Account):
         self.allAccounts[account] = LeftSideInfo(self.accountListFrame.inner_frame, account, self.show)
-        if isinstance(account, Account):
-            account.addUpdatedAccount(self.pingUpdated)
+        account.addUpdatedAccount(self.pingUpdated)
 
     def serverStarted(self, serverInfo: ServerMainChannel):
         self.createNewAccount(serverInfo.accountManager.getSelfAccount())
@@ -71,7 +70,7 @@ class Module(RightSideInfo):
     # def clientConnected(self, serverInfo: ClientMainChannel):
     #     self.createNewAccount(serverInfo.accountManager.getSelfAccount())
 
-    def pingUpdated(self, account: Account):
+    def pingUpdated(self, account: Account, what: str):
         self.allAccounts[account].updateInfo()
 
     def clientDisconnected(self, account: Account):

@@ -113,6 +113,7 @@ class MainMenuUIFunctions:
             self.accountManager.setSelfAccount(SelfAccount(nickname))
             self.accountManager.getSelfAccount().tags.append('Owner')
             self.accountManager.getSelfAccount().setId(Authentication.generate_random_id(8))
+            self.accountManager.startedAsServer()
             self.server = ServerMainChannel(
                 self.logs,
                 self.accountManager,
@@ -130,6 +131,7 @@ class MainMenuUIFunctions:
         except Exception as error:
             self.root.bell()
             self.logs.sendLog("Couldn't start the server. Reason: " + error.__str__(), -1)
+            self.accountManager.stopped()
             raise error
 
     def startClient(self):
@@ -146,6 +148,7 @@ class MainMenuUIFunctions:
                 self.left_entry_ip.put('127.0.0.1')
 
             self.accountManager.setSelfAccount(SelfAccount(nickname))
+            self.accountManager.startedAsClient()
 
             self.left_entry_nickname.put(nickname)
             self.client = ClientMainChannel(
@@ -165,10 +168,12 @@ class MainMenuUIFunctions:
         except Client.PhaseFailedException as error:
             self.root.bell()
             self.logs.sendLog("Couldn't connect to the server. Reason: " + error.__str__(), 0)
+            self.accountManager.stopped()
         except Exception as error:
             self.root.bell()
             self.logs.sendLog("Couldn't connect to the server. Reason: " + error.__str__(), -1)
             self.logs.sendLog("Couldn't connect to the server. Reason: " + error.__str__(), 0)
+            self.accountManager.stopped()
             raise error
 
     def askPassword(self) -> str:

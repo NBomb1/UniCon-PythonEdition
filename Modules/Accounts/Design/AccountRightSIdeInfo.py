@@ -52,7 +52,7 @@ class RightSideInfo:
     def updatePing(self, ping: str | int):
         self.accountPing.configure(text=str(ping))
 
-    def triggeredUpdate(self, account: Account):
+    def triggeredUpdate(self, account: Account, what: str):
         if account != self.current:
             return
         self.updatePing(account.ping)

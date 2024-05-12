@@ -25,7 +25,7 @@ class Module:
     def __init__(self, api: API):
         self.api = api
         self.logs = self.api.getLogs()
-        self.logs.sendLog('[PingManager] Has been loaded!', -1)
+        # self.logs.sendLog('[PingManager] Has been loaded!', -1)
 
     def getInfo(self, accountManager: AccountManager, isServer: bool):
         self.logs.sendLog(f'[PingManager] Getting info! isServer={isServer}', -1)

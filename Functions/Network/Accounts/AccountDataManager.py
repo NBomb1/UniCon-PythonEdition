@@ -1,20 +1,31 @@
 import socket
 
 from Functions.Network.Accounts.AccountData import Account
-from Functions.Network.Accounts.AccountDataTransfer import AccountDataTransfer
+from Functions.Network.Accounts.Client.AccountDataHandler import AccountDataHandler
+from Functions.Network.Accounts.Server.AccountDataTransfer import AccountDataTransfer
 from Functions.Network.Accounts.SelfAccount import SelfAccount
 
 
-class AccountManager(AccountDataTransfer):
+class AccountManager(AccountDataTransfer, AccountDataHandler):
     _NewAccountTrigger = []
     _DisconnectAccountTrigger = []
     _selfDisconnectTrigger = []
     participants: list[Account] = []
     selfAccount: SelfAccount
     maxConnections: int
+    isServer: bool | None
 
     def __init__(self, logs):
         self.logs = logs
+
+    def startedAsServer(self):
+        self.isServer = True
+
+    def startedAsClient(self):
+        self.isServer = False
+
+    def stopped(self):
+        self.isServer = None
 
     def add(self, account: Account):
         """Adds new account. Calls trigger functions."""
@@ -23,11 +34,15 @@ class AccountManager(AccountDataTransfer):
             return
 
         self.participants.append(account)
+        if self.isServer:
+            account.addUpdatedAccount(self._sendUpdatedInfo)
         for func in self._NewAccountTrigger:
             func(account)
 
-    def findID(self, id_: str) -> Account | None:
+    def findByID(self, id_: str) -> Account | SelfAccount | None:
         """Tries to find account. If not found returns None."""
+        if self.selfAccount.id == id_:
+            return self.selfAccount
         for i in self.participants:
             if i.id == id_:
                 return i

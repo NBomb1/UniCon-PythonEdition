@@ -4,6 +4,17 @@ from Functions.Network.DataTransfer import MessageTransfer
 
 
 class Account:
+    # all possible given arguments by default
+    what_pc_name = 'pc_name'
+    what_id = 'id'
+    what_ip = 'ip'
+    what_port = 'port'
+
+    what_nickname = 'nickname'
+    what_ping = 'ping'
+    what_tag = 'tags'
+    what_conn = 'extraConnections'
+
     socket: MessageTransfer
     ip: str
     port: int
@@ -11,16 +22,14 @@ class Account:
     pc_name: str
     id: str
     ping: int
-    on_ping_update_functions = []
-    accountUpdated: list[callable] = []
 
     def __init__(
             self,
-            socket: MessageTransfer,
-            ip: str,
-            port: int,
-            nickname: str,
-            pc_name: str,
+            socket: MessageTransfer | None,
+            ip: str | None,
+            port: int | None,
+            nickname: str | None,
+            pc_name: str | None,
             id_: str,
             salt: bytes | None,
             tags: list = None
@@ -35,28 +44,56 @@ class Account:
         self.ping = -1  # updates
         self.tags = tags if tags is not None else []  # can be used for special perms
         self.extraConnections: dict[str, list[MessageTransfer]] = {}
+        self.on_ping_update_functions = []
+        self.accountUpdated: list[callable] = []
 
     def update_ping(self, ping: int):
-        if self.ping != ping:
-            self.ping = ping
-            self.accountHasBeenUpdated()
+        if self.ping == ping:
+            return
+        self.ping = ping
+        self.accountHasBeenUpdated(self.what_ping)
 
     def addTag(self, tag: str):
+        if not tag:
+            raise ValueError(f"tag can't be empty!")
         if tag in self.tags:
-            raise Exception(f"tag {tag} is already in list!\nlist: {self.tags}\ntag: '{tag}'")
+            raise ValueError(f"tag {tag} is already in list!\nlist: {self.tags}\ntag: '{tag}'")
+        if tag[0] == '_':
+            raise ValueError(f"tag {tag} can't start with '_'!")
+
         self.tags.append(tag)
+        self.accountHasBeenUpdated(self.what_tag)
+
+    def removeTag(self, tag: str):
+        if tag not in self.tags:
+            raise ValueError(f"tag {tag} is not in list!\nlist: {self.tags}\ntag: '{tag}'")
+        self.tags.remove(tag)
+        self.accountHasBeenUpdated(self.what_tag)
+
+    def updateTags(self, tags: list):
+        self.tags.clear()
+        for tag in tags:
+            self.addTag(tag)
 
     def updateNickname(self, nickname: str):
+        if nickname == self.nickname:
+            return
         self.nickname = nickname
-        self.accountHasBeenUpdated()
+        self.accountHasBeenUpdated(self.what_nickname)
+
+    def updatePcName(self, pc_name: str):
+        if pc_name == self.pc_name:
+            return
+        self.pc_name = pc_name
+        self.accountHasBeenUpdated(self.what_pc_name)
 
     def addExtraConnection(self, moduleId: str, s: MessageTransfer):
         self.extraConnections.setdefault(moduleId, []).append(s)
-        self.accountHasBeenUpdated()
+        self.accountHasBeenUpdated(self.what_conn)
 
     def removeExtraConnection(self, moduleId: str, s: MessageTransfer):
         self.extraConnections.get(moduleId).remove(s)
-        self.accountHasBeenUpdated()
+        self.accountHasBeenUpdated(self.what_conn)
 
     def addUpdatedAccount(self, func: callable):
         self.accountUpdated.append(func)
@@ -64,6 +101,6 @@ class Account:
     def removeUpdatedAccount(self, func: callable):
         self.accountUpdated.append(func)
 
-    def accountHasBeenUpdated(self):
+    def accountHasBeenUpdated(self, what: str):
         for func in self.accountUpdated:
-            Thread(target=func, args=(self, ), daemon=True).start()
+            Thread(target=func, args=(self, what), daemon=True).start()

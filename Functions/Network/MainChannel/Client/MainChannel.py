@@ -39,10 +39,15 @@ class ClientMainChannel:
 
         self.messageTransfer.registerType('ModuleConnector')
         self.messageTransfer.registerType('close')
+        self.messageTransfer.registerType('account')
 
         self.messageTransfer.senderHandler()
 
         self.accountManager.setMaxConnections(50)
         Authentication(self.messageTransfer, self.logs, password, self.askPassword, account).start()
+
         self.messageTransfer.registerFunction('close', self.accountManager._disconnectedFromServer)  # it's ok
+        self.messageTransfer.registerFunction('account', self.accountManager.accountHandler)
+
         mc.setClient(self.messageTransfer)
+

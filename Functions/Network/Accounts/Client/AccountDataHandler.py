@@ -1,0 +1,39 @@
+from Functions.Network.Accounts.AccountData import Account
+from Functions.Network.Accounts.SelfAccount import SelfAccount
+
+
+class AccountDataHandler:
+    # specially for server side
+    participants: list[Account] = []
+    selfAccount: SelfAccount
+
+    def accountHandler(self, msg: dict[str: str]):
+        print('got', msg)
+        if msg.get('_all') is None:
+            account: Account = self.findByID(msg['id'])
+            if account is None:
+                account = Account(
+                    None, None, None, None, None, msg['id'], None
+                )
+                self.add(account)
+
+            if msg['what'] == Account.what_ping:
+                account.update_ping(msg['data'])
+            if msg['what'] == Account.what_nickname:
+                account.updateNickname(msg['data'])
+            # setattr(account, msg['what'], msg['data'])
+        else:
+            for i in msg['_all']:
+                account = self.findByID(i['id'])
+                if account is None:
+                    account = Account(None, None, None, None, None, i['id'], None)
+                    self.add(account)
+                for info in i:
+                    if info == Account.what_nickname:
+                        account.updateNickname(i[info])
+                    if info == Account.what_ping:
+                        account.update_ping(i[info])
+                    if info == Account.what_pc_name:
+                        account.updatePcName(i[info])
+                    if info == Account.what_tag:
+                        account.updateTags(i[info])

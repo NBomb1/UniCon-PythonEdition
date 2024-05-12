@@ -79,6 +79,8 @@ class Authentication:
                 id_=data['id'],
                 salt=client_salt
             )
+            # registering types
+            account.socket.registerType('account')
             account.socket.registerType('ModuleConnector')
             account.socket.registerType('close')
 
@@ -204,7 +206,7 @@ class Authentication:
         s.send(Authentication._fillText(id_, Info.preAuthMessageLength).encode())
 
         # Sending all accounts info
-        accountInfo = accountManager.getAllInfoAccount().__str__()
+        accountInfo = accountManager.getAllInfoAccount([]).__str__()
         s.send(Authentication._fillText(accountInfo, Info.preAuthGetAccountInfo).encode())
 
         logs.sendLog("[Authentication] Forth phase has been passed."

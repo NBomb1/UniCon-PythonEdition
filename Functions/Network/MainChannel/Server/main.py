@@ -47,6 +47,7 @@ class ServerMainChannel:
         self.socket.bind((ip, port))
         self.socket.listen()
         self.accountManager.setMaxConnections(maxCon)
+        self.accountManager.updateAccountInfoHandler()
         self.manager = ServerInformation(ip, port, password, self.socket, accountManager, self.beforeAuth, self.mcm)
         self.mcm.setServer()
 

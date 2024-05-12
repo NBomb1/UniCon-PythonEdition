@@ -24,6 +24,7 @@ class MessageTransfer:
             self.types.append(type_)
 
     def registerFunction(self, type_: str, func: callable):
+        """This will return to registered function a dictionary with all the data in message"""
         if self.registeredFunctions.get(type_) is None:
             self.registeredFunctions[type_] = [func]
         else:
