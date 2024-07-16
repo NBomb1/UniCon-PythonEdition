@@ -1,6 +1,7 @@
 import socket as s
 
 from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.DataTransfer import MessageTransfer
 from Functions.Network.Info import Info
 from Functions.Network.MainChannel.Server.ServerHandlers import ServerInformation
 from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager
@@ -50,6 +51,8 @@ class ServerMainChannel:
         self.accountManager.updateAccountInfoHandler()
         self.manager = ServerInformation(ip, port, password, self.socket, accountManager, self.beforeAuth, self.mcm)
         self.mcm.setServer()
+
+        self.accountManager.getSelfAccount().setSocket(MessageTransfer(accountManager, self.socket))
 
         self.logs.sendLog("[MainChannel] Creating new connection handler...", -1)
         self.manager.handler.handleIncomingConnections(logs)

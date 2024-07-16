@@ -58,6 +58,7 @@ class AccountDataTransfer:
 
     def updateAccountInfoHandler(self):
         self._updateAccountsFlag = True
+        self.accountDisconnectedTrigger(self._accountDisconnection)
 
         def handler1():
             while self._updateAccountsFlag:
@@ -76,9 +77,14 @@ class AccountDataTransfer:
         if what == Account.what_conn:
             return
         for i in self.participants:
-            print('participant:', i)
             i.socket.send_message('account', id=account.id, what=what, data=getattr(account, what))
 
     def _sendAllInfo(self):
         for i in self.participants:
             i.socket.send_message('account', _all=self.getAllInfoAccount(i.tags))
+
+    def _accountDisconnection(self, account: Account):
+        for i in self.participants:
+            if i == account:
+                continue
+            i.socket.send_message('account', id=account.id, what='disconnect')

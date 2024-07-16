@@ -12,8 +12,9 @@ def closing(mainMenu: MainMenu):
             messagebox.askokcancel("Confirmation", "Are you sure want to close program while in progress?")
     ):
         return
-
     try:
+        if mainMenu.server is not None or mainMenu.client is not None:
+            mainMenu.closeConnection()
         afterClose(mainMenu.dataManager, mainMenu)
     except Exception:
         print_exc()

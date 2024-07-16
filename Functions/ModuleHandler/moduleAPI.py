@@ -2,6 +2,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 
 from Functions.ModuleHandler.moduleHandler import ModuleHandler
+from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager
 from Functions.Network.TriggerManager import TriggerManager
 from Functions.Tools.DataSettings.FileDataManager import FileDataManager
@@ -24,7 +25,8 @@ class API:
                  dataManager: FileDataManager,
                  triggerManager: TriggerManager,
                  connectorManager: ConnectorManager,
-                 moduleHandler: ModuleHandler
+                 moduleHandler: ModuleHandler,
+                 accountManager: AccountManager
                  ):
         self.__root = root
         self.__rightNotebook = right_notebook
@@ -36,6 +38,7 @@ class API:
         self.__dataManager = dataManager
         self.__triggerManager = triggerManager
         self.__connectorManager = connectorManager
+        self.__accountManager = accountManager
         self.moduleHandler = moduleHandler
 
     def getRoot(self) -> tk.Tk:
@@ -92,3 +95,8 @@ class API:
         if self.__connectorManager is None:
             raise APIException.ObjectIsNull("ConnectorManager is None")
         return self.__connectorManager
+
+    def getAccountManager(self) -> AccountManager:
+        if self.__accountManager is None:
+            raise APIException.ObjectIsNull("AccountManager is None")
+        return self.__accountManager

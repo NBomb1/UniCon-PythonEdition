@@ -25,6 +25,7 @@ class Module:
     def __init__(self, api: API):
         self.api = api
         self.logs = self.api.getLogs()
+        self.api.getAccountManager().serverStoppedTrigger(self.closedConnection)
         # self.logs.sendLog('[PingManager] Has been loaded!', -1)
 
     def getInfo(self, accountManager: AccountManager, isServer: bool):
@@ -37,7 +38,9 @@ class Module:
         #     self.api.getTriggerManager().clientConnectedTrigger(self)
 
     def startPing(self, account: Account):
+        """Server function"""
         self.logs.sendLog('[PingManager] Trying to establish to client.', -1)
+        print('1salt:', account.salt)
         WaitingForConnectionInfo(
             self.id_,
             self.api.getConnectorManager().server.addConnectionWaiting,
@@ -46,20 +49,25 @@ class Module:
         )
 
     def mcm_inviteConnection(self, invite: InviteConnectionInfo):
+        """Server Function - sends unique code to client and waits for response."""
         self.logs.sendLog('[PingManager] Accepting the invite...', -1)
         s: MessageTransfer = invite.accept()
 
         def echo():
-            while True:
-                msg = s.socket.recv(16)
-                sleep(random.randint(1, 100) / 1000)
-                # s.socket.send(msg.upper() if random.randint(0, 5) == 1 else msg)
-                s.socket.send(msg)
-                # s.socket.send(s.socket.recv(16))
+            try:
+                while True:
+                    msg = s.socket.recv(16)
+                    sleep(random.randint(1, 500) / 1000)  # creating random fake latency for tests
+                    # s.socket.send(msg.upper() if random.randint(0, 5) == 1 else msg)
+                    s.socket.send(msg)
+                    # s.socket.send(s.socket.recv(16))
+            except (ConnectionAbortedError, OSError):
+                self.api.getTriggerManager().accountManager.closeConnection()
 
         Thread(target=echo, daemon=True).start()
 
     def gotServerConnection(self, info: WaitingForConnectionInfo):
+        """Client Function - waits for server special code and sends it back."""
         socket = info.socket.socket
 
         def pingHandler():
@@ -72,20 +80,28 @@ class Module:
                         res = int((datetime.now() - start).total_seconds() * 1000)
                         info.account.update_ping(res)
                     else:
-                        print('closing connection!!!!', recv)
+                        # print('closing connection!!!!', recv)
                         self.accountManager.kickAccount(
                             self.accountManager.getSelfAccount(),
                             info.account,
-                            'PingManager got wrong info'
+                            'PingManager got wrong info',
+                            True
                         )
                         return
                     sleep(2)
-            except ConnectionResetError:
-                print('kicking an account')
+            except (ConnectionResetError, OSError):
+                # print('kicking an account')
                 self.accountManager.kickAccount(
                     self.accountManager.getSelfAccount(),
                     info.account,
                     'Client disconnected from ping channel',
+                    True
                 )
 
         Thread(target=pingHandler, daemon=True).start()
+
+    def closedConnection(self):
+        """must be done correctly"""
+        print('Function closedConnection in PingManager was ran!')
+        if self.startPing in self.api.getAccountManager().NewAccountTrigger:
+            self.api.getAccountManager().NewAccountTrigger.remove(self.startPing)

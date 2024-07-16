@@ -7,11 +7,15 @@ class AccountDataHandler:
     participants: list[Account] = []
     selfAccount: SelfAccount
 
+    #  Functions/Network/Accounts/AccountDataManager.py
+    add: callable
+    findByID: callable
+    _disconnectAccount: callable
+
     def accountHandler(self, msg: dict[str: str]):
-        print('got', msg)
         if msg.get('_all') is None:
             account: Account = self.findByID(msg['id'])
-            if account is None:
+            if account is None:  # if account is not present we create one
                 account = Account(
                     None, None, None, None, None, msg['id'], None
                 )
@@ -21,10 +25,14 @@ class AccountDataHandler:
                 account.update_ping(msg['data'])
             if msg['what'] == Account.what_nickname:
                 account.updateNickname(msg['data'])
+            if msg['what'] == 'disconnect':  # account has been disconnected
+                account: Account = self.findByID(msg['id'])
+                # print(account.port, account.tags, account.id, account.ping)
+                self._disconnectAccount(self.findByID(msg['id']))
             # setattr(account, msg['what'], msg['data'])
         else:
             for i in msg['_all']:
-                account = self.findByID(i['id'])
+                account: Account = self.findByID(i['id'])
                 if account is None:
                     account = Account(None, None, None, None, None, i['id'], None)
                     self.add(account)
@@ -37,3 +45,6 @@ class AccountDataHandler:
                         account.updatePcName(i[info])
                     if info == Account.what_tag:
                         account.updateTags(i[info])
+            # for account in self.participants:
+            #     for i in msg['_all']:
+            #         if

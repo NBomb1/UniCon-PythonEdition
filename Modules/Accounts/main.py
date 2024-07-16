@@ -28,6 +28,13 @@ class Module(RightSideInfo):
 
         self.notebook.add(self.frame, text='Accounts', state=tk.DISABLED)
 
+        self.labelServerNotActive = tk.Label(self.frameDisabled,
+                                             text='Connect or create the server to see account info.',
+                                             font=(None, 10, 'bold')
+                                             )
+        self.accountListFrame = ScrollableFrame(self.frameEnabled)
+        self.accountInformationFrame = ScrollableFrame(self.frameEnabled)
+
         self.setup()
         self.frameDisabled.pack()
 
@@ -37,19 +44,17 @@ class Module(RightSideInfo):
         self.triggerManager.accountAddedTrigger(self.createNewAccount)  # started as server
         self.triggerManager.serverStartedTrigger(self.serverStarted)  # started as client
         # self.triggerManager.clientConnectedTrigger(self.clientConnected)  # client connected
+
         self.triggerManager.clientConnectedTrigger(self.serverStarted)  # client connected
         self.triggerManager.accountRemovedTrigger(self.clientDisconnected)  # client disconnected
+
+        self.api.getAccountManager().serverStoppedTrigger(self.connectionClosed)
+        self.api.getAccountManager().clientStoppedTrigger(self.connectionClosed)
         # self.triggerManager.accountRemovedTrigger(self.clientDisconnected)  # client disconnected
 
     def setup(self):
-        self.labelServerNotActive = tk.Label(self.frameDisabled,
-                                             text='Connect or create the server to see account info.',
-                                             font=(None, 10, 'bold')
-                                             )
         self.labelServerNotActive.pack(anchor=tk.CENTER, expand=True)
-        self.accountListFrame = ScrollableFrame(self.frameEnabled)
 
-        self.accountInformationFrame = ScrollableFrame(self.frameEnabled)
         self.accountListFrame.pack(side=tk.LEFT, fill=tk.Y)
         self.accountInformationFrame.pack(expand=True, fill=tk.BOTH)
         self.accountListFrame.canvas.configure(width=200)
@@ -71,7 +76,19 @@ class Module(RightSideInfo):
     #     self.createNewAccount(serverInfo.accountManager.getSelfAccount())
 
     def pingUpdated(self, account: Account, what: str):
-        self.allAccounts[account].updateInfo()
+        if (res := self.allAccounts.get(account)) is not None:
+            res.updateInfo()
 
     def clientDisconnected(self, account: Account):
-        self.allAccounts.get(account).mainFrame.destroy()
+        # print('deleting', account)
+        if (res := self.allAccounts.get(account)) is not None:
+            res.destroy()
+            self.allAccounts.pop(account)
+            # del res.mainFrame
+
+    def connectionClosed(self):
+        for i in self.allAccounts.keys():
+            self.allAccounts.get(i).destroy()
+        self.allAccounts.clear()
+        self.frameDisabled.pack()
+        self.frameEnabled.pack_forget()

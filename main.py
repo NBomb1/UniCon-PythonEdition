@@ -12,9 +12,18 @@ Extra Modules are used:
 packaging - 23.1
 
 Extra libraries:
-No
+Yaml - saves&loads data from settings.
 
 """
+from sys import version_info
+
+if not (version_info.major == 3 and version_info.minor >= 10):
+    input(
+          "This program was started on python 3.10.\n"
+          "I do not recommend use any versions above this.\n"
+          "To continue press enter..."
+    )
+
 from functools import partial
 
 from Functions.Closing.ClosingProcess import closing
@@ -23,8 +32,7 @@ from Functions.Closing.ClosingProcess import closing
 Goals:
 1. Finish account module and related things.
 2. Pass all authentication phases.
-3. Function execution before program closes.
-4. Check for Authentication scripts and move some code to Tools.
+3. Check for Authentication scripts and move some code to Tools.
 """
 
 from datetime import datetime

@@ -23,7 +23,7 @@ class Module:
     currentId: int = -1
     limit_constant = 3_000_000  # limit for check
     limit = 0  # current number
-    idLog: dict[int: ChatText] = {}
+    idLog: dict[int, ChatText] = {}
     messageList: list[callable] = []
 
     def __init__(self, api: API):
@@ -157,7 +157,7 @@ class Module:
         self.FrameCombobox = tk.Frame(self.frame)  # low
 
         self.idLog[self.currentId] = ChatText(self.FrameChat)
-        self.idLog[self.currentId].configure(wrap=tk.WORD, height=20, font=self.font)
+        self.idLog[self.currentId].configure(wrap=tk.WORD, height=20, font=self.font, undo=False)
 
         self.button_save = tk.Button(self.FrameButton, text='Save', command=self.saveLogs, width=1)
         self.button_clear = tk.Button(self.FrameButton, text='Clear', command=self.clearButtonConfirmation, width=1)

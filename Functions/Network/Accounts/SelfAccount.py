@@ -23,8 +23,9 @@ class SelfAccount:
     id: str = None
     ping: int = None
     salt: bytes = None  # needs for modules and ect.
-    accountUpdated: list[callable] = []
+    accountUpdatedTrigger: list[callable] = []
     extraConnections: dict[str, list[MessageTransfer]] = {}
+    socket: MessageTransfer = None
 
     def __init__(self, nickname: str, tags=None):
         self.nickname = nickname
@@ -85,16 +86,39 @@ class SelfAccount:
         self.extraConnections.setdefault(moduleId, []).append(s)
         self.accountHasBeenUpdated(self.what_conn)
 
-    def removeExtraConnection(self, moduleId: str, s: MessageTransfer):
+    def removeExtraConnectionExact(self, moduleId: str, s: MessageTransfer):
         self.extraConnections.get(moduleId).remove(s)
+        try:
+            s.socket.close()
+        except OSError:
+            pass
+        self.accountHasBeenUpdated(self.what_conn)
+
+    def removeExtraConnection(self, s: MessageTransfer):
+        for key in self.extraConnections.keys():
+            for conn in self.extraConnections[key]:
+                if s == conn:
+                    try:
+                        conn.socket.close()
+                    except OSError:
+                        pass
+                    self.extraConnections.get(key).remove(conn)
         self.accountHasBeenUpdated(self.what_conn)
 
     def addUpdatedAccount(self, func: callable):
-        self.accountUpdated.append(func)
+        self.accountUpdatedTrigger.append(func)
 
     def removeUpdatedAccount(self, func: callable):
-        self.accountUpdated.append(func)
+        self.accountUpdatedTrigger.remove(func)
 
     def accountHasBeenUpdated(self, what: str):
-        for func in self.accountUpdated:
+        if what == self.what_conn:
+            for i in self.extraConnections.keys():
+                if not self.extraConnections.get(i):
+                    self.extraConnections.pop(i)
+
+        for func in self.accountUpdatedTrigger:
             Thread(target=func, args=(self, what), daemon=True).start()
+
+    def setSocket(self, socket: MessageTransfer):
+        self.socket = socket

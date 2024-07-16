@@ -29,23 +29,17 @@ class ServerInformation:
 
 
 class Handlers:
-    isWorking = False
 
     def __init__(self, s: socket.socket, info: ServerInformation):
         self.socket = s
         self.server = info
 
     def handleIncomingConnections(self, logs: Logs):
-        self.isWorking = True
-
         def thread():
-            while self.isWorking:
+            while True:
                 try:
                     logs.sendLog("[MainChannel] Waiting for new connections. ", -1)
                     account = PreAccount(self.socket.accept())  # Creating Pre Account for others Modules
-                    if not self.isWorking:  # checking if we still must accept connection
-                        account.socket.close()  # closing connection if we shouldn't accept it
-                        return  # stop working
                     self.server.beforeAuth(account)
                     logs.sendLog(f"[MainChannel] "
                                  f"Got new {'module' if account.stopAuth else ''} connection from "
@@ -67,5 +61,7 @@ class Handlers:
 
                 except socket.timeout:
                     account.socket.close()
+                except OSError:
+                    return
 
         threading.Thread(target=thread, daemon=True).start()

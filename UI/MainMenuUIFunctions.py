@@ -1,9 +1,10 @@
 # the idea is to move buttons and their functions there for making readable code
 import tkinter as tk
-from tkinter import simpledialog, ttk
+import traceback
+from functools import partial
+from tkinter import simpledialog, ttk, messagebox
 
 import settings
-from Functions.Exceptions.Authentication import Client
 from Functions.Exceptions.Server import DataCollectionException
 from Functions.ModuleHandler.moduleAPI import API
 from Functions.ModuleHandler.moduleHandler import ModuleHandler
@@ -58,12 +59,19 @@ class MainMenuUIFunctions:
 
     # Label
     moduleLoaderError: tk.Label
+    left_status_label: tk.Label
+    left_status: tk.Label
 
     # Logs manager
     logs: Logs
 
-    server: ServerMainChannel
-    client: ClientMainChannel
+    # Photos
+    photoDisabled: tk.PhotoImage
+    photoEnabledClient: tk.PhotoImage
+    photoEnabledHost: tk.PhotoImage
+
+    server: ServerMainChannel | None
+    client: ClientMainChannel | None
 
     def changeTitle(self, name: str):
         self.root.title('Unicon - ' + name + " - " + settings.MainInfo.startDate)
@@ -98,6 +106,7 @@ class MainMenuUIFunctions:
 
     def startServer(self):
         try:
+            print('Starting as server')
             # Getting data
             nickname = self.left_entry_nickname.get().lstrip(' ').rstrip(' ')
             ip = self.left_entry_ip.get()
@@ -111,15 +120,16 @@ class MainMenuUIFunctions:
                 self.left_entry_ip.put('127.0.0.1')
 
             self.accountManager.setSelfAccount(SelfAccount(nickname))
+            self.accountManager.startedAsServer()
             self.accountManager.getSelfAccount().tags.append('Owner')
             self.accountManager.getSelfAccount().setId(Authentication.generate_random_id(8))
-            self.accountManager.startedAsServer()
+
             self.server = ServerMainChannel(
                 self.logs,
                 self.accountManager,
                 ip,
                 port,
-                3,
+                50,
                 None,
                 self.triggerManager.beforeAuthConnection,
                 self.api.getConnectorManager()
@@ -128,14 +138,19 @@ class MainMenuUIFunctions:
             self.lockInteraction()
             self.triggerManager.serverStarted(self.server)
             self.pingManager.getInfo(self.accountManager, True)
+            self.left_status.configure(image=self.photoEnabledHost)
+            self.root.wm_iconphoto(False, self.photoEnabledHost)
+            self.left_status_label.configure(text='Host mode')
         except Exception as error:
             self.root.bell()
             self.logs.sendLog("Couldn't start the server. Reason: " + error.__str__(), -1)
-            self.accountManager.stopped()
+            self.closeConnection()
+            # self.accountManager.closeConnection()
             raise error
 
     def startClient(self):
         try:
+            print('Starting as client')
             nickname = self.left_entry_nickname.get().lstrip(' ').rstrip(' ')
             ip = self.left_entry_ip.get()
             port = int(self.left_spinbox_port.get())
@@ -165,15 +180,16 @@ class MainMenuUIFunctions:
             self.triggerManager.clientConnected(self.client)
             self.pingManager.getInfo(self.accountManager, False)
             self.lockInteraction()
-        except Client.PhaseFailedException as error:
-            self.root.bell()
-            self.logs.sendLog("Couldn't connect to the server. Reason: " + error.__str__(), 0)
-            self.accountManager.stopped()
+            self.left_status.configure(image=self.photoEnabledClient)
+            self.root.wm_iconphoto(False, self.photoEnabledClient)
+            self.left_status_label.configure(text='Client mode')
         except Exception as error:
             self.root.bell()
             self.logs.sendLog("Couldn't connect to the server. Reason: " + error.__str__(), -1)
             self.logs.sendLog("Couldn't connect to the server. Reason: " + error.__str__(), 0)
-            self.accountManager.stopped()
+            # self.accountManager.closeConnection()
+            self.closeConnection()
+            traceback.format_exc()
             raise error
 
     def askPassword(self) -> str:
@@ -184,17 +200,51 @@ class MainMenuUIFunctions:
         self.left_entry_ip.configure(state=tk.DISABLED)
         self.left_entry_nickname.configure(state=tk.DISABLED)
         self.left_spinbox_port.configure(state=tk.DISABLED)
+        # self.left_button_create_server.configure(state=tk.DISABLED)
         self.left_button_create_server.configure(state=tk.DISABLED)
         self.left_button_connect.configure(state=tk.DISABLED)
+        self.root.after(500,
+                        partial(
+                            self.left_button_create_server.configure, command=self.closeConnection,
+                            text='Close connection', state=tk.NORMAL)
+                        )
 
     def unlockInteraction(self):
         self.left_entry_ip.configure(state=tk.NORMAL)
         self.left_entry_nickname.configure(state=tk.NORMAL)
         self.left_spinbox_port.configure(state=tk.NORMAL)
-        self.left_button_create_server.configure(state=tk.NORMAL)
-        self.left_button_connect.configure(state=tk.NORMAL)
+        # self.left_button_create_server.configure(state=tk.NORMAL)
+        self.left_button_create_server.configure(state=tk.DISABLED)
+        self.left_button_connect.configure(state=tk.DISABLED)
+        self.root.after(500,
+                        partial(
+                            self.left_button_create_server.configure,
+                            command=self.startServer,
+                            text='Create the server',
+                            state=tk.NORMAL
+                            )
+                        )
+        self.root.after(500, partial(self.left_button_connect.configure, state=tk.NORMAL))
 
     def selfClientDisconnected(self, msg: dict):
         self.logs.sendLog(f'Got disconnected from server. Reason: {msg["reason"]}', -1)
         self.logs.sendLog(f'All info {msg}', -1)
+        # self.unlockInteraction()
+        self.closeConnection()
+        messagebox.showinfo(
+            'Disconnected',
+            f'You were kicked from server. Reason: \n{msg["reason"]}'
+        )
+
+    def closeConnection(self):
+        if self.accountManager.getIsServer():
+            self.accountManager.closeConnection()
+            self.server = None
+        elif not self.accountManager.getIsServer():
+            self.accountManager.closeConnection()
+            self.client = None
+        self.left_status.configure(image=self.photoDisabled)
+        self.root.wm_iconphoto(False, self.photoDisabled)
         self.unlockInteraction()
+        self.left_status_label.configure(text='No connection')
+        # messagebox.showinfo('test', 'test2')

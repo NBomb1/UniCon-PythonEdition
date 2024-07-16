@@ -4,39 +4,69 @@ from Functions.Network.Accounts.AccountData import Account
 from Functions.Network.Accounts.Client.AccountDataHandler import AccountDataHandler
 from Functions.Network.Accounts.Server.AccountDataTransfer import AccountDataTransfer
 from Functions.Network.Accounts.SelfAccount import SelfAccount
+from Functions.Exceptions.Account import Account as AccountExc
 
 
 class AccountManager(AccountDataTransfer, AccountDataHandler):
-    _NewAccountTrigger = []
-    _DisconnectAccountTrigger = []
-    _selfDisconnectTrigger = []
+    NewAccountTrigger = []
+    DisconnectAccountTrigger = []
+    SelfDisconnectTrigger = []
+    ServerStoppedTrigger = []
+    ClientStoppedTrigger = []
+
     participants: list[Account] = []
-    selfAccount: SelfAccount
+    selfAccount: SelfAccount | None
     maxConnections: int
-    isServer: bool | None
+    owner: Account | SelfAccount | None = None
 
     def __init__(self, logs):
         self.logs = logs
 
     def startedAsServer(self):
-        self.isServer = True
+        """Sets flag isServer to True"""
+        self.owner = self.selfAccount
 
     def startedAsClient(self):
-        self.isServer = False
+        """Sets flag isServer to False"""
 
-    def stopped(self):
-        self.isServer = None
+    def closeConnection(self):
+        """Sets isServer to None and clears manager."""
+        if self.getIsServer() is None:
+            return
+
+        if self.getIsServer():
+            self.serverStopped()
+            # for i in self.participants:
+            #     self.kickAccount(self.selfAccount, i, 'Server closed.')
+            for i in self.participants:
+                self.kickAccount(self.getSelfAccount(), i, 'Server closed', True)
+            self._disconnectSelfAccount()
+        elif not self.getIsServer():
+            self.clientStopped()
+            self._disconnectSelfAccount()
+            for i in self.participants:
+                self._disconnectAccount(i)
+        self.logs.sendLog("[AccountManager] Connection successfully closed.", -1)
+
+            # for i in self.selfAccount.extraConnections.values():
+            #     for conn in i:
+            #         try:
+            #             print(f'Disconnected {conn.socket.getpeername()}')
+            #             conn.socket.close()
+            #         except OSError:
+            #             pass
+        self.owner = None
 
     def add(self, account: Account):
         """Adds new account. Calls trigger functions."""
-        if len(self.participants) >= self.maxConnections:
+        if self.getIsServer() and len(self.participants) >= self.maxConnections:
             account.socket.socket.close()
             return
 
         self.participants.append(account)
-        if self.isServer:
+        if self.getIsServer():
             account.addUpdatedAccount(self._sendUpdatedInfo)
-        for func in self._NewAccountTrigger:
+        for func in self.NewAccountTrigger:
             func(account)
 
     def findByID(self, id_: str) -> Account | SelfAccount | None:
@@ -54,7 +84,7 @@ class AccountManager(AccountDataTransfer, AccountDataHandler):
 
     def addNewAccountFunction(self, func: callable):
         """Adds function to trigger list."""
-        self._NewAccountTrigger.append(func)
+        self.NewAccountTrigger.append(func)
 
     def setSelfAccount(self, selfAccount: SelfAccount):
         """Sets Self Account. Info of your account."""
@@ -88,20 +118,60 @@ class AccountManager(AccountDataTransfer, AccountDataHandler):
         2. Calls trigger functions.
         Works only for server side.
         """
-        assert account in self.participants
-        for func in self._DisconnectAccountTrigger:
+        try:
+            self.participants.remove(account)
+        except ValueError:
+            return
+
+        # assert account in self.participants
+        for func in self.DisconnectAccountTrigger:
             func(account)
-
-        for i in account.extraConnections.values():
+        self.logs.sendLog(f'[AccountManager] Kicking from the server {account.id}', 0)
+        for i in account.extraConnections.copy().values():  # getting list of connections related to this account
             for conn in i:
-                conn.socket.close()
+                self.logs.sendLog(f'[AccountManager] Deleting socket - {account.ip}:{account.port}', 0)
+                account.removeExtraConnection(conn)
+                try:
+                    conn.socket.close()
+                except OSError:
+                    pass
+        if self.getIsServer():
+            self.logs.sendLog('[AccountManager] Kicking from the server', 0)
 
-        account.socket.socket.close()
-        self.participants.remove(account)
+            account.socket.socket.close()
+        if self.selfAccount is not None:
+            self.selfAccount.accountHasBeenUpdated(self.selfAccount.what_conn)
 
-    def kickAccount(self, actionMaker: Account, account: Account, reason='No reason was given.'):
+    def _disconnectSelfAccount(self):
+        if self.selfAccount is None:
+            return
+        temp = self.selfAccount
+        self.selfAccount = None
+
+        for i in temp.extraConnections.values():
+            for _ in i:
+                _.socket.close()
+        temp.extraConnections.clear()
+        try:
+            temp.socket.socket.close()
+        except AttributeError:
+            pass
+        for func in self.DisconnectAccountTrigger:
+            func(temp)
+
+    def kickAccount(self, actionMaker: Account | SelfAccount, kickingAccount: Account, reason='No reason given.',
+                    ignoreException=False):
         """Kicks an account. Works only for server.(now)"""
-        account.socket.send_message(
+        if actionMaker == kickingAccount:
+            raise Exception("You cant kick yourself!")
+
+        if self.getIsServer() is None and not ignoreException:
+            raise AccountExc.AccountManagerError('AccountManager is not active.')
+        if self.getIsServer() is None:
+            return
+
+        # print(actionMaker is None, kickingAccount is None)
+        kickingAccount.socket.send_message(
             type_='close',
             thread=False,
             disconnectType='kick',
@@ -109,27 +179,45 @@ class AccountManager(AccountDataTransfer, AccountDataHandler):
             nickname=actionMaker.nickname,
             reason=reason
         )
-        self._disconnectAccount(account)
+        self._disconnectAccount(kickingAccount)
 
     def accountDisconnectedTrigger(self, func: callable):
         """
         Adds function to trigger list.
         Calls when SOMEONE disconnected from server.
         """
-        self._DisconnectAccountTrigger.append(func)
+        self.DisconnectAccountTrigger.append(func)
 
     def selfAccountDisconnectedTrigger(self, func: callable):
         """
         Adds function to trigger list.
         Calls when YOU disconnected from server.
         """
-        self._selfDisconnectTrigger.append(func)
+        self.SelfDisconnectTrigger.append(func)
 
     def _disconnectedFromServer(self, msg: dict[str, str]):
         # def disconnectedFromServer(self, *args, **kwargs):
         """
         Calls all trigger functions if YOU disconnected from server.
+        Do not use it.
         """
-        print(msg)
-        for func in self._selfDisconnectTrigger:
+        for func in self.SelfDisconnectTrigger:
             func(msg)
+
+    def getIsServer(self) -> bool | None:
+        """Returns bool is AccountManager is active."""
+        return (self.selfAccount == self.owner) if self.selfAccount is not None else None
+
+    def clientStopped(self):
+        for func in self.ClientStoppedTrigger:
+            func()
+
+    def serverStopped(self):
+        for func in self.ServerStoppedTrigger:
+            func()
+
+    def serverStoppedTrigger(self, func: callable):
+        self.ServerStoppedTrigger.append(func)
+
+    def clientStoppedTrigger(self, func: callable):
+        self.ClientStoppedTrigger.append(func)

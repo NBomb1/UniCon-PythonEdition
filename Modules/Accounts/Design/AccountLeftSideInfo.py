@@ -57,10 +57,13 @@ class LeftSideInfo:
         self.updateInfo()
 
     def updateInfo(self):
-        self.nickname.configure(text=f'{self.account.nickname}')
-        self.pc_name.configure(text=f'{self.account.pc_name}')
-        if not self.isOwner:
-            self.ping.configure(text=f'Ping: {self.account.ping}')
+        try:
+            self.nickname.configure(text=f'{self.account.nickname}')
+            self.pc_name.configure(text=f'{self.account.pc_name}')
+            if not self.isOwner:
+                self.ping.configure(text=f'Ping: {self.account.ping}')
+        except tk.TclError:
+            pass
 
     def on_enter(self, event):
         event.widget.config(cursor="hand2")
@@ -70,3 +73,12 @@ class LeftSideInfo:
 
     def on_click(self, event):
         self.updateFunc(self.account)
+
+    def destroy(self):
+        self.nickname.destroy()
+        self.pc_name.destroy()
+        if self.isOwner:
+            self.crown.destroy()
+        else:
+            self.ping.destroy()
+        self.mainFrame.destroy()

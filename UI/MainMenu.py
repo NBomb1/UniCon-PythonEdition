@@ -12,7 +12,6 @@ from Functions.Tools.DataSettings.FileDataManager import FileDataManager
 from Functions.Tools.DataSettings.Widgets.StringEntry import StringEntry
 from Functions.Tools.logManager import Logs
 from UI.MainMenuUIFunctions import MainMenuUIFunctions
-from UI.TKinter_addons.Text_status import StatusText
 from UI.ChildFrames.SettingsMenu import Settings
 from UI.window.WindowCenter import center_main
 from Functions.ModuleHandler.moduleHandler import ModuleHandler
@@ -59,7 +58,8 @@ class MainMenu(MainMenuUIFunctions):
                 self.dataManager,
                 self.triggerManager,
                 self.mcm,
-                self.module
+                self.module,
+                self.accountManager
             )
         self.module.api = self.api
         self.pingManager: PingManager.Module = self.module.activateSingleModule(
@@ -75,8 +75,26 @@ class MainMenu(MainMenuUIFunctions):
         self.left_frame1 = tk.Frame(self.mainFrame)
 
         # Creating widgets on the left frame
-        self.left_text_status = StatusText(self.left_frame1)
-        self.left_text_status.configure(wrap=tk.WORD, height=3, width=20)
+        # self.left_text_status = StatusText(self.left_frame1)
+        # self.left_text_status.configure(wrap=tk.WORD, height=3, width=20)
+        self.left_status_frame = tk.Frame(self.left_frame1)
+        self.photoEnabledHost = tk.PhotoImage(file=r'UI\Enabled-Host.gif')
+        self.photoEnabledClient = tk.PhotoImage(file=r'UI\Enabled-Client.gif')
+        self.photoDisabled = tk.PhotoImage(file=r'UI\Disabled.gif')
+
+        self.photoDisabled = self.photoDisabled.subsample(3)
+        self.photoEnabledClient = self.photoEnabledClient.subsample(3)
+        self.photoEnabledHost = self.photoEnabledHost.subsample(3)
+
+        self.root.wm_iconphoto(False, self.photoDisabled)
+
+        self.left_status = tk.Label(
+            self.left_status_frame,
+            image=self.photoDisabled,
+            width=self.photoDisabled.width(), height=self.photoDisabled.height()
+        )
+        self.left_status_label = tk.Label(self.left_status_frame, text='No connection', font=(None, 10))
+
         self.left_entry_ip = StringEntry(self.left_frame1, 'Type ip...')
         self.left_entry_nickname = StringEntry(self.left_frame1, 'Type your nickname...')
         # self.left_label_port = customtkinter.CTkLabel(self.left_frame1, text='Port: ')
@@ -108,7 +126,10 @@ class MainMenu(MainMenuUIFunctions):
         )
 
         # Placing widgets on the left frame
-        self.left_text_status.pack(fill=tk.X, pady=(5, 10), padx=(5, 0))
+        # self.left_text_status.pack(fill=tk.X, pady=(5, 10), padx=(5, 0))
+        self.left_status_frame.pack(fill=tk.X, pady=(5, 10), padx=(5, 0))
+        self.left_status.pack(anchor=tk.E, side=tk.LEFT, expand=True)
+        self.left_status_label.pack(anchor=tk.NW, side=tk.RIGHT, expand=True)
         self.left_entry_nickname.pack(fill=tk.X, padx=(5, 0))
         self.left_entry_ip.pack(fill=tk.X, padx=(5, 0))
         self.left_label_port.pack(fill=tk.X, padx=(5, 0))

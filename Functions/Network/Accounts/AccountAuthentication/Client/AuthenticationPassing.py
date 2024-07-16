@@ -11,7 +11,8 @@ from Functions.Exceptions.Authentication import Client
 
 
 class Authentication:
-    def __init__(self, messageTransfer: MessageTransfer, logs: Logs, password: str, askPassword: callable, account: AccountManager):
+    def __init__(self, messageTransfer: MessageTransfer, logs: Logs, password: str, askPassword: callable,
+                 account: AccountManager):
         self.messageTransfer = messageTransfer
         self.socket = messageTransfer.socket
         self.logs = logs
@@ -48,7 +49,6 @@ class Authentication:
     def _getMessage(self, length=Info.preAuthMessageLength) -> str | None:
         try:
             message = self.socket.recv(length)
-            print(message)
             return message.decode()  # getting special message
         except s.timeout:
             return None
@@ -91,17 +91,17 @@ class Authentication:
         id = self._getMessage().rstrip(' ')
         self.account.getSelfAccount().setId(id)
 
-        accounts = self._getMessage(Info.preAuthGetAccountInfo).rstrip(' ')
         try:
-            accounts: list[dict[str:str]] = literal_eval(accounts)
-        except ValueError:
-            self.logs.sendLog('[Authentication Client] Something went wrong due getting an account info.', -1)
-            self.socket.close()
-        for i in accounts:
-            self.logs.sendLog(f"[Authentication Client] Adding {i['nickname']} with {i['tags']}", -1)
-            self.account.add(
-                Account(
-                    self.messageTransfer,
+            accounts: list[dict[str:str]] = literal_eval(self._getMessage(Info.preAuthGetAccountInfo).rstrip(' '))
+            for i in accounts:
+                self.logs.sendLog(f"[Authentication Client] Adding {i['nickname']} with {i['tags']}", -1)
+                account = Account(
+
+                    # creating a new MessageTransfer if it is not owner
+                    MessageTransfer(self.messageTransfer.accountManager, None)
+                    if 'Owner' not in i['tags']
+                    else self.messageTransfer,
+
                     self.messageTransfer.socket.getpeername()[0],
                     self.messageTransfer.socket.getpeername()[1],
                     i['nickname'],
@@ -110,7 +110,13 @@ class Authentication:
                     None,
                     i['tags']
                 )
-            )
+                self.account.add(account)
+                if 'Owner' in i['tags']:
+                    self.account.owner = account
+            self.messageTransfer.registerAccount(self.account.owner)
+        except ValueError:
+            self.logs.sendLog('[Authentication Client] Something went wrong due getting an account info.', -1)
+            self.socket.close()
 
         # self.checkPhasePassing()
 

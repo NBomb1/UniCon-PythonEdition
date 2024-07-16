@@ -46,6 +46,7 @@ class Account:
         self.extraConnections: dict[str, list[MessageTransfer]] = {}
         self.on_ping_update_functions = []
         self.accountUpdated: list[callable] = []
+        self.socket.registerAccount(self)
 
     def update_ping(self, ping: int):
         if self.ping == ping:
@@ -91,16 +92,39 @@ class Account:
         self.extraConnections.setdefault(moduleId, []).append(s)
         self.accountHasBeenUpdated(self.what_conn)
 
-    def removeExtraConnection(self, moduleId: str, s: MessageTransfer):
+    def removeExtraConnectionExact(self, moduleId: str, s: MessageTransfer):
         self.extraConnections.get(moduleId).remove(s)
+        try:
+            s.socket.close()
+        except OSError:
+            pass
         self.accountHasBeenUpdated(self.what_conn)
 
     def addUpdatedAccount(self, func: callable):
         self.accountUpdated.append(func)
 
     def removeUpdatedAccount(self, func: callable):
-        self.accountUpdated.append(func)
+        self.accountUpdated.remove(func)
 
     def accountHasBeenUpdated(self, what: str):
+        if what == self.what_conn:
+            print(f'updating conns\n{self.extraConnections}')
+            keys = self.extraConnections.copy().keys()
+            for i in keys:
+                if not self.extraConnections.get(i):
+                    self.extraConnections.pop(i)
+
         for func in self.accountUpdated:
             Thread(target=func, args=(self, what), daemon=True).start()
+
+    def removeExtraConnection(self, s: MessageTransfer):
+        for key in self.extraConnections.keys():
+            for conn in self.extraConnections[key]:
+                if s == conn:
+                    self.extraConnections.get(key).remove(conn)
+                    try:
+                        conn.socket.close()
+                    except OSError:
+                        pass
+                    self.accountHasBeenUpdated(self.what_conn)
+                    return

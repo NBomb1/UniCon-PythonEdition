@@ -11,6 +11,10 @@ class TriggerManager:
     beforeAuthConnectionTrigger_Temporary = []
 
     def __init__(self, accountManager: AccountManager):
+        """
+        All functions, that adds TriggerFunction into list has word in the end "Trigger".
+        All functions, that doesn't have this word, start all the functions in the list.
+        """
         self.accountManager = accountManager
 
     def accountAddedTrigger(self, func: callable):
