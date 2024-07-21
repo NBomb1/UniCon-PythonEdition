@@ -1,5 +1,4 @@
-import os
-import sys
+from os import getcwd
 from sys import version_info, executable
 import tkinter as tk
 
@@ -27,7 +26,6 @@ class VersionChecker:
     buttonFont = (None, 10, 'bold')
 
     def __init__(self):
-        self.absolutePath: str = "/".join(os.path.abspath(str(sys.modules['__main__'].__file__)).split('/')[:-1])
         self.root = tk.Tk()
         self.root.title('Wrong python version!')
         self.root.geometry('550x200')
@@ -36,7 +34,7 @@ class VersionChecker:
 
         center_main(self.root)
 
-        self.inactiveImage = tk.PhotoImage(file=self.absolutePath+r'.\UI\Disabled.gif')
+        self.inactiveImage = tk.PhotoImage(file=getcwd() + r'.\UI\Disabled.gif')
         self.root.wm_iconphoto(False, self.inactiveImage)
 
         self.label = tk.Label(self.root, text=self.text, font=self.textFont)
@@ -50,10 +48,7 @@ class VersionChecker:
         self.root.mainloop()
 
 
-def main():
+def start():
     if version_info.major == 3 and version_info.minor >= 10:
         return
     VersionChecker()
-
-
-main()

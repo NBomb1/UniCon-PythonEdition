@@ -1,6 +1,4 @@
-import os
-import sys
-
+from os import getcwd
 from Functions.Starting.ModuleChecker import *
 from Functions.Starting.MissingModule import MissingModule
 import tkinter as tk
@@ -40,7 +38,6 @@ class CheckModules:
         Returns:
         None
         """
-        self.absolutePath: str = "/".join(os.path.abspath(str(sys.modules['__main__'].__file__)).split('\\')[:-1])
         self.inactiveImage: tk.PhotoImage | None = None
         self.root: tk.Tk | None = None
         self.moduleGridder: tk.Frame | None = None
@@ -64,7 +61,7 @@ class CheckModules:
 
         self.root.title('Warning: Some modules are not installed.')
         center_main(self.root)
-        self.inactiveImage = tk.PhotoImage(file=(self.absolutePath + r'\UI\Disabled.gif'))
+        self.inactiveImage = tk.PhotoImage(file=(getcwd() + r'\UI\Disabled.gif'))
         self.root.wm_iconphoto(False, self.inactiveImage)
 
         label = tk.Label(self.root, text='Warning: Some modules are not installed.', font=self.textFont)
@@ -83,8 +80,5 @@ class CheckModules:
         self.root.mainloop()
 
 
-def main():
+def start():
     CheckModules()
-
-
-main()

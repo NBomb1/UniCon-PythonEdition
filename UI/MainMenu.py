@@ -79,9 +79,9 @@ class MainMenu(MainMenuUIFunctions):
 
         # Creating widgets on the left frame
         self.left_status_frame = tk.Frame(self.left_frame1)
-        self.photoEnabledHost = tk.PhotoImage(file=self.absolutePath + r'\UI\Enabled-Host.gif')
-        self.photoEnabledClient = tk.PhotoImage(file=self.absolutePath + r'\UI\Enabled-Client.gif')
-        self.photoDisabled = tk.PhotoImage(file=self.absolutePath + r'\UI\Disabled.gif')
+        self.photoEnabledHost = tk.PhotoImage(file=getcwd() + r'\UI\Enabled-Host.gif')
+        self.photoEnabledClient = tk.PhotoImage(file=getcwd() + r'\UI\Enabled-Client.gif')
+        self.photoDisabled = tk.PhotoImage(file=getcwd() + r'\UI\Disabled.gif')
 
         self.photoDisabled = self.photoDisabled.subsample(3)
         self.photoEnabledClient = self.photoEnabledClient.subsample(3)

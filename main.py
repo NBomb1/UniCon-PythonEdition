@@ -13,12 +13,6 @@ Yaml - saves&loads data from settings.
 
 Started using AI tabnine to document some functions 2024y 7m 18d.
 """
-import Functions.Starting.VersionChecker  # checks python version automatically
-import Functions.Starting.ModuleDownloader  # checks modules
-
-from functools import partial
-
-from Functions.Closing.ClosingProcess import closing
 
 """
 Goals:
@@ -27,8 +21,22 @@ Goals:
 3. Check for Authentication scripts and move some code to Tools.
 """
 
+from os import getcwd, chdir
+chdir('\\'.join(__file__.split('\\')[:-1]))
+
+from Functions.Starting import VersionChecker  # checks python version
+
+VersionChecker.start()
+
+from Functions.Starting import ModuleDownloader  # checks modules
+
+ModuleDownloader.start()
+
+from functools import partial
+
+from Functions.Closing.ClosingProcess import closing
+
 from datetime import datetime
-from os import getcwd
 from traceback import format_exc
 
 from UI.MainMenu import MainMenu
