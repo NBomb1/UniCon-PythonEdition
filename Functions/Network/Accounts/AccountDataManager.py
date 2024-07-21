@@ -36,25 +36,17 @@ class AccountManager(AccountDataTransfer, AccountDataHandler):
 
         if self.getIsServer():
             self.serverStopped()
-            # for i in self.participants:
-            #     self.kickAccount(self.selfAccount, i, 'Server closed.')
             for i in self.participants:
                 self.kickAccount(self.getSelfAccount(), i, 'Server closed', True)
             self._disconnectSelfAccount()
         elif not self.getIsServer():
             self.clientStopped()
-            self._disconnectSelfAccount()
             for i in self.participants:
                 self._disconnectAccount(i)
+            self._disconnectSelfAccount()
+
         self.logs.sendLog("[AccountManager] Connection successfully closed.", -1)
 
-            # for i in self.selfAccount.extraConnections.values():
-            #     for conn in i:
-            #         try:
-            #             print(f'Disconnected {conn.socket.getpeername()}')
-            #             conn.socket.close()
-            #         except OSError:
-            #             pass
         self.owner = None
 
     def add(self, account: Account):
@@ -127,14 +119,7 @@ class AccountManager(AccountDataTransfer, AccountDataHandler):
         for func in self.DisconnectAccountTrigger:
             func(account)
         self.logs.sendLog(f'[AccountManager] Kicking from the server {account.id}', 0)
-        for i in account.extraConnections.copy().values():  # getting list of connections related to this account
-            for conn in i:
-                self.logs.sendLog(f'[AccountManager] Deleting socket - {account.ip}:{account.port}', 0)
-                account.removeExtraConnection(conn)
-                try:
-                    conn.socket.close()
-                except OSError:
-                    pass
+        account.removeAllConnections(self.getSelfAccount())
         if self.getIsServer():
             self.logs.sendLog('[AccountManager] Kicking from the server', 0)
 
@@ -163,14 +148,17 @@ class AccountManager(AccountDataTransfer, AccountDataHandler):
                     ignoreException=False):
         """Kicks an account. Works only for server.(now)"""
         if actionMaker == kickingAccount:
-            raise Exception("You cant kick yourself!")
+            raise AccountExc.KickingException("You cant kick yourself!")
 
-        if self.getIsServer() is None and not ignoreException:
-            raise AccountExc.AccountManagerError('AccountManager is not active.')
+        if kickingAccount not in self.participants:
+            if not ignoreException:
+                raise AccountExc.KickingException("Account is already disconnected.")
+            return
         if self.getIsServer() is None:
+            if not ignoreException:
+                raise AccountExc.AccountManagerError('AccountManager is not active.')
             return
 
-        # print(actionMaker is None, kickingAccount is None)
         kickingAccount.socket.send_message(
             type_='close',
             thread=False,

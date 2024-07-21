@@ -39,7 +39,7 @@ class Authentication:
             self.logs.sendLog('[Authentication Client] Connection established!', -1)
             self.messageTransfer.handleMessages()
         except Client.PhaseFailedException as fail:
-            self.logs.sendLog(f"[Authentication Client] Couldn't pass authentication phase. Reason: {fail}", -1)
+            # self.logs.sendLog(f"[Authentication Client] Couldn't pass authentication phase. Reason: {fail}", -1)
             raise fail
 
     def sendMessage(self, message: str, count: int) -> int:
@@ -73,12 +73,28 @@ class Authentication:
         hashed_password = hashlib.sha512(salt + self.password.encode()).hexdigest()
         self.socket.send(hashed_password.encode())
 
-        while (message := self._getMessage()) is not None and not bool(message.replace(' ', '')):
-            try:
-                self.socket.send(hashlib.sha512(salt + (self.askPassword()).encode()).hexdigest().encode())
-            except TypeError:
-                self.socket.close()
-                self.logs.sendLog("[Authentication Client] Connection closed.", -1)
+        message = self._getMessage()
+        if message is None:
+            raise Client.PhaseFailedException("Server disconnected without reason.")
+        if bool(message.replace(' ', '')) and message.replace(" ", '')!= '1':
+            raise Client.PhaseFailedException(f"Authentication failed: {message.rstrip()}.")
+
+        if message.replace(' ', '') != '1':
+            while True:
+                if message is None:
+                    raise Client.PhaseFailedException("Server disconnected without reason.")
+                if bool(message.replace(' ', '')) and message.replace(" ", '') != '1':
+                    raise Client.PhaseFailedException(f"Authentication failed: {message.rstrip()}.")
+                if message.replace(' ', '') == '1':
+                    return
+
+                try:
+                    self.socket.send(hashlib.sha512(salt + (self.askPassword()).encode()).hexdigest().encode())
+                    message = self._getMessage()
+                except (TypeError, AttributeError, ConnectionAbortedError):
+                    self.socket.close()
+                    self.logs.sendLog("[Authentication Client] Connection closed.", -1)
+                    raise Client.PhaseFailedException("Authentication failed due to incorrect password.")
 
     def _4_PhaseDataShare(self):
         # sending nickname and pc name
@@ -117,8 +133,6 @@ class Authentication:
         except ValueError:
             self.logs.sendLog('[Authentication Client] Something went wrong due getting an account info.', -1)
             self.socket.close()
-
-        # self.checkPhasePassing()
 
     def checkPhasePassing(self):
         text = self._getMessage().rstrip(' ')

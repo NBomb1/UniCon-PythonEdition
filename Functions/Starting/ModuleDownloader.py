@@ -26,8 +26,19 @@ class CheckModules:
         """
         Initializes the CheckModules class.
 
-        Sets up the absolute path to the main script file, initializes GUI components, and checks for missing modules.
-        If missing modules are found, it calls the showWarning() method.
+        This method sets up the necessary attributes for the CheckModules class. It calculates the absolute path to the main
+        script file, initializes GUI components, and checks for missing modules. If any missing modules are found, it calls the
+        showWarning() method.
+
+        Attributes:
+        absolutePath (str): The absolute path to the main script file.
+        inactiveImage (tk.PhotoImage | None): The image to be used as the window icon when modules are not installed.
+        root (tk.Tk | None): The main window object.
+        moduleGridder (tk.Frame | None): The frame for displaying missing module information.
+        moduleYaml (bool): A flag indicating whether the required YAML module is installed.
+
+        Returns:
+        None
         """
         self.absolutePath: str = "/".join(os.path.abspath(str(sys.modules['__main__'].__file__)).split('\\')[:-1])
         self.inactiveImage: tk.PhotoImage | None = None
@@ -53,7 +64,6 @@ class CheckModules:
 
         self.root.title('Warning: Some modules are not installed.')
         center_main(self.root)
-        print(self.absolutePath + r'\UI\Disabled.gif')
         self.inactiveImage = tk.PhotoImage(file=(self.absolutePath + r'\UI\Disabled.gif'))
         self.root.wm_iconphoto(False, self.inactiveImage)
 

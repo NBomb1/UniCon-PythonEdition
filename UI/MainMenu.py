@@ -78,8 +78,6 @@ class MainMenu(MainMenuUIFunctions):
         self.left_frame1 = tk.Frame(self.mainFrame)
 
         # Creating widgets on the left frame
-        # self.left_text_status = StatusText(self.left_frame1)
-        # self.left_text_status.configure(wrap=tk.WORD, height=3, width=20)
         self.left_status_frame = tk.Frame(self.left_frame1)
         self.photoEnabledHost = tk.PhotoImage(file=self.absolutePath + r'\UI\Enabled-Host.gif')
         self.photoEnabledClient = tk.PhotoImage(file=self.absolutePath + r'\UI\Enabled-Client.gif')
@@ -102,6 +100,7 @@ class MainMenu(MainMenuUIFunctions):
         self.left_entry_nickname = StringEntry(self.left_frame1, 'Type your nickname...')
         # self.left_label_port = customtkinter.CTkLabel(self.left_frame1, text='Port: ')
         self.left_label_port = tk.Label(self.left_frame1, text='Port: ')
+        self.left_entry_password = StringEntry(self.left_frame1, 'Type password...')
 
         self.left_button_connect = tk.Button(
             self.left_frame1,
@@ -137,6 +136,7 @@ class MainMenu(MainMenuUIFunctions):
         self.left_entry_ip.pack(fill=tk.X, padx=(5, 0))
         self.left_label_port.pack(fill=tk.X, padx=(5, 0))
         self.left_spinbox_port.pack(fill=tk.X, padx=(5, 0))
+        self.left_entry_password.pack(fill=tk.X, padx=(5, 0), pady=(5, 0))
         self.left_button_settings.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))
         self.left_button_connect.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))
         self.left_button_create_server.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))

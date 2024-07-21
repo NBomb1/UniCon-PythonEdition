@@ -1,4 +1,6 @@
 import tkinter as tk
+from tkinter import simpledialog
+from functools import partial
 
 from Functions.ModuleHandler.moduleAPI import API
 from Functions.Network.Accounts.AccountData import Account
@@ -21,6 +23,8 @@ class RightSideInfo:
     accountNameLabel: tk.Label = None
     accountTagsLabel: tk.Label = None
     accountConsLabel: tk.Label = None
+    accountKickButton: tk.Button = None
+    accountKickReasonButton: tk.Button = None
     font = (None, 13)
     isShowing = False
 
@@ -28,9 +32,10 @@ class RightSideInfo:
         self.frameMainInfo = tk.Frame(root)
         self.frameMainInfo.pack(fill=tk.X)
         self.frameMainInfo.grid_columnconfigure(1, weight=True)
-        self.frameMainInfo.grid_rowconfigure(1, pad=10)
-        self.frameMainInfo.grid_rowconfigure(3, pad=10)
-        self.frameMainInfo.grid_rowconfigure(5, pad=10)
+        self.frameMainInfo.grid_rowconfigure(1, pad=5)
+        self.frameMainInfo.grid_rowconfigure(3, pad=5)
+        self.frameMainInfo.grid_rowconfigure(5, pad=5)
+        self.frameMainInfo.grid_rowconfigure(6, weight=True)
 
         self.accountNameLabel = tk.Label(self.frameMainInfo, text='Nickname:', font=self.font)
         self.accountPingLabel = tk.Label(self.frameMainInfo, text='Ping:', font=self.font)
@@ -46,19 +51,14 @@ class RightSideInfo:
         self.accountTags = tk.Label(self.frameMainInfo, font=self.font, anchor=tk.E)
         self.accountCons = tk.Label(self.frameMainInfo, font=self.font, anchor=tk.E)
 
+        self.accountKickButton = tk.Button(self.frameMainInfo, text='Kick', state=tk.DISABLED)
+        self.accountKickReasonButton = tk.Button(self.frameMainInfo, text='Kick with Reason', state=tk.DISABLED)
+
     def updateName(self, name: str):
         self.accountName.configure(text=name)
 
     def updatePing(self, ping: str | int):
         self.accountPing.configure(text=str(ping))
-
-    def triggeredUpdate(self, account: Account, what: str):
-        if account != self.current:
-            return
-        self.updatePing(account.ping)
-        self.updateName(account.nickname)
-        self.updateTags(account.tags)
-        self.updateConnections(account.extraConnections)
 
     def updateTags(self, tags: list):
         text = f", ".join(tags) + f' - [{len(tags)}]'
@@ -70,6 +70,26 @@ class RightSideInfo:
             text += self.api.getModuleHandler().findById(i).name + f' - {len(obj[i])}\n'
         self.accountCons.configure(text=text.rstrip('\n') if text else 'None')
 
+    def triggeredUpdate(self, account: Account, what: str):
+        if account != self.current and what != '':
+            return
+        self.updatePing(account.ping)
+        self.updateName(account.nickname)
+        self.updateTags(account.tags)
+        self.updateConnections(account.extraConnections)
+        if self.api.getAccountManager().getIsServer() and self.api.getAccountManager().owner != account:
+            self.accountKickButton.configure(state=tk.NORMAL, command=partial(self.kickAccount, account, False))
+            self.accountKickReasonButton.configure(state=tk.NORMAL,
+                                                   command=partial(
+                                                       self.kickAccount,
+                                                       account,
+                                                       True
+                                                   )
+                                                   )
+        else:
+            self.accountKickReasonButton.configure(state=tk.DISABLED)
+            self.accountKickButton.configure(state=tk.DISABLED)
+
     def show(self, account: Account):
         if self.current == account:
             return
@@ -79,10 +99,7 @@ class RightSideInfo:
             self.current.removeUpdatedAccount(self.triggeredUpdate)
         self.accountPcName.configure(text=account.pc_name)
         self.accountId.configure(text=f'{account.id}')
-        self.updateName(account.nickname)
-        self.updatePing(account.ping)
-        self.updateTags(account.tags)
-        self.updateConnections(account.extraConnections)
+        self.triggeredUpdate(account, '')
 
         self.current = account
 
@@ -102,6 +119,19 @@ class RightSideInfo:
         self.accountId.grid(column=1, row=3, sticky=tk.E)
         self.accountTags.grid(column=1, row=4, sticky=tk.E)
         self.accountCons.grid(column=1, row=5, sticky=tk.E)
+        self.accountKickButton.grid(column=0, row=6, sticky=tk.NSEW, columnspan=2)
+        self.accountKickReasonButton.grid(column=0, row=7, sticky=tk.NSEW, columnspan=2)
 
-    def checkCurrent(self, account: Account):
-        return account == self.current
+    def kickAccount(self, account: Account, askReason: bool = False):
+        reason = 'You were kicked by the server.'
+        if askReason:
+            reason = simpledialog.askstring('Kick Reason', 'Enter a reason for kicking: ')
+            if reason is None:
+                return
+        self.api.getAccountManager().kickAccount(
+            self.api.getAccountManager().getSelfAccount(),
+            account,
+            reason
+        )
+        self.accountKickButton.configure(state=tk.DISABLED)
+        self.accountKickReasonButton.configure(state=tk.DISABLED)

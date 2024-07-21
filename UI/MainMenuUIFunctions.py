@@ -15,10 +15,9 @@ from Functions.Network.MainChannel.Client.MainChannel import ClientMainChannel
 from Functions.Network.MainChannel.Server.main import ServerMainChannel
 from Functions.Network.PingManager import PingManager
 from Functions.Network.TriggerManager import TriggerManager
+from Functions.Tools.DataSettings.Widgets.StringEntry import StringEntry
 from Functions.Tools.logManager import Logs
 from UI.ChildFrames.SettingsMenu import Settings
-from UI.TKinter_addons.Entry_Placeholder import EntryWithPlaceholder
-
 
 class MainMenuUIFunctions:
     # pingManager
@@ -40,8 +39,9 @@ class MainMenuUIFunctions:
     root: tk.Tk
 
     # Entry
-    left_entry_nickname: EntryWithPlaceholder
-    left_entry_ip: EntryWithPlaceholder
+    left_entry_nickname: StringEntry
+    left_entry_ip: StringEntry
+    left_entry_password: StringEntry
 
     # Settings
     settingsFrame: Settings
@@ -111,10 +111,13 @@ class MainMenuUIFunctions:
             nickname = self.left_entry_nickname.get().lstrip(' ').rstrip(' ')
             ip = self.left_entry_ip.get()
             port = int(self.left_spinbox_port.get())
+            password = self.left_entry_password.get()
 
             # Checking correctness
-            if len(nickname) < 3:
+            if len(nickname) < 3 or len(nickname) > 15:
                 raise DataCollectionException.UsernameException("No nickname was given.")
+            if password != '' and (len(password) < 3 or len(password) > 50):
+                raise DataCollectionException.UsernameException("Password not in length range (from 3 to 50).")
             if ip in ['', self.left_entry_ip.placeholder]:
                 ip = '127.0.0.1'
                 self.left_entry_ip.put('127.0.0.1')
@@ -130,7 +133,7 @@ class MainMenuUIFunctions:
                 ip,
                 port,
                 50,
-                None,
+                password if password else None,
                 self.triggerManager.beforeAuthConnection,
                 self.api.getConnectorManager()
             )
@@ -154,9 +157,12 @@ class MainMenuUIFunctions:
             nickname = self.left_entry_nickname.get().lstrip(' ').rstrip(' ')
             ip = self.left_entry_ip.get()
             port = int(self.left_spinbox_port.get())
+            password = self.left_entry_password.get()
 
-            if len(nickname) < 3:
+            if len(nickname) < 3 or len(nickname) > 15:
                 raise DataCollectionException.UsernameException("No nickname was given.")
+            if password != '' and (len(password) < 3 or len(password) > 50):
+                raise DataCollectionException.UsernameException("Password not in length range (from 3 to 50).")
 
             if ip in ['', self.left_entry_ip.placeholder]:
                 ip = '127.0.0.1'
@@ -173,7 +179,7 @@ class MainMenuUIFunctions:
                 port,
                 self.api.getConnectorManager(),
                 self.askPassword,
-                None,
+                password if password else None,
             )
             # self.client.messageTransfer.registerFunction('close', self.accountManager.disconnectedFromServer)
             self.accountManager.selfAccountDisconnectedTrigger(self.selfClientDisconnected)
@@ -203,6 +209,7 @@ class MainMenuUIFunctions:
         # self.left_button_create_server.configure(state=tk.DISABLED)
         self.left_button_create_server.configure(state=tk.DISABLED)
         self.left_button_connect.configure(state=tk.DISABLED)
+        self.left_entry_password.configure(state=tk.DISABLED)
         self.root.after(500,
                         partial(
                             self.left_button_create_server.configure, command=self.closeConnection,
@@ -216,6 +223,7 @@ class MainMenuUIFunctions:
         # self.left_button_create_server.configure(state=tk.NORMAL)
         self.left_button_create_server.configure(state=tk.DISABLED)
         self.left_button_connect.configure(state=tk.DISABLED)
+        self.left_entry_password.configure(state=tk.NORMAL)
         self.root.after(500,
                         partial(
                             self.left_button_create_server.configure,
@@ -227,6 +235,7 @@ class MainMenuUIFunctions:
         self.root.after(500, partial(self.left_button_connect.configure, state=tk.NORMAL))
 
     def selfClientDisconnected(self, msg: dict):
+        self.api.getAccountManager().SelfDisconnectTrigger.remove(self.selfClientDisconnected)
         self.logs.sendLog(f'Got disconnected from server. Reason: {msg["reason"]}', -1)
         self.logs.sendLog(f'All info {msg}', -1)
         # self.unlockInteraction()
@@ -247,4 +256,3 @@ class MainMenuUIFunctions:
         self.root.wm_iconphoto(False, self.photoDisabled)
         self.unlockInteraction()
         self.left_status_label.configure(text='No connection')
-        # messagebox.showinfo('test', 'test2')

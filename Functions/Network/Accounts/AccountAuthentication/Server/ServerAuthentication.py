@@ -9,6 +9,7 @@ import socket
 
 from ast import literal_eval
 from random import randint
+from time import sleep
 
 from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.DataTransfer import MessageTransfer
@@ -68,6 +69,8 @@ class Authentication:
                 return
                 # Authentication._5_PhaseAllModulesCheck(account.socket, logs) # Проверка аддонов
                 # Authentication._6_PhaseModuleConnection(account.socket, logs)  # Подключение аддонов
+            if not Authentication._PhaseVerification(logs, data, account):  # checking data integrity
+                return
 
             # Creating account
             account = Account(
@@ -101,7 +104,8 @@ class Authentication:
         if mcm.server.checkSpecialCode(message, account.socket):
             return True
         elif message != Info.unique_message:  # checking if those aren't same
-            account.socket.send(Authentication._fillText("!!Connection restriction", Info.preAuthMessageLength).encode())
+            account.socket.send(
+                Authentication._fillText("!!Connection restriction", Info.preAuthMessageLength).encode())
             logs.sendLog(f"[Authentication] Couldn't pass 1st authentication phase. "
                          f"{account.socket.getpeername()[0]}:{account.socket.getpeername()[1]}", -1)
             account.socket.close()
@@ -155,13 +159,18 @@ class Authentication:
         hashed_password = hashlib.sha512(client_salt + password.encode()).hexdigest().encode()
 
         # Receiving the hashed password from the client
-        # 4 tries because 1st goes to default password check
-        for tries in range(4):
+        allowed_tries = 3
+        current_tries = 0
+        defaultPasswordChecked = False
+        while current_tries < allowed_tries:
+            current_tries += 1
             # Getting password hash from client
             try:
                 # Hashed password is 128 characters long
                 received_hashed_password = s.recv(Info.preAuthMessageLength)
             except ConnectionAbortedError:  # Client can disconnect from server before logging in
+                received_hashed_password = None
+            except ConnectionResetError:  # Client can disconnect from server before logging in
                 received_hashed_password = None
 
             # Checking is password is not given
@@ -179,12 +188,25 @@ class Authentication:
                 s.send(Authentication._fillText("1", Info.preAuthMessageLength).encode())
                 return True
             else:
-                logs.sendLog(f"[Authentication] Couldn't pass 3rd authentication phase for {tries + 1} time."
+                if current_tries < allowed_tries:
+                    s.send(Authentication._fillText("", Info.preAuthMessageLength).encode())
+                if (
+                        received_hashed_password.decode()
+                        ==
+                        Authentication.createHashedPassword(client_salt, Info.defaultPassword).decode()
+                        and not defaultPasswordChecked
+                ):
+                    defaultPasswordChecked = True
+                    current_tries -= 1
+                    continue
+                defaultPasswordChecked = True
+                logs.sendLog(f"[Authentication] Couldn't pass 3rd authentication phase for {current_tries} time."
                              f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
-                s.send(Authentication._fillText("", Info.preAuthMessageLength).encode())
 
         logs.sendLog(f"[Authentication] Client couldn't pass 3rd phase. Closing connection..."
                      f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
+        s.send(Authentication._fillText("Too many attempts", Info.preAuthMessageLength).encode())
+        sleep(10)
         s.close()
         return False
 
@@ -224,6 +246,24 @@ class Authentication:
         return True
 
     @staticmethod
+    def _PhaseVerification(logs: Logs, data: dict, account: PreAccount) -> bool:
+        if len(data['nickname']) > 30 or len(data['nickname']) < 3:
+            account.socket.send(Authentication._fillText("Nickname must be between 3 and 30 symbols.",
+                                                         Info.preAuthMessageLength).encode())
+            logs.sendLog(f"[Authentication] Couldn't pass authentication verification phase. "
+                         f"{account.socket.getpeername()[0]}:{account.socket.getpeername()[1]}", -1)
+            account.socket.close()
+            return False
+        if len(data['pc_name']) > 50 or len(data['pc_name']) < 2:
+            account.socket.send(Authentication._fillText("PC name must be between 2 and 50 symbols.",
+                                                         Info.preAuthMessageLength).encode())
+            logs.sendLog(f"[Authentication] Couldn't pass authentication verification phase. "
+                         f"{account.socket.getpeername()[0]}:{account.socket.getpeername()[1]}", -1)
+            account.socket.close()
+            return False
+        return True
+
+    @staticmethod
     def _6_PhaseModuleConnection(s: socket.socket, logs: Logs) -> bool:
         logs.sendLog("[Authentication] Sixth phase has been passed."
                      f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
@@ -233,3 +273,7 @@ class Authentication:
     def _passInfo(s: socket.socket) -> bool:
         s.send(Authentication._fillText('pass', Info.preAuthMessageLength).encode())
         return True
+
+    @staticmethod
+    def createHashedPassword(salt: bytes, password: str) -> bytes:
+        return hashlib.sha512(salt + password.encode()).hexdigest().encode()

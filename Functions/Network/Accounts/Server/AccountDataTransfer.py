@@ -19,20 +19,6 @@ class AccountDataTransfer:
         ]
     }
 
-    # def getAllInfoAccount(self, tags: list[str]) -> list[dict[str: str]]:
-    #     info = []
-    #     temp = [self.selfAccount]
-    #     temp.extend(self.participants)
-    #     for account in temp:
-    #         info.append(
-    #             {
-    #                 'id': account.id,
-    #                 'pc_name': account.pc_name,
-    #                 'nickname': account.nickname,
-    #                 'tags': account.tags
-    #             }
-    #         )
-    #     return info
     def getAllInfoAccount(self, tags_: list[str]) -> list[dict[str: str]]:
         informationToGet = []
         send = []
@@ -53,7 +39,6 @@ class AccountDataTransfer:
                 put[info] = getattr(i, info)
             put['id'] = i.id
             send.append(put)
-        print(f'tags&info: {tags}\n{send}')
         return send
 
     def updateAccountInfoHandler(self):

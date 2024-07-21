@@ -27,9 +27,7 @@ class AccountDataHandler:
                 account.updateNickname(msg['data'])
             if msg['what'] == 'disconnect':  # account has been disconnected
                 account: Account = self.findByID(msg['id'])
-                # print(account.port, account.tags, account.id, account.ping)
                 self._disconnectAccount(self.findByID(msg['id']))
-            # setattr(account, msg['what'], msg['data'])
         else:
             for i in msg['_all']:
                 account: Account = self.findByID(i['id'])
@@ -45,6 +43,3 @@ class AccountDataHandler:
                         account.updatePcName(i[info])
                     if info == Account.what_tag:
                         account.updateTags(i[info])
-            # for account in self.participants:
-            #     for i in msg['_all']:
-            #         if

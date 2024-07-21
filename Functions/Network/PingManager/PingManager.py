@@ -34,13 +34,10 @@ class Module:
         self.mcm = self.api.getConnectorManager()
         if isServer:
             self.api.getTriggerManager().accountAddedTrigger(self.startPing)
-        # else:
-        #     self.api.getTriggerManager().clientConnectedTrigger(self)
 
     def startPing(self, account: Account):
         """Server function"""
         self.logs.sendLog('[PingManager] Trying to establish to client.', -1)
-        print('1salt:', account.salt)
         WaitingForConnectionInfo(
             self.id_,
             self.api.getConnectorManager().server.addConnectionWaiting,
@@ -60,7 +57,7 @@ class Module:
                     sleep(random.randint(1, 500) / 1000)  # creating random fake latency for tests
                     # s.socket.send(msg.upper() if random.randint(0, 5) == 1 else msg)
                     s.socket.send(msg)
-                    # s.socket.send(s.socket.recv(16))
+                    # s.socket.send(s.socket.recv(16))  # default
             except (ConnectionAbortedError, OSError):
                 self.api.getTriggerManager().accountManager.closeConnection()
 

@@ -95,7 +95,8 @@ class SelfAccount:
         self.accountHasBeenUpdated(self.what_conn)
 
     def removeExtraConnection(self, s: MessageTransfer):
-        for key in self.extraConnections.keys():
+        copyKeys = self.extraConnections.copy().keys()
+        for key in copyKeys:
             for conn in self.extraConnections[key]:
                 if s == conn:
                     try:
@@ -113,7 +114,8 @@ class SelfAccount:
 
     def accountHasBeenUpdated(self, what: str):
         if what == self.what_conn:
-            for i in self.extraConnections.keys():
+            copyKeys = self.extraConnections.copy().keys()
+            for i in copyKeys:
                 if not self.extraConnections.get(i):
                     self.extraConnections.pop(i)
 

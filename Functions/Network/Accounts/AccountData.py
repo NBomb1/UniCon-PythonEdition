@@ -1,5 +1,6 @@
 from threading import Thread
 
+from Functions.Network.Accounts.SelfAccount import SelfAccount
 from Functions.Network.DataTransfer import MessageTransfer
 
 
@@ -108,7 +109,6 @@ class Account:
 
     def accountHasBeenUpdated(self, what: str):
         if what == self.what_conn:
-            print(f'updating conns\n{self.extraConnections}')
             keys = self.extraConnections.copy().keys()
             for i in keys:
                 if not self.extraConnections.get(i):
@@ -128,3 +128,14 @@ class Account:
                         pass
                     self.accountHasBeenUpdated(self.what_conn)
                     return
+
+    def removeAllConnections(self, account: SelfAccount):
+        for i in self.extraConnections.values():
+            for _ in i:
+                try:
+                    _.socket.close()
+                except OSError:
+                    pass
+                account.removeExtraConnection(_)
+        self.extraConnections.clear()
+        self.accountHasBeenUpdated(self.what_conn)

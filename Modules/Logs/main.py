@@ -142,11 +142,11 @@ class Module:
                 if i not in self.allIDs:
                     self.allIDs.append(i)
                     self.idLog[i] = ChatText(self.FrameChat)
+                    self.allIDs.sort()
                     self.combobox_ids.configure(values=self.allIDs)
                     self.api.getLogs().registerHandler(i, self.message)
                     self.idLog[i].configure(wrap=tk.WORD, height=20, font=self.font)
                     self.message(f"[Logs] ID {i} have been found.", i)
-                    self.allIDs.sort()
 
     def _create_widgets(self):
         # Creating widgets

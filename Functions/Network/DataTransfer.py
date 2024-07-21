@@ -44,12 +44,6 @@ class MessageTransfer:
         try:
             self.socket.send(text)
             return True
-        # except ConnectionResetError as error:  # client disconnected
-        #     self._callErrorFunc(error)
-        #     return False
-        # except OSError as error:  # client was disconnected in code, but code didn't stop
-        #     self._callErrorFunc(error)
-        #     return False
         except Exception as error:
             self._callErrorFunc(error)
             return False
@@ -99,11 +93,10 @@ class MessageTransfer:
                         return
                     message['_socket'] = self.socket
                     message['_account'] = self.account
-                    # print('output:', message)
+                    if message['type'] == 'close':
+                        print('reg Functions', self.registeredFunctions)
                     for func in funcList:
                         func(message)
-            # except ConnectionResetError:
-            #     pass  # needs to be done
             except Exception as error:
                 self._callErrorFunc(error)
         threading.Thread(target=handler, daemon=True).start()
