@@ -55,7 +55,7 @@ class MessageTransfer:
         if type_ not in self.types:
             raise DataTransfer.TypeDoesntExistError(f"Type {type_} doesn't exists.")
         kwargs['type'] = type_
-        message = len(kwargs.__str__()).__str__() + kwargs.__str__()
+        message = len(kwargs.__str__().encode()).__str__() + kwargs.__str__()
 
         if thread:
             self.sendMessages.append(message.encode())
