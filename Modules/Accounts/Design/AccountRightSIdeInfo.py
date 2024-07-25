@@ -77,7 +77,7 @@ class RightSideInfo:
         self.updateName(account.nickname)
         self.updateTags(account.tags)
         self.updateConnections(account.extraConnections)
-        if self.api.getAccountManager().getIsServer() and self.api.getAccountManager().owner != account:
+        if self.api.getAccountManager().getIsServer() and account in self.api.getAccountManager().getParticipants():
             self.accountKickButton.configure(state=tk.NORMAL, command=partial(self.kickAccount, account, False))
             self.accountKickReasonButton.configure(state=tk.NORMAL,
                                                    command=partial(
