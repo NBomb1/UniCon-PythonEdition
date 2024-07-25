@@ -20,7 +20,7 @@ class Module:
     name = "PingManager"
     author = "ArT"
     defaultNetworkAuth = True
-    isOnlyUI = False
+    isUI = False
 
     def __init__(self, api: API):
         self.api = api

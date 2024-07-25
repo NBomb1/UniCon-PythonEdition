@@ -46,7 +46,7 @@ class MainMenu(MainMenuUIFunctions):
         # Settings frame
         self.settingsFrame = Settings(self.mainFrame, self.dataManager, self.left_entry_nickname)
 
-        self.module = ModuleHandler(self.logs, self.moduleLoaderError, self.right_notebook, self.root)
+        self.module = ModuleHandler(self.logs, self.moduleLoaderError, self.right_notebook, self.root, dataManager)
         self.triggerManager = TriggerManager(self.accountManager)
         self.mcm = ConnectorManager(self.module, self.accountManager)
 
@@ -67,7 +67,8 @@ class MainMenu(MainMenuUIFunctions):
         self.module.api = self.api
         self.pingManager: PingManager.Module = self.module.activateSingleModule(
             PingManager,
-            getcwd() + '\\Functions\\Network\\PingManager\\PingManager.py'
+            getcwd() + '\\Functions\\Network\\PingManager\\PingManager.py',
+            True
         )
         self.module.startLoading()
 

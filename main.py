@@ -19,9 +19,15 @@ Goals:
 1. Finish account module and related things.
 2. Pass all authentication phases.
 3. Check for Authentication scripts and move some code to Tools.
+4. Auto update code.
+5. Permissions for clients.
+6. ModuleChecker module.
+7. Chat module.
+8. File transfer module.
 """
 
 from os import getcwd, chdir
+
 chdir('\\'.join(__file__.split('\\')[:-1]))
 
 from Functions.Starting import VersionChecker  # checks python version

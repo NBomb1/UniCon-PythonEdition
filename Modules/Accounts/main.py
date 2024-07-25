@@ -9,12 +9,33 @@ from Modules.Accounts.Design.AccountRightSIdeInfo import RightSideInfo
 
 
 class Module(RightSideInfo):
+    """
+    This class represents the AccountManager module. It manages user accounts and provides UI for managing them.
+
+    Attributes:
+    id_ (str): The unique identifier of the module.
+    version (str): The version of the module.
+    name (str): The name of the module.
+    author (str): The author of the module.
+    defaultNetworkAuth (bool): Whether the module requires network authentication by default.
+    isUI (bool): Whether the module provides a user interface.
+    allAccounts (dict[Account, LeftSideInfo]): A dictionary to store all accounts and their corresponding UI components.
+
+    Methods:
+    __init__(self, api: API): Initializes the module with the provided API instance.
+    setup(): Sets up the UI components for the module.
+    createNewAccount(self, account: Account): Creates a new account and its corresponding UI component.
+    serverStarted(self, serverInfo: ServerMainChannel): Handles the server started event.
+    pingUpdated(self, account: Account, what: str): Updates the UI component for a specific account.
+    clientDisconnected(self, account: Account): Handles the client disconnected event.
+    connectionClosed(): Handles the connection closed event.
+    """
     id_ = "Qzc2rFEcJf0s3&d#qj1kC$A7P!~lG}tUu9vWb4xLh5KgZiope^mD(R)=O*wyXT6B"
     version = "0.0.1"
-    name = "Accounts"
+    name = "AccountManager"
     author = "ArT"
     defaultNetworkAuth = True
-    isOnlyUI = True
+    isUI = True
     allAccounts: dict[Account, LeftSideInfo] = {}
 
     def __init__(self, api: API):

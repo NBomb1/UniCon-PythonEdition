@@ -17,7 +17,7 @@ class Module:
     name = "Logs"
     author = "ArT"
     defaultNetworkAuth = False
-    isOnlyUI = True
+    isUI = True
 
     font = (None, 11, "normal")
     currentId: int = -1

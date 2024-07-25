@@ -10,7 +10,8 @@ class ActiveModule:
                  obj: object,
                  module: ModuleType,
                  defaultNetworkAuth: bool,
-                 isOnlyUI: bool,
+                 isUI: bool,
+                 isInternal: bool
                  ):
         self.id_ = id_
         self.name = name
@@ -19,4 +20,6 @@ class ActiveModule:
         self.object = obj
         self.module = module
         self.defaultNetworkAuth = defaultNetworkAuth
-        self.isOnlyUI = isOnlyUI
+        self.isUI = isUI
+        self.isInternal = isInternal
+        self.description = module.__doc__
