@@ -167,8 +167,11 @@ class UpdaterUI:
             # self.root.quit()
 
     def deleteFiles(self):
-        for file in listdir(projectPath):
-            remove(file)
+        for file in listdir(thisPath):
+            try:
+                remove(file)
+            except Exception as e:
+                print(f'Error removing {file}: {e}')
 
 
 if __name__ == '__main__':
