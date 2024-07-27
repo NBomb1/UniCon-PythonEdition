@@ -32,6 +32,7 @@ def move_all_contents(src_dir, dest_dir):
 
 
 def deleteOldFiles(directory):
+    print(__file__.split('\\')[-1])
     for file in os.listdir(directory):
         file_path = os.path.join(directory, file)
         try:
@@ -52,8 +53,11 @@ def deleteOldFiles(directory):
 
 print(copyFrom, copyTo)
 deleteOldFiles(copyTo)
+print('Old files have been deleted.')
+print('Moving all files...')
 move_all_contents(copyFrom, copyTo)
 print(sys.executable, copyFrom, copyTo, copyTo + '\\main.py', '--updated')
+print('Starting...')
 os.execl(sys.executable, sys.executable, copyTo + '\\main.py', '--updated')
 
 input()
