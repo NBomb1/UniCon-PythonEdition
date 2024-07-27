@@ -157,7 +157,7 @@ class UpdaterUI:
         #     '"' + projectPath + '"'
         # ))
         self.root.after(7500, lambda: self.run_independent_process(
-            thisPath + '\\versionChanger.py',
+            projectPath + '\\versionChanger.py',
             projectPath + '\\new_version',
             projectPath,
             f"{getpid()}"  # Идентификатор текущего процесса
@@ -185,6 +185,7 @@ class UpdaterUI:
     def run_independent_process(self, script_path, *args):
         list_ = [executable, script_path]
         list_.extend(args)
+        print(f'args: {list_}')
         if name == 'nt':  # Windows
             DETACHED_PROCESS = 0x00000008
             Popen(
