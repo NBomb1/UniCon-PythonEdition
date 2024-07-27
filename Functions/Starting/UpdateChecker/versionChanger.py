@@ -6,6 +6,9 @@ from time import sleep
 copyFrom = sys.argv[1]
 copyTo = sys.argv[2]
 pid = sys.argv[3]
+file = open('logs.txt', 'w')
+print_ = print
+print = lambda *args: print_(args, file=file)
 print('killing')
 os.kill(int(pid), 0)
 print(sys.argv)
