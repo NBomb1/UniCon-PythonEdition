@@ -4,7 +4,6 @@ from urllib.parse import quote
 from base64 import b64decode
 from UpdaterInfo import *
 import json
-import sys
 import os
 from time import sleep
 
@@ -57,9 +56,4 @@ def update_program(logs: callable):
             break
         sleep(1)
     logs('Download completed.')
-    # Здесь можно добавить логику перезапуска программы, если нужно
 
-
-def restart_program():
-    print('Restarting...')
-    os.execl(sys.executable, sys.executable, *sys.argv)

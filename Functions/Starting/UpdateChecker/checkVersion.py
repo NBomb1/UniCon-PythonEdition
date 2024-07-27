@@ -78,11 +78,3 @@ def extract_version_from_content(content, className: str, attributeName: str) ->
                 if attr_line.strip().startswith(f'{attributeName} ='):
                     return attr_line.split('=')[1].strip().strip('"')
     return None
-
-# check_for_updates(
-#     url='https://raw.githubusercontent.com/NBomb1/1C-project/master/UI/Info.py',
-#     gitHubToken='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',
-#     currentVersion='0.0.4',
-#     className='Info',
-#     attributeName='version'
-# )

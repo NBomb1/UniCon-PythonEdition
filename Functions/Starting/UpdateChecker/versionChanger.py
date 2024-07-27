@@ -22,10 +22,12 @@ def move_all_contents(src_dir, dest_dir):
         else:
             # Если элемент - файл, используем shutil.move для перемещения
             shutil.move(s, d)
+        print(s, d)
 
     # Опционально: удалить исходную директорию, если она пустая
     if not os.listdir(src_dir):
         os.rmdir(src_dir)
+        print(f'Directory {src_dir} has been deleted.')
 
 
 move_all_contents(copyFrom, copyTo)

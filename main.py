@@ -37,7 +37,7 @@ if '--updated' in argv:
 
 chdir('\\'.join(__file__.split('\\')[:-1]))
 
-from Functions.Starting import VersionChecker  # checks python version
+from Functions.Starting import PythonVersionChecker  # checks python version
 
 VersionChecker.start()
 

@@ -1,5 +1,4 @@
 class MainInfo:
-    ver = '0.0.1-dev'
     startDate = '12 06 2023'
 
 
