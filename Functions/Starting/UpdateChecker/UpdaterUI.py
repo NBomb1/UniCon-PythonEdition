@@ -2,6 +2,7 @@ import tkinter as tk
 from datetime import datetime
 from functools import partial
 from os import chdir, getcwd, execl
+from os import path as pathOs
 from shutil import copy2
 from sys import path, executable
 from threading import Thread, Timer
@@ -9,8 +10,16 @@ from time import sleep
 
 import fileDownloader
 
-projectPath = '\\'.join(__file__.split('\\')[:-4])
-thisPath = '\\'.join(__file__.split('\\')[:-1])
+thisPath = pathOs.dirname(pathOs.abspath(__file__))
+projectPath = pathOs.join(thisPath, '..', '..', '..')
+# projectPath = '\\'.join(__file__.split('\\')[:-4])
+# thisPath = '\\'.join(__file__.split('\\')[:-1])
+thisPath = pathOs.dirname(pathOs.abspath(__file__))
+projectPath = '\\'.join(thisPath.split('\\')[:-3])
+downloadPath = projectPath + '\\new_version'
+# path.append(projectPath)
+# chdir(thisPath)
+
 path.append(projectPath)
 chdir(thisPath)
 
@@ -116,7 +125,7 @@ class UpdaterUI:
     def download_update(self):
         self.createMessage('Downloading update...')
         self.root.update()
-        fileDownloader.update_program(self.createMessage)
+        fileDownloader.update_program(self.createMessage, downloadPath)
         self.isFinished = True
         # TODO: Download and install the update
         self.createMessage('Update downloaded successfully!')
@@ -133,12 +142,17 @@ class UpdaterUI:
         self.root.after(4000, lambda: self.createMessage('Restarting in 2 seconds...'))
         self.root.after(5000, lambda: self.createMessage('Restarting in 1 seconds...'))
         self.root.after(6000, lambda: self.createMessage('Restarting in 0 seconds...'))
+        print(executable,
+            '\n"' + projectPath + '\\versionChanger.py' + '"\n',
+            '"' + projectPath + '\\new_version' + '"\n',
+            '"' + projectPath + '"')
+
         self.root.after(7500, lambda: execl(
             executable,
             executable,
-            projectPath + '\\versionChanger.py',
-            thisPath + '\\new_version',
-            projectPath
+            '"' + projectPath + '\\versionChanger.py' + '"',
+            '"' + projectPath + '\\new_version' + '"',
+            '"' + projectPath + '"'
         ))
             # self.root.quit()
 

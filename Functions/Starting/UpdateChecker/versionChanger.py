@@ -5,6 +5,7 @@ import sys
 copyFrom = sys.argv[1]
 copyTo = sys.argv[2]
 print(sys.argv)
+DeleteExtensions = ('py', 'gif')
 
 
 def move_all_contents(src_dir, dest_dir):
@@ -22,7 +23,7 @@ def move_all_contents(src_dir, dest_dir):
         else:
             # Если элемент - файл, используем shutil.move для перемещения
             shutil.move(s, d)
-        print(s, d)
+        print('\nmoving:', s, 'to:', d)
 
     # Опционально: удалить исходную директорию, если она пустая
     if not os.listdir(src_dir):
@@ -30,7 +31,23 @@ def move_all_contents(src_dir, dest_dir):
         print(f'Directory {src_dir} has been deleted.')
 
 
+def deleteOldFiles(directory):
+    for file in os.listdir(directory):
+        file_path = os.path.join(directory, file)
+        try:
+            # if os.path.isfile(file_path):
+            print(file_path, copyFrom)
+            if file_path.endswith(DeleteExtensions) and file != copyFrom.split('\\')[-1]:
+                os.remove(file_path)
+                print(f'File {file_path} has been deleted.')
+        except Exception as e:
+            print(f'Error occurred while deleting {file_path}: {e}')
+
+
+print(copyFrom, copyTo)
+deleteOldFiles(copyTo)
 move_all_contents(copyFrom, copyTo)
+print(sys.executable, copyFrom, copyTo, copyTo + '\\main.py', '--updated')
 os.execl(sys.executable, sys.executable, copyTo + '\\main.py', '--updated')
 
 input()

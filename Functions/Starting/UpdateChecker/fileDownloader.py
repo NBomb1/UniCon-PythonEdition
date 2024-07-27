@@ -47,8 +47,9 @@ def download_directory(logs: callable, path='', download_path=''):
             download_directory(logs, item['path'], download_path)
 
 
-def update_program(logs: callable):
-    download_path = 'new_version'
+def update_program(logs: callable, path: str):
+    download_path = path
+    # download_path = 'new_version'
     logs(f'Downloading to {download_path}...')
     download_directory(logs, download_path=download_path)
     while True:

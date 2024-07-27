@@ -39,7 +39,7 @@ chdir('\\'.join(__file__.split('\\')[:-1]))
 
 from Functions.Starting import PythonVersionChecker  # checks python version
 
-VersionChecker.start()
+PythonVersionChecker.start()
 
 from Functions.Starting import ModuleDownloader  # checks modules
 
