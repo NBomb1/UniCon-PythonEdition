@@ -7,7 +7,7 @@ from sys import path, executable
 from threading import Thread, Timer
 from time import sleep
 
-from Functions.Starting.UpdateChecker import fileDownloader
+import fileDownloader
 
 projectPath = '\\'.join(__file__.split('\\')[:-4])
 thisPath = '\\'.join(__file__.split('\\')[:-1])
