@@ -162,8 +162,7 @@ class UpdaterUI:
                 projectPath
             ])
         )
-        sleep(0.1)
-        exit()
+        self.root.after(7800, lambda: self.root.destroy())
             # self.root.quit()
 
 
