@@ -1,8 +1,9 @@
 import tkinter as tk
 from datetime import datetime
 from functools import partial
-from os import chdir, getcwd, execl, remove, listdir
+from os import chdir, getcwd, execl, remove, listdir, getpid, setsid, name
 from os import path as pathOs
+import os
 from shutil import copy2
 from subprocess import Popen
 from sys import path, executable
@@ -155,13 +156,21 @@ class UpdaterUI:
         #     '"' + projectPath + '\\new_version' + '"',
         #     '"' + projectPath + '"'
         # ))
-        self.root.after(7500, lambda: Popen([
-                executable,
-                projectPath + '\\versionChanger.py',
-                projectPath + '\\new_version',
-                projectPath
-            ])
+        self.root.after(7500, lambda: self.run_independent_process(
+            thisPath + '\\versionChanger.py',
+            projectPath + '\\new_version',
+            projectPath,
+            f"{getpid()}"  # Идентификатор текущего процесса
         )
+        )
+        # self.root.after(7500, lambda: Popen([
+        #         executable,
+        #         projectPath + '\\versionChanger.py',
+        #         projectPath + '\\new_version',
+        #         projectPath,
+        #         f"{getpid()}"
+        #     ], start_new_session=True)
+        # )
         self.root.after(8000, self.deleteFiles)
         self.root.after(9000, lambda: exit())
             # self.root.quit()
@@ -172,6 +181,23 @@ class UpdaterUI:
                 remove(file)
             except Exception as e:
                 print(f'Error removing {file}: {e}')
+
+    def run_independent_process(self, script_path, *args):
+        list_ = [executable, script_path]
+        list_.extend(args)
+        if name == 'nt':  # Windows
+            DETACHED_PROCESS = 0x00000008
+            Popen(
+                list_,
+                creationflags=DETACHED_PROCESS,
+                close_fds=True
+            )
+        else:  # Unix-системы
+            Popen(
+                list_,
+                preexec_fn=os.setsid,
+                close_fds=True
+            )
 
 
 if __name__ == '__main__':

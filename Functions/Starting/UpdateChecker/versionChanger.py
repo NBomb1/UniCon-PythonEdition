@@ -5,6 +5,9 @@ from time import sleep
 
 copyFrom = sys.argv[1]
 copyTo = sys.argv[2]
+pid = sys.argv[3]
+print('killing')
+os.kill(int(pid), 0)
 print(sys.argv)
 DeleteExtensions = ('py', 'gif')
 
