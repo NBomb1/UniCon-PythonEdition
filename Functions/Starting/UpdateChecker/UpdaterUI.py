@@ -1,7 +1,7 @@
 import tkinter as tk
 from datetime import datetime
 from functools import partial
-from os import chdir, getcwd, execl, remove, listdir, getpid, setsid, name
+from os import chdir, getcwd, execl, remove, listdir, getpid, name
 from os import path as pathOs
 import os
 from shutil import copy2
