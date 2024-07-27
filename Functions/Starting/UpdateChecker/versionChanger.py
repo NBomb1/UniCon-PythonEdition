@@ -52,7 +52,9 @@ def deleteOldFiles(directory):
 
 
 print(copyFrom, copyTo)
-sleep(2)
+print('waiting 3 seconds')
+sleep(3)
+print('Deleting old files...')
 deleteOldFiles(copyTo)
 print('Old files have been deleted.')
 print('Moving all files...')

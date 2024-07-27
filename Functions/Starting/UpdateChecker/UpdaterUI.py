@@ -163,6 +163,7 @@ class UpdaterUI:
             ])
         )
         self.root.after(7800, lambda: self.root.destroy())
+        self.root.after(8000, lambda: exit())
             # self.root.quit()
 
 
