@@ -7,6 +7,8 @@ from sys import path, executable
 from threading import Thread, Timer
 from time import sleep
 
+from Functions.Starting.UpdateChecker import fileDownloader
+
 projectPath = '\\'.join(__file__.split('\\')[:-4])
 thisPath = '\\'.join(__file__.split('\\')[:-1])
 path.append(projectPath)
@@ -114,7 +116,7 @@ class UpdaterUI:
     def download_update(self):
         self.createMessage('Downloading update...')
         self.root.update()
-        # fileDownloader.update_program(self.createMessage)
+        fileDownloader.update_program(self.createMessage)
         self.isFinished = True
         # TODO: Download and install the update
         self.createMessage('Update downloaded successfully!')
@@ -135,8 +137,8 @@ class UpdaterUI:
             executable,
             executable,
             projectPath + '\\versionChanger.py',
-            thisPath + '\\new',
-            'vcbx'
+            thisPath + '\\new_version',
+            projectPath
         ))
             # self.root.quit()
 
