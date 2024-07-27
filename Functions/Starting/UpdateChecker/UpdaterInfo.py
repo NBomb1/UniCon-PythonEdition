@@ -1,0 +1,8 @@
+CLASS_NAME = 'Info'
+ATTRIBUTE_NAME = 'version'
+GITHUB_API_URL = 'https://api.github.com'
+URL = 'https://raw.githubusercontent.com/NBomb1/1C-project/master/UI/Info.py'
+REPO_OWNER = 'NBomb1'
+REPO_NAME = '1C-project'
+BRANCH = 'master'
+GITHUB_TOKEN = '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'

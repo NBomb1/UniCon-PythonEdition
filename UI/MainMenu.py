@@ -26,7 +26,6 @@ class MainMenu(MainMenuUIFunctions):
     client: ClientMainChannel = None
 
     def __init__(self, log: Logs, dataManager: FileDataManager):
-        self.absolutePath: str = "\\".join(os.path.abspath(str(sys.modules['__main__'].__file__)).split('\\')[:-1])
         self.logs = log
         self.root = tk.Tk()
         self.dataManager = dataManager

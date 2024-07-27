@@ -26,7 +26,14 @@ Goals:
 8. File transfer module.
 """
 
-from os import getcwd, chdir
+from os import getcwd, chdir, remove
+from sys import argv
+
+if '--updated' in argv:
+    try:
+        remove('versionChanger.py')
+    except Exception as e:
+        print(f'Failed to delete versionChanger.py: \n{e}')
 
 chdir('\\'.join(__file__.split('\\')[:-1]))
 
@@ -67,6 +74,8 @@ def main():
 
         mainMenu = MainMenu(logManager, dataManager)  # Main code goes here
         mainMenu.root.protocol("WM_DELETE_WINDOW", partial(closing, mainMenu))
+        if '--updated' in argv:
+            mainMenu.logs.sendLog('Program was updated successfully.', -1)
         mainMenu.root.mainloop()
 
         logManager.closeFiles()
