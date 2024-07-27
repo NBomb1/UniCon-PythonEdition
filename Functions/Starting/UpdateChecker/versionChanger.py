@@ -38,6 +38,9 @@ def deleteOldFiles(directory):
             # if os.path.isfile(file_path):
             print(file_path, copyFrom)
             if os.path.isfile(file_path) and file_path.endswith(DeleteExtensions):
+                if __file__.split('\\')[-1] == file:
+                    print('NOT DELETING THE MAIN FILE!')
+                    return
                 os.remove(file_path)
                 print(f'FILE {file_path} has been deleted.')
             elif file != copyFrom.split('\\')[-1]:
