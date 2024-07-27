@@ -52,8 +52,8 @@ def deleteOldFiles(directory):
 
 
 print(copyFrom, copyTo)
-print('waiting 3 seconds')
-sleep(3)
+print('waiting 8 seconds')
+sleep(20)
 print('Deleting old files...')
 deleteOldFiles(copyTo)
 print('Old files have been deleted.')
@@ -62,5 +62,3 @@ print('Moving all files...')
 print(sys.executable, copyFrom, copyTo, copyTo + '\\main.py', '--updated')
 print('not Starting...')
 # os.execl(sys.executable, sys.executable, copyTo + '\\main.py', '--updated')
-
-input()

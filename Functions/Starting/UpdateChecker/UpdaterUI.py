@@ -1,7 +1,7 @@
 import tkinter as tk
 from datetime import datetime
 from functools import partial
-from os import chdir, getcwd, execl
+from os import chdir, getcwd, execl, remove, listdir
 from os import path as pathOs
 from shutil import copy2
 from subprocess import Popen
@@ -43,7 +43,7 @@ class UpdaterUI:
         self.root = tk.Tk()
         self.root.title('UniCon updater')
 
-        self.photoDisabled = tk.PhotoImage(file=getcwd() + r'\UpdaterIcon.gif')
+        self.photoDisabled = tk.PhotoImage(file=thisPath + r'\UpdaterIcon.gif')
         self.root.wm_iconphoto(False, self.photoDisabled)
 
         self.labelUpdateRunning = tk.Label(self.root, justify=tk.LEFT, width=1000)
@@ -162,9 +162,13 @@ class UpdaterUI:
                 projectPath
             ])
         )
-        self.root.after(7800, lambda: self.root.destroy())
-        self.root.after(8000, lambda: exit())
+        self.root.after(8000, self.deleteFiles)
+        self.root.after(9000, lambda: exit())
             # self.root.quit()
+
+    def deleteFiles(self):
+        for file in listdir(projectPath):
+            remove(file)
 
 
 if __name__ == '__main__':
