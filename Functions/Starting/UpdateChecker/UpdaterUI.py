@@ -162,6 +162,8 @@ class UpdaterUI:
                 projectPath
             ])
         )
+        sleep(0.1)
+        exit()
             # self.root.quit()
 
 
