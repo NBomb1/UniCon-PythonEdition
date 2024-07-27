@@ -37,9 +37,12 @@ def deleteOldFiles(directory):
         try:
             # if os.path.isfile(file_path):
             print(file_path, copyFrom)
-            if file_path.endswith(DeleteExtensions) and file != copyFrom.split('\\')[-1]:
+            if os.path.isfile(file_path) and file_path.endswith(DeleteExtensions):
                 os.remove(file_path)
-                print(f'File {file_path} has been deleted.')
+                print(f'FILE {file_path} has been deleted.')
+            elif file != copyFrom.split('\\')[-1]:
+                os.remove(file_path)
+                print(f'PATH {file_path} has been deleted.')
         except Exception as e:
             print(f'Error occurred while deleting {file_path}: {e}')
 
