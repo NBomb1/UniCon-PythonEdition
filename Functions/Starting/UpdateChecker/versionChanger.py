@@ -1,6 +1,7 @@
 import os
 import shutil
 import sys
+from time import sleep
 
 copyFrom = sys.argv[1]
 copyTo = sys.argv[2]
@@ -51,6 +52,7 @@ def deleteOldFiles(directory):
 
 
 print(copyFrom, copyTo)
+sleep(1)
 deleteOldFiles(copyTo)
 print('Old files have been deleted.')
 print('Moving all files...')
