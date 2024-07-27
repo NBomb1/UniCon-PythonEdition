@@ -44,7 +44,7 @@ def deleteOldFiles(directory):
                     return
                 os.remove(file_path)
                 print(f'FILE {file_path} has been deleted.')
-            elif file != copyFrom.split('\\')[-1]:
+            elif file != copyFrom.split('\\')[-1] and os.path.isdir(file_path):
                 shutil.rmtree(file_path)
                 print(f'PATH {file_path} has been deleted.')
         except Exception as e:

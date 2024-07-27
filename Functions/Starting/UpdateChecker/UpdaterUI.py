@@ -4,6 +4,7 @@ from functools import partial
 from os import chdir, getcwd, execl
 from os import path as pathOs
 from shutil import copy2
+from subprocess import Popen
 from sys import path, executable
 from threading import Thread, Timer
 from time import sleep
@@ -147,13 +148,20 @@ class UpdaterUI:
             '"' + projectPath + '\\new_version' + '"\n',
             '"' + projectPath + '"')
 
-        self.root.after(7500, lambda: execl(
-            executable,
-            executable,
-            '"' + projectPath + '\\versionChanger.py' + '"',
-            '"' + projectPath + '\\new_version' + '"',
-            '"' + projectPath + '"'
-        ))
+        # self.root.after(7500, lambda: execl(
+        #     executable,
+        #     executable,
+        #     '"' + projectPath + '\\versionChanger.py' + '"',
+        #     '"' + projectPath + '\\new_version' + '"',
+        #     '"' + projectPath + '"'
+        # ))
+        self.root.after(7500, lambda: Popen([
+                executable,
+                projectPath + '\\versionChanger.py',
+                projectPath + '\\new_version',
+                projectPath
+            ])
+        )
             # self.root.quit()
 
 
