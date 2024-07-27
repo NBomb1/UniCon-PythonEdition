@@ -40,7 +40,6 @@ def deleteOldFiles(directory):
             print(file_path, copyFrom)
             if os.path.isfile(file_path) and file_path.endswith(DeleteExtensions):
                 if __file__.split('\\')[-1] == file:
-                    print('NOT DELETING THE MAIN FILE!')
                     return
                 os.remove(file_path)
                 print(f'FILE {file_path} has been deleted.')
@@ -55,9 +54,9 @@ print(copyFrom, copyTo)
 deleteOldFiles(copyTo)
 print('Old files have been deleted.')
 print('Moving all files...')
-move_all_contents(copyFrom, copyTo)
+# move_all_contents(copyFrom, copyTo)
 print(sys.executable, copyFrom, copyTo, copyTo + '\\main.py', '--updated')
-print('Starting...')
-os.execl(sys.executable, sys.executable, copyTo + '\\main.py', '--updated')
+print('not Starting...')
+# os.execl(sys.executable, sys.executable, copyTo + '\\main.py', '--updated')
 
 input()
