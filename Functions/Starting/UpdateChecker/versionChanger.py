@@ -56,8 +56,8 @@ try:
             file_path = os.path.join(directory, file)
             try:
                 if os.path.isfile(file_path) and file_path.endswith(DeleteExtensions):
-                    if __file__.split('\\')[-1] == file:
-                        continue
+                    # if __file__.split('\\')[-1] == file:
+                    #     continue
                     os.remove(file_path)
                     log_message(f'FILE {file_path} has been deleted.')
                 elif os.path.isdir(file_path) and file != copyFrom.split('\\')[-1]:
@@ -68,15 +68,16 @@ try:
 
 
     log_message('Waiting 8 seconds...')
-    sleep(15)
+    sleep(3)
     log_message('Deleting old files...')
     delete_old_files(copyTo)
+    sleep(3)
     log_message('Old files have been deleted.')
     log_message('Moving all files...')
     move_all_contents(copyFrom, copyTo)
     log_message('Files moved successfully.')
     log_message('Restarting application...')
-    os.execl(sys.executable, sys.executable, os.path.join(copyTo, 'main.py'), '--updated')
+    os.execl(sys.executable, sys.executable, '"' + os.path.join(copyTo, 'main.py') + '"', '--updated')
 
 finally:
     import tkinter as tk

@@ -2,7 +2,7 @@ import subprocess
 import tkinter as tk
 from datetime import datetime
 from functools import partial
-from os import chdir, getcwd, execl, remove, listdir, getpid, name
+from os import chdir, remove, listdir, getpid
 from os import path as pathOs
 import os
 from shutil import copy2, rmtree
@@ -14,8 +14,6 @@ import fileDownloader
 
 thisPath = pathOs.dirname(pathOs.abspath(__file__))
 projectPath = pathOs.join(thisPath, '..', '..', '..')
-# projectPath = '\\'.join(__file__.split('\\')[:-4])
-# thisPath = '\\'.join(__file__.split('\\')[:-1])
 thisPath = pathOs.dirname(pathOs.abspath(__file__))
 projectPath = '\\'.join(thisPath.split('\\')[:-3])
 downloadPath = projectPath + '\\new_version'
@@ -59,6 +57,7 @@ class UpdaterUI:
         self.root.wm_minsize(400, 170)
         Thread(target=self.logsHandler, daemon=True).start()
         self.createMessage('UniCon updater is running...')
+        self.createMessage('OLD UPDATER...')
         self.root.after(4000, self.checkVersion)
         self.root.mainloop()
 
@@ -133,46 +132,22 @@ class UpdaterUI:
         self.restart_program()
 
     def restart_program(self):
-        source_file = thisPath + '\\versionChanger.py'
-        destination_file = projectPath + '\\versionChanger.py'
+        # source_file = thisPath + '\\versionChanger.py'
 
-        copy2(source_file, destination_file)
         self.root.after(1000, lambda: self.createMessage('Restarting in 5 seconds...'))
         self.root.after(2000, lambda: self.createMessage('Restarting in 4 seconds...'))
         self.root.after(3000, lambda: self.createMessage('Restarting in 3 seconds...'))
         self.root.after(4000, lambda: self.createMessage('Restarting in 2 seconds...'))
         self.root.after(5000, lambda: self.createMessage('Restarting in 1 seconds...'))
         self.root.after(6000, lambda: self.createMessage('Restarting in 0 seconds...'))
-        print(executable,
-              '\n"' + projectPath + '\\versionChanger.py' + '"\n',
-              '"' + projectPath + '\\new_version' + '"\n',
-              '"' + projectPath + '"')
-
-        # self.root.after(7500, lambda: execl(
-        #     executable,
-        #     executable,
-        #     '"' + projectPath + '\\versionChanger.py' + '"',
-        #     '"' + projectPath + '\\new_version' + '"',
-        #     '"' + projectPath + '"'
-        # ))
         self.root.after(7500, lambda: self.run_independent_process(
-            projectPath + '\\versionChanger.py',
+            thisPath + '\\versionChanger.py',
             projectPath + '\\new_version',
             projectPath,
             f"{getpid()}"  # Идентификатор текущего процесса
         )
                         )
-        # self.root.after(7500, lambda: subprocess.Popen([
-        #         executable,
-        #         projectPath + '\\versionChanger.py',
-        #         projectPath + '\\new_version',
-        #         projectPath,
-        #         f"{getpid()}"
-        #     ], start_new_session=True)
-        # )
         self.root.after(8000, self.deleteFiles)
-        # self.root.after(9000, lambda: exit())
-        # self.root.quit()
 
     def deleteFiles(self):
         for file in listdir(thisPath):
@@ -188,7 +163,6 @@ class UpdaterUI:
         print(f'Command to run: {list_}')
 
         if os.name == 'nt':  # Windows
-            print('Running on Windows')
             DETACHED_PROCESS = 0x00000008
             process = subprocess.Popen(
                 list_,
@@ -198,7 +172,6 @@ class UpdaterUI:
                 close_fds=True
             )
         else:  # Unix-системы
-            print('Running on Unix')
             process = subprocess.Popen(
                 list_,
                 preexec_fn=os.setsid,
