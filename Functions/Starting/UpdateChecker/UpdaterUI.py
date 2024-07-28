@@ -1,24 +1,19 @@
-import subprocess
 import tkinter as tk
 from datetime import datetime
 from functools import partial
-from os import chdir, remove, listdir, getpid
+from os import chdir, getpid
 from os import path as pathOs
-import os
-from shutil import copy2, rmtree
-from sys import path, executable
+from sys import path
 from threading import Thread, Timer
 from time import sleep
 
 import fileDownloader
 
-thisPath = pathOs.dirname(pathOs.abspath(__file__))
-projectPath = pathOs.join(thisPath, '..', '..', '..')
+# thisPath = pathOs.dirname(pathOs.abspath(__file__))
+# projectPath = pathOs.join(thisPath, '..', '..', '..')
 thisPath = pathOs.dirname(pathOs.abspath(__file__))
 projectPath = '\\'.join(thisPath.split('\\')[:-3])
 downloadPath = projectPath + '\\new_version'
-# path.append(projectPath)
-# chdir(thisPath)
 
 path.append(projectPath)
 chdir(thisPath)
@@ -28,6 +23,7 @@ from Functions.Starting.UpdateChecker.checkVersion import check_for_updates
 from UI.TKinter_addons.Text_chat import ChatText
 from UI.window.WindowCenter import center_main
 from UI.Info import Info
+from Functions.Starting.UpdateChecker import Processes
 
 
 class UpdaterUI:
@@ -57,7 +53,6 @@ class UpdaterUI:
         self.root.wm_minsize(400, 170)
         Thread(target=self.logsHandler, daemon=True).start()
         self.createMessage('UniCon updater is running...')
-        self.createMessage('OLD UPDATER...')
         self.root.after(4000, self.checkVersion)
         self.root.mainloop()
 
@@ -140,52 +135,13 @@ class UpdaterUI:
         self.root.after(4000, lambda: self.createMessage('Restarting in 2 seconds...'))
         self.root.after(5000, lambda: self.createMessage('Restarting in 1 seconds...'))
         self.root.after(6000, lambda: self.createMessage('Restarting in 0 seconds...'))
-        self.root.after(7500, lambda: self.run_independent_process(
+        self.root.after(7500, lambda: Processes.run_independent_process(
             thisPath + '\\versionChanger.py',
             projectPath + '\\new_version',
             projectPath,
             f"{getpid()}"  # Идентификатор текущего процесса
         )
                         )
-        self.root.after(8000, self.deleteFiles)
-
-    def deleteFiles(self):
-        for file in listdir(thisPath):
-            try:
-                remove(file)
-            except Exception as e:
-                print(f'Error removing {file}: {e}')
-        rmtree(projectPath + '\\Functions')
-
-    def run_independent_process(self, script_path, *args):
-        list_ = [executable, script_path]
-        list_.extend(args)
-        print(f'Command to run: {list_}')
-
-        if os.name == 'nt':  # Windows
-            DETACHED_PROCESS = 0x00000008
-            process = subprocess.Popen(
-                list_,
-                creationflags=DETACHED_PROCESS,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                close_fds=True
-            )
-        else:  # Unix-системы
-            process = subprocess.Popen(
-                list_,
-                preexec_fn=os.setsid,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                close_fds=True
-            )
-
-        print(f'Parent PID: {os.getpid()}')
-        print(f'Child PID: {process.pid}')
-        stdout, stderr = process.communicate()
-        print(f'Standard Output:', {stdout})
-        print(f'Standard Error:', {stderr.decode()})
-        print(f'Process exited with return code:', {process.returncode})
 
 
 if __name__ == '__main__':

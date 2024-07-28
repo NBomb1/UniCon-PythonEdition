@@ -1,5 +1,3 @@
-import os
-import sys
 import tkinter as tk
 from os import getcwd
 from tkinter import ttk
