@@ -25,6 +25,8 @@ from UI.window.WindowCenter import center_main
 from UI.Info import Info
 from Functions.Starting.UpdateChecker import Processes
 
+sleep(1)
+
 
 class UpdaterUI:
     uniconUpdateText = [".", "..", "..."]
@@ -71,7 +73,6 @@ class UpdaterUI:
         )
 
     def checkVersion(self):
-        Info.version = '0.0.1'
         self.createMessage(f'Current version {Info.version}')
         self.createMessage('Checking for updates...')
 
@@ -79,7 +80,7 @@ class UpdaterUI:
             res = check_for_updates(
                 info.URL,
                 info.GITHUB_TOKEN,
-                Info.version,
+                Info.version,  # other file
                 info.CLASS_NAME,
                 info.ATTRIBUTE_NAME
             )

@@ -56,7 +56,7 @@ def check_for_updates(
         res = UpdateCheckResult(
             res is True,
             latest_version,
-            ''
+            'No description available.'
         )
         return res
     return None

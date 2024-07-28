@@ -70,6 +70,7 @@ class MainMenu(MainMenuUIFunctions):
         self.module.startLoading()
 
         center_main(self.root)
+        self.checkForUpdates()
 
     def _createLeftWidgets(self):
         # Creating two frames that will contain all sorts of widgets

@@ -2,6 +2,8 @@
 import tkinter as tk
 import traceback
 from functools import partial
+from os import getcwd
+from threading import Thread
 from tkinter import simpledialog, ttk, messagebox
 
 import settings
@@ -15,11 +17,17 @@ from Functions.Network.MainChannel.Client.MainChannel import ClientMainChannel
 from Functions.Network.MainChannel.Server.main import ServerMainChannel
 from Functions.Network.PingManager import PingManager
 from Functions.Network.TriggerManager import TriggerManager
+from Functions.Starting.UpdateChecker import UpdaterInfo
+from Functions.Starting.UpdateChecker.Processes import run_independent_process
+from Functions.Starting.UpdateChecker.checkVersion import check_for_updates
 from Functions.Tools.DataSettings.Widgets.StringEntry import StringEntry
 from Functions.Tools.logManager import Logs
 from UI.ChildFrames.SettingsMenu import Settings
+from UI.Info import Info
+
 
 class MainMenuUIFunctions:
+    new_version_available: bool = False
     # pingManager
     pingManager: PingManager.Module
 
@@ -79,7 +87,10 @@ class MainMenuUIFunctions:
     def goSettings(self):
         self.settingsFrame.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=5)
         self.changeTitle("Settings")
-        self.left_button_connect.pack_forget()
+        if self.new_version_available:
+            self.left_button_connect.configure(text='Update application', command=self.update_app)
+        else:
+            self.left_button_connect.pack_forget()
         self.left_button_create_server.pack_forget()
         self.left_button_settings.configure(
             text="Return",
@@ -93,7 +104,10 @@ class MainMenuUIFunctions:
     def goMainFrame(self):
         self.settingsFrame.pack_forget()
         self.changeTitle("MainMenu")
-        self.left_button_connect.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))
+        if self.new_version_available:
+            self.left_button_connect.configure(text='Connect to the server', command=self.startClient)
+        else:
+            self.left_button_connect.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))
         self.left_button_create_server.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))
         self.left_button_settings.configure(
             text="Settings",
@@ -230,7 +244,7 @@ class MainMenuUIFunctions:
                             command=self.startServer,
                             text='Create the server',
                             state=tk.NORMAL
-                            )
+                        )
                         )
         self.root.after(500, partial(self.left_button_connect.configure, state=tk.NORMAL))
 
@@ -256,3 +270,36 @@ class MainMenuUIFunctions:
         self.root.wm_iconphoto(False, self.photoDisabled)
         self.unlockInteraction()
         self.left_status_label.configure(text='No connection')
+
+    def checkForUpdates(self):
+        def thread():
+            res = check_for_updates(
+                UpdaterInfo.URL,
+                UpdaterInfo.GITHUB_TOKEN,
+                Info.version,
+                UpdaterInfo.CLASS_NAME,
+                UpdaterInfo.ATTRIBUTE_NAME
+            )
+            if res.isOutdated:
+                self.new_version_available = True
+                messagebox.showinfo(
+                    "New update available!",
+                    "New version available: " + res.newVersion + "\n" +
+                    "You can go to settings and update your version.\n"
+                    "ChangeLog: " + res.changelog
+                )
+
+        Thread(target=thread).start()
+
+    def update_app(self):
+        if not messagebox.askyesno("Update", "Do you really want to update this application?\n"
+                                             "You might lose third party modules and your settings."):
+            return
+        self.logs.sendLog("Closing...", 0)
+        try:
+            run_independent_process(
+                getcwd() + "\\Functions\\Starting\\UpdateChecker\\UpdaterUI.py"
+            )
+            self.root.after(1000, self.root.destroy)
+        except Exception as e:
+            self.logs.sendLog("Error while starting update process.", 0)
