@@ -278,7 +278,12 @@ class MainMenuUIFunctions:
                 UpdaterInfo.GITHUB_TOKEN,
                 Info.version,
                 UpdaterInfo.CLASS_NAME,
-                UpdaterInfo.ATTRIBUTE_NAME
+                UpdaterInfo.ATTRIBUTE_NAME,
+                UpdaterInfo.REPO_OWNER,
+                UpdaterInfo.REPO_NAME,
+                UpdaterInfo.BRANCH,
+                UpdaterInfo.GITHUB_API_URL,
+                False
             )
             if res.isOutdated:
                 self.new_version_available = True

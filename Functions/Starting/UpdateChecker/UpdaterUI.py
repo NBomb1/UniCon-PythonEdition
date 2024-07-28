@@ -82,7 +82,12 @@ class UpdaterUI:
                 info.GITHUB_TOKEN,
                 Info.version,  # other file
                 info.CLASS_NAME,
-                info.ATTRIBUTE_NAME
+                info.ATTRIBUTE_NAME,
+                info.REPO_OWNER,
+                info.REPO_NAME,
+                info.BRANCH,
+                info.GITHUB_API_URL,
+                False
             )
             if res is None:
                 self.createMessage("Couldn't check for updates. Please check your internet connection.")
