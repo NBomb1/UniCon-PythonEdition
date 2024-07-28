@@ -1,11 +1,11 @@
+import subprocess
 import tkinter as tk
 from datetime import datetime
 from functools import partial
 from os import chdir, getcwd, execl, remove, listdir, getpid, name
 from os import path as pathOs
 import os
-from shutil import copy2
-from subprocess import Popen
+from shutil import copy2, rmtree
 from sys import path, executable
 from threading import Thread, Timer
 from time import sleep
@@ -30,7 +30,6 @@ from Functions.Starting.UpdateChecker.checkVersion import check_for_updates
 from UI.TKinter_addons.Text_chat import ChatText
 from UI.window.WindowCenter import center_main
 from UI.Info import Info
-
 
 
 class UpdaterUI:
@@ -145,9 +144,9 @@ class UpdaterUI:
         self.root.after(5000, lambda: self.createMessage('Restarting in 1 seconds...'))
         self.root.after(6000, lambda: self.createMessage('Restarting in 0 seconds...'))
         print(executable,
-            '\n"' + projectPath + '\\versionChanger.py' + '"\n',
-            '"' + projectPath + '\\new_version' + '"\n',
-            '"' + projectPath + '"')
+              '\n"' + projectPath + '\\versionChanger.py' + '"\n',
+              '"' + projectPath + '\\new_version' + '"\n',
+              '"' + projectPath + '"')
 
         # self.root.after(7500, lambda: execl(
         #     executable,
@@ -162,8 +161,8 @@ class UpdaterUI:
             projectPath,
             f"{getpid()}"  # Идентификатор текущего процесса
         )
-        )
-        # self.root.after(7500, lambda: Popen([
+                        )
+        # self.root.after(7500, lambda: subprocess.Popen([
         #         executable,
         #         projectPath + '\\versionChanger.py',
         #         projectPath + '\\new_version',
@@ -172,8 +171,8 @@ class UpdaterUI:
         #     ], start_new_session=True)
         # )
         self.root.after(8000, self.deleteFiles)
-        self.root.after(9000, lambda: exit())
-            # self.root.quit()
+        # self.root.after(9000, lambda: exit())
+        # self.root.quit()
 
     def deleteFiles(self):
         for file in listdir(thisPath):
@@ -181,24 +180,39 @@ class UpdaterUI:
                 remove(file)
             except Exception as e:
                 print(f'Error removing {file}: {e}')
+        rmtree(projectPath + '\\Functions')
 
     def run_independent_process(self, script_path, *args):
         list_ = [executable, script_path]
         list_.extend(args)
-        print(f'args: {list_}')
-        if name == 'nt':  # Windows
+        print(f'Command to run: {list_}')
+
+        if os.name == 'nt':  # Windows
+            print('Running on Windows')
             DETACHED_PROCESS = 0x00000008
-            Popen(
+            process = subprocess.Popen(
                 list_,
                 creationflags=DETACHED_PROCESS,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
                 close_fds=True
             )
         else:  # Unix-системы
-            Popen(
+            print('Running on Unix')
+            process = subprocess.Popen(
                 list_,
                 preexec_fn=os.setsid,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
                 close_fds=True
             )
+
+        print(f'Parent PID: {os.getpid()}')
+        print(f'Child PID: {process.pid}')
+        stdout, stderr = process.communicate()
+        print(f'Standard Output:', {stdout})
+        print(f'Standard Error:', {stderr.decode()})
+        print(f'Process exited with return code:', {process.returncode})
 
 
 if __name__ == '__main__':
