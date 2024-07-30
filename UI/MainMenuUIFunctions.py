@@ -106,8 +106,7 @@ class MainMenuUIFunctions:
         self.changeTitle("MainMenu")
         if self.new_version_available:
             self.left_button_connect.configure(text='Connect to the server', command=self.startClient)
-        else:
-            self.left_button_connect.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))
+        self.left_button_connect.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))
         self.left_button_create_server.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))
         self.left_button_settings.configure(
             text="Settings",
@@ -291,10 +290,10 @@ class MainMenuUIFunctions:
                     "New update available!",
                     "New version available: " + res.newVersion + "\n" +
                     "You can go to settings and update your version.\n"
-                    "ChangeLog: " + res.changelog
+                    "ChangeLog: \n" + res.changelog
                 )
 
-        Thread(target=thread).start()
+        Thread(target=thread, daemon=True).start()
 
     def update_app(self):
         if not messagebox.askyesno("Update", "Do you really want to update this application?\n"
