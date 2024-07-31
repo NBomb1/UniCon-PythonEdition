@@ -32,6 +32,16 @@ class MainMenu(MainMenuUIFunctions):
         self.root.wm_minsize(925, 450)
         self.changeTitle("MainMenu")
 
+        self.photoEnabledHost = tk.PhotoImage(file=getcwd() + r'\UI\Enabled-Host.gif')
+        self.photoEnabledClient = tk.PhotoImage(file=getcwd() + r'\UI\Enabled-Client.gif')
+        self.photoDisabled = tk.PhotoImage(file=getcwd() + r'\UI\Disabled.gif')
+
+        self.photoDisabled = self.photoDisabled.subsample(3)
+        self.photoEnabledClient = self.photoEnabledClient.subsample(3)
+        self.photoEnabledHost = self.photoEnabledHost.subsample(3)
+
+        self.root.wm_iconphoto(False, self.photoDisabled)
+
         # Main menu frame
         self.mainFrame = tk.Frame(self.root)
         self.mainFrame.pack(fill=tk.BOTH, expand=True)
@@ -41,7 +51,7 @@ class MainMenu(MainMenuUIFunctions):
         self._createRightWidgets()
 
         # Settings frame
-        self.settingsFrame = Settings(self.mainFrame, self.dataManager, self.left_entry_nickname)
+        self.settingsFrame = Settings(self.mainFrame, self.dataManager, self)
 
         self.module = ModuleHandler(self.logs, self.moduleLoaderError, self.right_notebook, self.root, dataManager)
         self.triggerManager = TriggerManager(self.accountManager)
@@ -75,18 +85,7 @@ class MainMenu(MainMenuUIFunctions):
     def _createLeftWidgets(self):
         # Creating two frames that will contain all sorts of widgets
         self.left_frame1 = tk.Frame(self.mainFrame)
-
-        # Creating widgets on the left frame
         self.left_status_frame = tk.Frame(self.left_frame1)
-        self.photoEnabledHost = tk.PhotoImage(file=getcwd() + r'\UI\Enabled-Host.gif')
-        self.photoEnabledClient = tk.PhotoImage(file=getcwd() + r'\UI\Enabled-Client.gif')
-        self.photoDisabled = tk.PhotoImage(file=getcwd() + r'\UI\Disabled.gif')
-
-        self.photoDisabled = self.photoDisabled.subsample(3)
-        self.photoEnabledClient = self.photoEnabledClient.subsample(3)
-        self.photoEnabledHost = self.photoEnabledHost.subsample(3)
-
-        self.root.wm_iconphoto(False, self.photoDisabled)
 
         self.left_status = tk.Label(
             self.left_status_frame,
@@ -100,6 +99,7 @@ class MainMenu(MainMenuUIFunctions):
         # self.left_label_port = customtkinter.CTkLabel(self.left_frame1, text='Port: ')
         self.left_label_port = tk.Label(self.left_frame1, text='Port: ')
         self.left_entry_password = StringEntry(self.left_frame1, 'Type password...')
+        self.left_entry_password.hideInfo()
 
         self.left_button_connect = tk.Button(
             self.left_frame1,
@@ -120,10 +120,12 @@ class MainMenu(MainMenuUIFunctions):
             width=20
         )
 
+        self.variable_port = tk.IntVar()
         self.left_spinbox_port = tk.Spinbox(
             self.left_frame1,
             from_=settings.MainMenu.port_from,
-            to=settings.MainMenu.port_to
+            to=settings.MainMenu.port_to,
+            textvariable=self.variable_port
         )
 
         # Placing widgets on the left frame

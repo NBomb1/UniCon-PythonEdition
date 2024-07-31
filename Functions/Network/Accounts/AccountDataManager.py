@@ -15,7 +15,7 @@ class AccountManager(AccountDataTransfer, AccountDataHandler):
     ClientStoppedTrigger = []
 
     participants: list[Account] = []
-    selfAccount: SelfAccount | None
+    selfAccount: SelfAccount | None = None
     maxConnections: int
     owner: Account | SelfAccount | None = None
 

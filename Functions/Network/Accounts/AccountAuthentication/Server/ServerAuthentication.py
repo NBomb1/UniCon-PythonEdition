@@ -13,7 +13,7 @@ from time import sleep
 
 from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.DataTransfer import MessageTransfer
-from Functions.Network.Info import Info
+from Functions.Network.SecurityInfo import SecurityInfo
 from Functions.Network.Accounts.AccountAuthentication.Server.PreAuthAccount import PreAccount
 from Functions.Network.Accounts.AccountData import Account
 from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager
@@ -33,7 +33,7 @@ class Authentication:
     @staticmethod
     def _getMessage(s: socket.socket) -> str | None:
         try:
-            message = s.recv(Info.preAuthMessageLength).decode()
+            message = s.recv(SecurityInfo.preAuthMessageLength).decode()
             return message  # getting special message
         except socket.timeout or ConnectionResetError or OSError:
             return None
@@ -50,7 +50,7 @@ class Authentication:
 
         #  checking if the server is full
         if len(accountManager.getParticipants()) >= accountManager.getMaxConnections():
-            s.send(Authentication._fillText('The server is full.', Info.preAuthMessageLength).encode())
+            s.send(Authentication._fillText('The server is full.', SecurityInfo.preAuthMessageLength).encode())
             s.close()
             logs.sendLog('[Authentication] Restriction: The server is full.', -1)
             return
@@ -103,9 +103,9 @@ class Authentication:
         message = message.replace(' ', '')  # formatting to built-in len default
         if mcm.server.checkSpecialCode(message, account.socket):
             return True
-        elif message != Info.unique_message:  # checking if those aren't same
+        elif message != SecurityInfo.unique_message:  # checking if those aren't same
             account.socket.send(
-                Authentication._fillText("!!Connection restriction", Info.preAuthMessageLength).encode())
+                Authentication._fillText("!!Connection restriction", SecurityInfo.preAuthMessageLength).encode())
             logs.sendLog(f"[Authentication] Couldn't pass 1st authentication phase. "
                          f"{account.socket.getpeername()[0]}:{account.socket.getpeername()[1]}", -1)
             account.socket.close()
@@ -132,7 +132,7 @@ class Authentication:
                          f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
             return False
 
-        modules = Info.getBuiltInModules()  # getting our module versions
+        modules = SecurityInfo.getBuiltInModules()  # getting our module versions
         send = {}
         for i in modules:  # comparing versions from ours to client
             if modules[i] != message[i]:  # if version is not the same
@@ -167,7 +167,7 @@ class Authentication:
             # Getting password hash from client
             try:
                 # Hashed password is 128 characters long
-                received_hashed_password = s.recv(Info.preAuthMessageLength)
+                received_hashed_password = s.recv(SecurityInfo.preAuthMessageLength)
             except ConnectionAbortedError:  # Client can disconnect from server before logging in
                 received_hashed_password = None
             except ConnectionResetError:  # Client can disconnect from server before logging in
@@ -185,15 +185,15 @@ class Authentication:
             if received_hashed_password == hashed_password:
                 logs.sendLog("[Authentication] Third phase has been passed."
                              f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
-                s.send(Authentication._fillText("1", Info.preAuthMessageLength).encode())
+                s.send(Authentication._fillText("1", SecurityInfo.preAuthMessageLength).encode())
                 return True
             else:
                 if current_tries < allowed_tries:
-                    s.send(Authentication._fillText("", Info.preAuthMessageLength).encode())
+                    s.send(Authentication._fillText("", SecurityInfo.preAuthMessageLength).encode())
                 if (
                         received_hashed_password.decode()
                         ==
-                        Authentication.createHashedPassword(client_salt, Info.defaultPassword).decode()
+                        Authentication.createHashedPassword(client_salt, SecurityInfo.defaultPassword).decode()
                         and not defaultPasswordChecked
                 ):
                     defaultPasswordChecked = True
@@ -205,7 +205,7 @@ class Authentication:
 
         logs.sendLog(f"[Authentication] Client couldn't pass 3rd phase. Closing connection..."
                      f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
-        s.send(Authentication._fillText("Too many attempts", Info.preAuthMessageLength).encode())
+        s.send(Authentication._fillText("Too many attempts", SecurityInfo.preAuthMessageLength).encode())
         sleep(10)
         s.close()
         return False
@@ -225,11 +225,11 @@ class Authentication:
         id_ = Authentication.generate_random_id(8)
 
         # Sending its id to client
-        s.send(Authentication._fillText(id_, Info.preAuthMessageLength).encode())
+        s.send(Authentication._fillText(id_, SecurityInfo.preAuthMessageLength).encode())
 
         # Sending all accounts info
         accountInfo = accountManager.getAllInfoAccount([]).__str__()
-        s.send(Authentication._fillText(accountInfo, Info.preAuthGetAccountInfo).encode())
+        s.send(Authentication._fillText(accountInfo, SecurityInfo.preAuthGetAccountInfo).encode())
 
         logs.sendLog("[Authentication] Forth phase has been passed."
                      f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
@@ -249,14 +249,14 @@ class Authentication:
     def _PhaseVerification(logs: Logs, data: dict, account: PreAccount) -> bool:
         if len(data['nickname']) > 30 or len(data['nickname']) < 3:
             account.socket.send(Authentication._fillText("Nickname must be between 3 and 30 symbols.",
-                                                         Info.preAuthMessageLength).encode())
+                                                         SecurityInfo.preAuthMessageLength).encode())
             logs.sendLog(f"[Authentication] Couldn't pass authentication verification phase. "
                          f"{account.socket.getpeername()[0]}:{account.socket.getpeername()[1]}", -1)
             account.socket.close()
             return False
         if len(data['pc_name']) > 50 or len(data['pc_name']) < 2:
             account.socket.send(Authentication._fillText("PC name must be between 2 and 50 symbols.",
-                                                         Info.preAuthMessageLength).encode())
+                                                         SecurityInfo.preAuthMessageLength).encode())
             logs.sendLog(f"[Authentication] Couldn't pass authentication verification phase. "
                          f"{account.socket.getpeername()[0]}:{account.socket.getpeername()[1]}", -1)
             account.socket.close()
@@ -271,7 +271,7 @@ class Authentication:
 
     @staticmethod
     def _passInfo(s: socket.socket) -> bool:
-        s.send(Authentication._fillText('pass', Info.preAuthMessageLength).encode())
+        s.send(Authentication._fillText('pass', SecurityInfo.preAuthMessageLength).encode())
         return True
 
     @staticmethod

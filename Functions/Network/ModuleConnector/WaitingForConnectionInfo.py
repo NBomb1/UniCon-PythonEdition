@@ -12,13 +12,15 @@ class WaitingForConnectionInfo:
                  moduleId: str,
                  addConnection: callable,  # ModuleConnectorManager.addConnectionWaiting,
                  account: Account,
-                 func: callable,
-                 timeout=60
+                 connectionAccepted: callable,
+                 timeout=60,
+                 connectionDeclined: callable = None
                  ):
         self.account = account
-        self.func = func
+        self.func = connectionAccepted
         self.timeout = timeout
         self.moduleId = moduleId
+        self.connectionDeclined = connectionDeclined
 
         addConnection(self)
         specialCode = urandom(128)
@@ -32,3 +34,7 @@ class WaitingForConnectionInfo:
     def setMessageTransfer(self, obj: MessageTransfer):
         if self.socket is None:
             self.socket = obj
+
+    def declined(self):
+        if self.connectionDeclined is not None:
+            self.connectionDeclined(self)

@@ -1,7 +1,7 @@
 from Functions.Network.Accounts.AccountAuthentication.Client.AuthenticationPassing import Authentication
 from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.DataTransfer import MessageTransfer
-from Functions.Network.Info import Info
+from Functions.Network.SecurityInfo import SecurityInfo
 from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager
 from Functions.Tools.logManager import Logs
 import socket as s
@@ -27,7 +27,7 @@ class ClientMainChannel:
         logs.sendLog(f"Connecting to server {ip}:{port}", -1)
 
         if password is None:
-            password = Info.defaultPassword
+            password = SecurityInfo.defaultPassword
             self.logs.sendLog("[MainChannel Client] Using default password.", -1)
         else:
             self.logs.sendLog("[MainChannel Client] Using custom password.", -1)

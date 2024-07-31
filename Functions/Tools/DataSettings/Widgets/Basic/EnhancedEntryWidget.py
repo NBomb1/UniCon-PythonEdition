@@ -19,12 +19,14 @@ class EnhancedEntry(EntryWithPlaceholder, SaveWidgetData, ShowRedFlag):
             minLen: int = 3,
             symbolExceptions=None,
             checkFunc=None,
+            default=None
     ):
         if checkFunc is None:
             checkFunc = []
         if symbolExceptions is None:
             symbolExceptions = []
 
+        self.default = default
         self.actualData = ''
         self.maxLen = maxLen
         self.minLen = minLen
@@ -47,7 +49,7 @@ class EnhancedEntry(EntryWithPlaceholder, SaveWidgetData, ShowRedFlag):
         self.actualData = data
         self._foc_in()
         self.delete("0", tk.END)
-        self.insert("1", str(data))
+        self.insert("1", str(data) if data else self.default)
         self._foc_out()
 
     def save(self) -> list[str]:

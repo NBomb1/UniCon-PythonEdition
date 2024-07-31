@@ -92,7 +92,13 @@ class RightSideInfo:
 
     def show(self, account: Account):
         if self.current == account:
+            try:
+                self.frameMainInfo.pack_info()
+                self.frameMainInfo.pack_forget()
+            except tk.TclError:
+                self.frameMainInfo.pack(fill=tk.X)
             return
+        self.frameMainInfo.pack(fill=tk.X)
 
         account.addUpdatedAccount(self.triggeredUpdate)
         if self.current is not None:

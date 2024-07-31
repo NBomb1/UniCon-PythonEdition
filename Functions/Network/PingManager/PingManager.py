@@ -10,13 +10,14 @@ from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.DataTransfer import MessageTransfer
 from Functions.Network.ModuleConnector.Client.InviteConnectionInfo import InviteConnectionInfo
 from Functions.Network.ModuleConnector.WaitingForConnectionInfo import WaitingForConnectionInfo
+from Functions.Network.SecurityInfo import SecurityInfo
 
 
 class Module:
     accountManager: AccountManager
 
     id_ = "sF6jA2wZ5tQ8xH3nM0iD7gK4pE9cV1oL2bN4vX7zY5rT1lQ3hU8yG9dS6fW2enw3"
-    version = "0.0.1"
+    version = SecurityInfo.PingManager
     name = "PingManager"
     author = "ArT"
     defaultNetworkAuth = True
@@ -42,7 +43,9 @@ class Module:
             self.id_,
             self.api.getConnectorManager().server.addConnectionWaiting,
             account,
-            self.gotServerConnection
+            self.gotServerConnection,
+            15,
+            self.connectionRefused
         )
 
     def mcm_inviteConnection(self, invite: InviteConnectionInfo):
@@ -102,3 +105,13 @@ class Module:
         print('Function closedConnection in PingManager was ran!')
         if self.startPing in self.api.getAccountManager().NewAccountTrigger:
             self.api.getAccountManager().NewAccountTrigger.remove(self.startPing)
+
+    def connectionRefused(self, info: WaitingForConnectionInfo):
+        """Client Function - refuses to connect to server."""
+        self.logs.sendLog(f'[PingManager] Connection refused from {info.account.ip}:{info.account.port}', -1)
+        self.accountManager.kickAccount(
+            self.accountManager.getSelfAccount(),
+            info.account,
+            "PingManager couldn't establish connection to your computer.",
+            True
+        )

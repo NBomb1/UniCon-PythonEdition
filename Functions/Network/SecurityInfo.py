@@ -9,12 +9,12 @@ from UI.Info import Info as UIInfo
 # {'version': 0}, 'text': 'ProjectSocketInterface16102023                                                                                                  ', 'text2': "{'Auth': '0.0.1', 'Security': '0.0.1', 'ModuleAuth': '0.0.1', 'MessageTransfer': '0.0.1', 'UI': '0.0.1'}
 
 
-class Info:
-    AuthVersion = "0.0.1"
+class SecurityInfo:
+    AuthVersion = "0.0.2"
     SecurityVersion = "0.0.1"
     ModuleAuth = "0.0.1"
-    PingManager = "0.0.1"
-    MessageTransfer = "0.0.1"
+    PingManager = "0.0.2"
+    MessageTransfer = "0.0.2"
 
     unique_message = "ProjectSocketInterface16102023"
     preAuthMessageLength = 256
@@ -24,10 +24,10 @@ class Info:
     @staticmethod
     def getBuiltInModules() -> dict:
         return {
-            "Auth": Info.AuthVersion,
-            "Security": Info.SecurityVersion,
-            "ModuleAuth": Info.ModuleAuth,
-            "PingManager": Info.PingManager,
-            "MessageTransfer": Info.MessageTransfer,
+            "Auth": SecurityInfo.AuthVersion,
+            "Security": SecurityInfo.SecurityVersion,
+            "ModuleAuth": SecurityInfo.ModuleAuth,
+            "PingManager": SecurityInfo.PingManager,
+            "MessageTransfer": SecurityInfo.MessageTransfer,
             "UI": UIInfo.version
         }

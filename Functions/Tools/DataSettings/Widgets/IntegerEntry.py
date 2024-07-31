@@ -15,14 +15,15 @@ class IntegerEntry(EnhancedEntry):
             symbolExceptions: list[str] = None,
             checkFunc: list[callable] = None,
             from_: int = -999999999999,
-            to_: int = 999999999999
+            to_: int = 999999999999,
+            default=None
     ):
         checkFunc = [] if checkFunc is None else checkFunc
         self.from_ = from_
         self.to_ = to_
         checkFunc.append(self._numberCheck)
 
-        super().__init__(master, placeholder, color, maxLen, minLen, symbolExceptions, checkFunc)
+        super().__init__(master, placeholder, color, maxLen, minLen, symbolExceptions, checkFunc, default=default)
 
     def getData(self) -> int:
         return int(self.actualData)
@@ -31,6 +32,6 @@ class IntegerEntry(EnhancedEntry):
         return self._var.get()
 
     def _numberCheck(self, number: str):
-        return 'Is not number' if not checkInteger(number) else \
-               'Too big number' if self.to_ < int(number) else \
-               'Too small number' if self.from_ > int(number) else ''
+        return f'Is not number' if not checkInteger(number) else \
+               f'Too big number>{self.to_}' if self.to_ < int(number) else \
+               f'Too small number<{self.from_}' if self.from_ > int(number) else ''

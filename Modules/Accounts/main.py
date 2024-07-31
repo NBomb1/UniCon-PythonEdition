@@ -81,7 +81,6 @@ class Module(RightSideInfo):
         self.accountListFrame.canvas.configure(width=200)
 
         self.accountListFrame.inner_frame.configure(bg='#B5B5B5')
-        self.accountInformationFrame.inner_frame.configure(bg='red')
         self.createWidgets(self.accountInformationFrame.inner_frame)
 
     def createNewAccount(self, account: Account):

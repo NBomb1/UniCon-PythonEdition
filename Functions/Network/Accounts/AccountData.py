@@ -49,6 +49,9 @@ class Account:
         self.accountUpdated: list[callable] = []
         self.socket.registerAccount(self)
 
+    def __str__(self) -> str:
+        return f"Nickname: {self.nickname}, ID: {self.id}"
+
     def update_ping(self, ping: int):
         if self.ping == ping:
             return

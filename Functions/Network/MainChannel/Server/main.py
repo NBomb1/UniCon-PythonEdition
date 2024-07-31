@@ -2,7 +2,7 @@ import socket as s
 
 from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.DataTransfer import MessageTransfer
-from Functions.Network.Info import Info
+from Functions.Network.SecurityInfo import SecurityInfo
 from Functions.Network.MainChannel.Server.ServerHandlers import ServerInformation
 from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager
 from Functions.Tools.logManager import Logs
@@ -39,7 +39,7 @@ class ServerMainChannel:
         self.logs.sendLog(f"[MainChannel] Starting server on {ip}:{port} with {maxCon} max connections.", -1)
 
         if password is None:
-            password = Info.defaultPassword
+            password = SecurityInfo.defaultPassword
             self.logs.sendLog("[MainChannel] Using default password.", -1)
         else:
             self.logs.sendLog("[MainChannel] Using custom password.", -1)

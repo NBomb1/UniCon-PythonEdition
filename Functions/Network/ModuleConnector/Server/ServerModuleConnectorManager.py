@@ -29,6 +29,7 @@ class ModuleConnectorManager:
     def _deleteCheckCode(self, obj: WaitingForConnectionInfo):
         try:
             self.__waitingForConnections.remove(obj)
+            obj.declined()
         except ValueError:
             pass
 

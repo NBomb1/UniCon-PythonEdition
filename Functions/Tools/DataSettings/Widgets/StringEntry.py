@@ -12,9 +12,10 @@ class StringEntry(EnhancedEntry):
             maxLen: int = 80,
             minLen: int = 3,
             symbolExceptions: list[str] = None,
-            checkFunc: list[callable] = None
+            checkFunc: list[callable] = None,
+            default=None
     ):
-        super().__init__(master, placeholder, color, maxLen, minLen, symbolExceptions, checkFunc)
+        super().__init__(master, placeholder, color, maxLen, minLen, symbolExceptions, checkFunc, default)
 
     def getData(self) -> str:
         return self.actualData

@@ -12,6 +12,9 @@ Extra libraries:
 Yaml - saves&loads data from settings.
 
 Started using AI tabnine to document some functions 2024y 7m 18d.
+
+Available app args:
+* "--updated" - removes versionChanger.py if it exists.
 """
 
 """

@@ -5,7 +5,7 @@ from ast import literal_eval
 from Functions.Network.Accounts.AccountData import Account
 from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.DataTransfer import MessageTransfer
-from Functions.Network.Info import Info
+from Functions.Network.SecurityInfo import SecurityInfo
 from Functions.Tools.logManager import Logs
 from Functions.Exceptions.Authentication import Client
 
@@ -46,7 +46,7 @@ class Authentication:
         # decoded non-english symbols can take more than 1 length of message
         return self.socket.send((message + (" " * (count - len(message.encode())))).encode())
 
-    def _getMessage(self, length=Info.preAuthMessageLength) -> str | None:
+    def _getMessage(self, length=SecurityInfo.preAuthMessageLength) -> str | None:
         try:
             message = self.socket.recv(length)
             return message.decode()  # getting special message
@@ -59,15 +59,15 @@ class Authentication:
 
     def _1_PhaseRecognition(self):
         self.logs.sendLog("[Authentication Client] Trying to pass 1st phase.", -1)
-        self.sendMessage(Info.unique_message, Info.preAuthMessageLength)
+        self.sendMessage(SecurityInfo.unique_message, SecurityInfo.preAuthMessageLength)
 
     def _2_PhaseBuiltInModuleCheck(self):
         self.logs.sendLog("[Authentication Client] Trying to pass 2nd phase.", -1)
-        self.sendMessage(Info.getBuiltInModules().__str__(), Info.preAuthMessageLength)
+        self.sendMessage(SecurityInfo.getBuiltInModules().__str__(), SecurityInfo.preAuthMessageLength)
 
     def _3_PhasePasswordCheck(self):
         self.logs.sendLog("[Authentication Client] Trying to pass 3rd phase.", -1)
-        salt = self.socket.recv(Info.preAuthMessageLength)  # receiving salt
+        salt = self.socket.recv(SecurityInfo.preAuthMessageLength)  # receiving salt
         self.account.getSelfAccount().setSalt(salt)
 
         hashed_password = hashlib.sha512(salt + self.password.encode()).hexdigest()
@@ -100,15 +100,15 @@ class Authentication:
         # sending nickname and pc name
         nickname = self.account.getSelfAccount().nickname
         pc_name = self.account.getSelfAccount().pc_name
-        self.sendMessage(nickname, Info.preAuthMessageLength)
-        self.sendMessage(pc_name, Info.preAuthMessageLength)
+        self.sendMessage(nickname, SecurityInfo.preAuthMessageLength)
+        self.sendMessage(pc_name, SecurityInfo.preAuthMessageLength)
 
         # Getting id
         id = self._getMessage().rstrip(' ')
         self.account.getSelfAccount().setId(id)
 
         try:
-            accounts: list[dict[str:str]] = literal_eval(self._getMessage(Info.preAuthGetAccountInfo).rstrip(' '))
+            accounts: list[dict[str:str]] = literal_eval(self._getMessage(SecurityInfo.preAuthGetAccountInfo).rstrip(' '))
             for i in accounts:
                 self.logs.sendLog(f"[Authentication Client] Adding {i['nickname']} with {i['tags']}", -1)
                 account = Account(

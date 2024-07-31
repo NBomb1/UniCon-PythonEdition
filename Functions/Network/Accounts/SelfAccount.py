@@ -32,6 +32,9 @@ class SelfAccount:
         self.pc_name = s.gethostname()
         self.tags = tags if tags is not None else []
 
+    def __str__(self) -> str:
+        return f"Nickname: {self.nickname}, ID: {self.id}"
+
     def setId(self, id: str):
         if self.id is not None:
             raise Account.InfoUpdateException("Can't change id that was filled once.")

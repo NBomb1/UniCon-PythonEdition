@@ -49,6 +49,10 @@ class LeftSideInfo:
             self.ping.bind("<Enter>", self.on_enter)
             self.ping.bind("<Leave>", self.on_leave)
             self.ping.bind("<Button-1>", self.on_click)
+        else:
+            self.crown.bind("<Enter>", self.on_enter)
+            self.crown.bind("<Leave>", self.on_leave)
+            self.crown.bind("<Button-1>", self.on_click)
 
         self.mainFrame.bind("<Enter>", self.on_enter)
         self.mainFrame.bind("<Leave>", self.on_leave)

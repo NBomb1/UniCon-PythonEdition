@@ -129,7 +129,3 @@ def findChanges(currentVer: str, url: str, owner: str, repo_name: str, branch: s
     if output is not None:
         output.append(returnStr)
     return returnStr
-    # for commit in commits:
-    #     commit_message = commit['commit']['message']
-    #     commit_date = commit['commit']['author']['date']
-    #     print(f'Дата: {commit_date}, Сообщение: {commit_message}')
