@@ -18,7 +18,9 @@ class ModuleConnectorManager:
     def checkSpecialCode(self, specialCode: str, s: socket.socket):
         for i in self.__waitingForConnections:
             if i.specialCode.decode() == specialCode:
-                i.setMessageTransfer(MessageTransfer(self.accountManager, s))
+                socket = MessageTransfer(self.accountManager, s)
+                socket.account = i.account
+                i.setMessageTransfer(socket)
                 i.func(i)
                 self.__waitingForConnections.remove(i)
                 i.account.addExtraConnection(i.moduleId, i.socket)

@@ -1,3 +1,6 @@
+"""
+Measures delay between server and clients, then sets this information to accounts.
+"""
 import random
 from datetime import datetime
 from os import urandom
@@ -26,7 +29,9 @@ class Module:
     def __init__(self, api: API):
         self.api = api
         self.logs = self.api.getLogs()
-        self.api.getAccountManager().serverStoppedTrigger(self.closedConnection)
+        self.api.getAccountManager().serverStoppedTrigger(
+            lambda: self.api.getTriggerManager().accountAddedTriggerREMOVE(self.startPing)
+        )
         # self.logs.sendLog('[PingManager] Has been loaded!', -1)
 
     def getInfo(self, accountManager: AccountManager, isServer: bool):
@@ -49,7 +54,7 @@ class Module:
         )
 
     def mcm_inviteConnection(self, invite: InviteConnectionInfo):
-        """Server Function - sends unique code to client and waits for response."""
+        """Client Function - sends unique code to client and waits for response."""
         self.logs.sendLog('[PingManager] Accepting the invite...', -1)
         s: MessageTransfer = invite.accept()
 
@@ -100,14 +105,8 @@ class Module:
 
         Thread(target=pingHandler, daemon=True).start()
 
-    def closedConnection(self):
-        """must be done correctly"""
-        print('Function closedConnection in PingManager was ran!')
-        if self.startPing in self.api.getAccountManager().NewAccountTrigger:
-            self.api.getAccountManager().NewAccountTrigger.remove(self.startPing)
-
     def connectionRefused(self, info: WaitingForConnectionInfo):
-        """Client Function - refuses to connect to server."""
+        """Client Function - refuses connect to server."""
         self.logs.sendLog(f'[PingManager] Connection refused from {info.account.ip}:{info.account.port}', -1)
         self.accountManager.kickAccount(
             self.accountManager.getSelfAccount(),

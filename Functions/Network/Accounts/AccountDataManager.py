@@ -1,4 +1,5 @@
 import socket
+import traceback
 
 from Functions.Network.Accounts.AccountData import Account
 from Functions.Network.Accounts.Client.AccountDataHandler import AccountDataHandler
@@ -51,13 +52,15 @@ class AccountManager(AccountDataTransfer, AccountDataHandler):
 
     def add(self, account: Account):
         """Adds new account. Calls trigger functions."""
-        if self.getIsServer() and len(self.participants) >= self.maxConnections:
+        isServer = self.getIsServer()
+        if isServer and len(self.participants) >= self.maxConnections:
             account.socket.socket.close()
             return
 
         self.participants.append(account)
-        if self.getIsServer():
+        if isServer:
             account.addUpdatedAccount(self._sendUpdatedInfo)
+            self._sendAllInfo()
         for func in self.NewAccountTrigger:
             func(account)
 
@@ -183,6 +186,11 @@ class AccountManager(AccountDataTransfer, AccountDataHandler):
         """
         self.SelfDisconnectTrigger.append(func)
 
+    def selfAccountDisconnectedTriggerREMOVE(self, func: callable, ignoreException=False):
+        """Removes function from trigger list."""
+        if not ignoreException or func in self.SelfDisconnectTrigger:
+            self.SelfDisconnectTrigger.remove(func)
+
     def _disconnectedFromServer(self, msg: dict[str, str]):
         # def disconnectedFromServer(self, *args, **kwargs):
         """
@@ -198,11 +206,17 @@ class AccountManager(AccountDataTransfer, AccountDataHandler):
 
     def clientStopped(self):
         for func in self.ClientStoppedTrigger:
-            func()
+            try:
+                func()
+            except Exception:
+                traceback.print_exc()
 
     def serverStopped(self):
         for func in self.ServerStoppedTrigger:
-            func()
+            try:
+                func()
+            except Exception:
+                traceback.print_exc()
 
     def serverStoppedTrigger(self, func: callable):
         self.ServerStoppedTrigger.append(func)

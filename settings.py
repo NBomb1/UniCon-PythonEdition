@@ -5,6 +5,7 @@ class MainInfo:
 class MainMenu:
     port_from = 1024
     port_to = 49151
+    switchModesDelay = 500
 
 
 class SettingsMenu:

@@ -12,7 +12,6 @@ from UI.Info import Info as UIInfo
 class SecurityInfo:
     AuthVersion = "0.0.2"
     SecurityVersion = "0.0.1"
-    ModuleAuth = "0.0.1"
     PingManager = "0.0.2"
     MessageTransfer = "0.0.2"
 
@@ -26,7 +25,6 @@ class SecurityInfo:
         return {
             "Auth": SecurityInfo.AuthVersion,
             "Security": SecurityInfo.SecurityVersion,
-            "ModuleAuth": SecurityInfo.ModuleAuth,
             "PingManager": SecurityInfo.PingManager,
             "MessageTransfer": SecurityInfo.MessageTransfer,
             "UI": UIInfo.version

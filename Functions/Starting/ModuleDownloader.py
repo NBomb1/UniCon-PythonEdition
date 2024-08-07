@@ -43,7 +43,9 @@ class CheckModules:
         self.moduleGridder: tk.Frame | None = None
 
         self.moduleYaml = checkYaml()
-        if not self.moduleYaml:
+        self.pywin32 = checkPywin32()
+        self.pyuac = checkPyUAC()
+        if not self.moduleYaml or not self.pywin32 or not self.pyuac:
             self.showWarning()
 
     def showWarning(self):
@@ -72,10 +74,18 @@ class CheckModules:
         self.moduleGridder = tk.Frame(self.root)
         self.moduleGridder.grid_columnconfigure(0, weight=1)
         self.moduleGridder.grid_rowconfigure(0, weight=1)
+        self.moduleGridder.grid_columnconfigure(1, weight=1)
+        self.moduleGridder.grid_columnconfigure(2, weight=1)
         self.moduleGridder.pack(fill=tk.BOTH, expand=True, pady=(10, 5))
 
         missingYaml = MissingModule(self.moduleGridder, 'Yaml', 'pyyaml', self.moduleYaml)
-        missingYaml.grid()
+        missingYaml.grid(column=0, row=0, sticky=tk.NSEW)
+
+        missingYaml = MissingModule(self.moduleGridder, 'pywin32', 'pywin32', self.pywin32)
+        missingYaml.grid(column=1, row=0, sticky=tk.NSEW)
+
+        missingYaml = MissingModule(self.moduleGridder, 'pyuac', 'pyuac', self.pyuac)
+        missingYaml.grid(column=2, row=0, sticky=tk.NSEW)
 
         self.root.mainloop()
 

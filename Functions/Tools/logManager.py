@@ -16,6 +16,7 @@ class Logs:
     ver = "0.0.2"
 
     def __init__(self):
+        self.printFlag = False
         self.handler()
 
     def registerId(self, id_, ignoreRegistered=False):
@@ -36,9 +37,11 @@ class Logs:
 
     def _sendLog(self, message: str, id_: int, time: datetime):
         for i in self.registeredFunctions[id_]:
-            i(message, id_)
+            i(message, id_, time)
         if self.registeredFileLog.get(id_) is not None:
             self.registeredFileLog[id_].write(f"[{time.__str__()}]: " + message + "\n")
+        if self.printFlag:
+            print(f"[{time.__str__()}]: " + message)
 
     def sendLog(self, message: str, id_: int):
         self.logsMessages.append(partial(self._sendLog, message, id_, datetime.now()))
@@ -82,3 +85,6 @@ class Logs:
 
             i.write(f"[{datetime.now().__str__()}]: [LogManager] File is closing. \n")
             i.close()
+
+    def showLogs(self):
+        self.printFlag = True

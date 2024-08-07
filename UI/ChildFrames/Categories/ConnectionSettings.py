@@ -2,7 +2,6 @@ from Functions.Network.SecurityInfo import SecurityInfo
 import tkinter as tk
 
 from Functions.Tools.DataSettings.FileDataManager import FileDataManager
-from Functions.Tools.DataSettings.Widgets.IntegerEntry import IntegerEntry
 from Functions.Tools.DataSettings.Widgets.checkWidget import CheckButton
 
 

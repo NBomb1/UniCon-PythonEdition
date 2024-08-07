@@ -1,5 +1,6 @@
 from Functions.Network.Accounts.AccountData import Account
 from Functions.Network.Accounts.SelfAccount import SelfAccount
+from Functions.Network.DataTransfer import MessageTransfer
 
 
 class AccountDataHandler:
@@ -17,7 +18,13 @@ class AccountDataHandler:
             account: Account = self.findByID(msg['id'])
             if account is None:  # if account is not present we create one
                 account = Account(
-                    None, None, None, None, None, msg['id'], None
+                    MessageTransfer(self, None),
+                    None,
+                    None,
+                    None,
+                    None,
+                    msg['id'],
+                    None
                 )
                 self.add(account)
 
@@ -32,7 +39,8 @@ class AccountDataHandler:
             for i in msg['_all']:
                 account: Account = self.findByID(i['id'])
                 if account is None:
-                    account = Account(None, None, None, None, None, i['id'], None)
+                    account = Account(MessageTransfer(self, None)
+                    , None, None, None, None, i['id'], None)
                     self.add(account)
                 for info in i:
                     if info == Account.what_nickname:

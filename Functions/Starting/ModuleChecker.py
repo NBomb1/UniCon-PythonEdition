@@ -15,10 +15,17 @@ def checkYaml() -> bool:
     return True
 
 
-# def checkYaml() -> bool:
-#     try:
-#         import yaml
-#     except ModuleNotFoundError:
-#         return False
-#     return True
+def checkPywin32() -> bool:
+    try:
+        import win32gui
+    except ModuleNotFoundError:
+        return False
+    return True
 
+
+def checkPyUAC() -> bool:
+    try:
+        import pyuac
+    except ModuleNotFoundError:
+        return False
+    return True

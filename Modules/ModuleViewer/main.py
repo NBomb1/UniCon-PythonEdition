@@ -29,7 +29,7 @@ class Module:
     update_modules(self): Updates the list of found modules by iterating through the module startup order.
     """
     id_ = r"""KUKXsz0r4nmT<XHU6,u-dw\Iz<t^(ZbU='Q"H1Ot5{[6Klq9/W'nFo<u@7t0@-s#"""
-    version = "0.0.1"
+    version = "0.1.0"
     name = "ModuleViewer"
     author = "ArT"
     defaultNetworkAuth = False

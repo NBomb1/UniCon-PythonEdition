@@ -5,10 +5,12 @@ from time import sleep
 import settings
 import tkinter.ttk as ttk
 
+from Functions.Starting import TaskManager
 from Functions.Tools.DataSettings.FileDataManager import FileDataManager
 from UI.ChildFrames.Categories.ConnectionSettings import ConnectionSettings
 from typing import TYPE_CHECKING
 
+from UI.ChildFrames.Categories.UnsortedSettings import UnsortedSettings
 
 if TYPE_CHECKING:
     from UI.MainMenu import MainMenu
@@ -40,13 +42,16 @@ class Settings(ttk.Notebook):
     def fill_main(self):
         self.add(self.settingsFrame, text="Main Settings")
         self.settingsFrame.grid_rowconfigure(0, weight=1)
-        self.settingsFrame.grid_columnconfigure(0, weight=1)
+        self.settingsFrame.grid_columnconfigure(0, weight=148)
+        self.settingsFrame.grid_columnconfigure(1, weight=110)
 
         self.connectionSettings = ConnectionSettings(self.settingsFrame, self.dataManager)
+        self.unsortedSettings = UnsortedSettings(self.settingsFrame, self.dataManager)
 
         self.saveButton = tk.Button(self.settingsFrame, text='save', command=self.save)
 
         self.connectionSettings.grid(row=0, column=0, sticky=tk.NSEW)
+        self.unsortedSettings.grid(row=0, column=1, sticky=tk.NSEW)
         self.saveButton.grid(row=1, columnspan=3, sticky=tk.NSEW)
 
     def save(self):
@@ -56,6 +61,9 @@ class Settings(ttk.Notebook):
         self.connectionSettings.checkButton_savePassword.save()
         self.connectionSettings.checkButton_saveIP.save()
         self.connectionSettings.checkButton_savePort.save()
+        self.unsortedSettings.checkButton_noAutoUpdateUserConfirmation.save()
+        if not TaskManager.disable:
+            self.unsortedSettings.checkButton_autoStart.save()
 
         Thread(target=self.enableSaving, daemon=True).start()
 

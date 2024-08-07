@@ -8,13 +8,17 @@ class ChatText(ScrolledText):
     """Can be used also for logs, not only for the chat."""
     def __init__(self, master):
         super().__init__(master)
-        self.tag_configure("system-message", )
-        self.tag_configure("username", foreground="green")
+        # self.tag_configure("system-message", )
+
+        self.tag_configure("g", foreground="green")
+        self.tag_configure("nickname1", font=(None, 11, 'bold'))
+        self.tag_configure("nickname2", foreground="green", font=(None, 11, 'bold'))
+        self.tag_configure("nickname3", foreground="red", font=(None, 11, 'bold'))
         self.tag_configure("time", foreground="blue")
-        self.tag_configure("message", foreground="red")
+
         self.configure(state=tk.DISABLED)
 
-    def create_message(self, data: dict, time: datetime, scheme: str, colorscheme: dict, new_line=True) -> int:
+    def create_message(self, data: dict, time: datetime, scheme: str, colorscheme: dict, new_line=True, ) -> int:
         # preparation
         scroll = (self.yview()[1] == 1)
         self.configure(state=tk.NORMAL)
@@ -39,7 +43,7 @@ class ChatText(ScrolledText):
             try:
                 self.tag_add(
                     list(colorscheme.values())[i],
-                    f"{index}.{text.find(data.get(list(colorscheme.keys())[i])) }",
+                    f"{index}.{text.find(data.get(list(colorscheme.keys())[i]))}",
                     f"{index}."
                     f"{text.find(data.get(list(colorscheme.keys())[i])) + len(data.get(list(colorscheme.keys())[i]))}"
                 )

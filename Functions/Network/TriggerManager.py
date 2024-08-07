@@ -20,6 +20,14 @@ class TriggerManager:
     def accountAddedTrigger(self, func: callable):
         self.accountManager.addNewAccountFunction(func)
 
+    def accountAddedTriggerREMOVE(self, func: callable, ignoreException: bool = False):
+        """Deletes trigger function if it exists."""
+        try:
+            self.accountManager.NewAccountTrigger.remove(func)
+        except ValueError as e:
+            if not ignoreException:
+                raise e
+
     def accountRemovedTrigger(self, func: callable):
         self.accountManager.accountDisconnectedTrigger(func)
 

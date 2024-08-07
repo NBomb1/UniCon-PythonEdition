@@ -35,10 +35,12 @@ class MainMenu(MainMenuUIFunctions):
         self.photoEnabledHost = tk.PhotoImage(file=getcwd() + r'\UI\Enabled-Host.gif')
         self.photoEnabledClient = tk.PhotoImage(file=getcwd() + r'\UI\Enabled-Client.gif')
         self.photoDisabled = tk.PhotoImage(file=getcwd() + r'\UI\Disabled.gif')
+        self.photoConnecting = tk.PhotoImage(file=getcwd() + r'\UI\Connecting.gif')
 
         self.photoDisabled = self.photoDisabled.subsample(3)
         self.photoEnabledClient = self.photoEnabledClient.subsample(3)
         self.photoEnabledHost = self.photoEnabledHost.subsample(3)
+        self.photoConnecting = self.photoConnecting.subsample(3)
 
         self.root.wm_iconphoto(False, self.photoDisabled)
 
@@ -80,7 +82,8 @@ class MainMenu(MainMenuUIFunctions):
         self.module.startLoading()
 
         center_main(self.root)
-        self.checkForUpdates()
+
+        self.confirmation = dataManager.get('main').get('checkButton_autoUpdateNoUserConfirmation')
 
     def _createLeftWidgets(self):
         # Creating two frames that will contain all sorts of widgets

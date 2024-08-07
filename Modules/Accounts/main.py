@@ -1,3 +1,6 @@
+"""
+This module shows account information and lets you manage them.
+"""
 from Functions.ModuleHandler.moduleAPI import API
 from Functions.Network.Accounts.AccountData import Account
 from Functions.Network.MainChannel.Server.main import ServerMainChannel

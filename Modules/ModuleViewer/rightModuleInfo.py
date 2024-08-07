@@ -42,7 +42,7 @@ class RightModuleInfo:
         self.defaultNetworkAuth.pack(anchor=tk.W)
         self.isUI.pack(anchor=tk.W)
         self.isInternal.pack(anchor=tk.W)
-        self.description.pack(anchor=tk.W)  #, fill=tk.BOTH, expand=True)
+        self.description.pack(anchor=tk.W)  # , fill=tk.BOTH, expand=True)
         self.disableButton.pack(anchor=tk.W, fill=tk.X)
 
     def showFailedInfo(self):
@@ -82,7 +82,9 @@ class RightModuleInfo:
                                       else self.enable(module),
                                       state=tk.DISABLED if module.isInternal else tk.NORMAL
                                       )
-            self.description.configure(text=f"Description: {module.description}")
+            self.description.configure(text=f"Description: "
+                                            f"{None if module.description is None else module.description.rstrip()}"
+                                       )
             # self.description.config(state=tk.DISABLED)
         else:
             self.hide_all()
@@ -101,15 +103,15 @@ class RightModuleInfo:
     def disable(self, module: ActiveModule | FailedModule):
         if (
                 module.id_ == self.id_ and not
-                messagebox.askyesno(
-                    "Warning",
-                    "Important Notice: \n"
-                    "Disabling this module will result in the loss of functionality "
-                    "for controlling other modules. "
-                    "You will need to manually activate "
-                    "this module at the next program startup.\n\n"
-                    "Continue?"
-                )
+        messagebox.askyesno(
+            "Warning",
+            "Important Notice: \n"
+            "Disabling this module will result in the loss of functionality "
+            "for controlling other modules. "
+            "You will need to manually activate "
+            "this module at the next program startup.\n\n"
+            "Continue?"
+        )
         ):
             return
 

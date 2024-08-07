@@ -88,6 +88,7 @@ class Authentication:
             account.socket.registerType('close')
 
             account.socket.senderHandler()
+            account.socket.handleMessages()
 
             accountManager.add(account)
             logs.sendLog(f"[MainChannel] Authentication from "
@@ -135,14 +136,16 @@ class Authentication:
         modules = SecurityInfo.getBuiltInModules()  # getting our module versions
         send = {}
         for i in modules:  # comparing versions from ours to client
-            if modules[i] != message[i]:  # if version is not the same
+            if i == 'UI':
+                continue
+            if modules[i] is not None and modules[i] != message[i]:  # if version is not the same
                 send[i] = modules[i]  # adding version message
 
         if send:  # checking if there are any issues with module versions
-            s.send(send.__str__())  # sending our module versions
-            s.close()  # and closing connection
+            s.send(send.__str__().encode())  # sending our module versions
             logs.sendLog("[Authentication] Couldn't pass 2nd authentication phase."
                          f"{s.getpeername()[0]}:{s.getpeername()[1]}", -1)
+            s.close()  # and closing connection
             return False
 
         logs.sendLog("[Authentication] Second phase has been passed."

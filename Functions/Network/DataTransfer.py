@@ -7,15 +7,15 @@ from time import sleep
 from Functions.Exceptions.DataTransfer import DataTransfer
 from typing import TYPE_CHECKING
 
+
 if TYPE_CHECKING:
     from Functions.Network.Accounts.AccountData import Account
-
-"""Is not done yet."""
+    from Functions.Network.Accounts.AccountDataManager import AccountManager
 
 
 class MessageTransfer:
 
-    def __init__(self, accountManager, s: socket.socket | None):
+    def __init__(self, accountManager: 'AccountManager', s: socket.socket | None, errorFunction=None):
         self.types = []
         self.registeredFunctions: dict[str, list[callable]] = {}
         self.account = None  # the problem is right here
@@ -23,7 +23,7 @@ class MessageTransfer:
         self.logs = accountManager.logs
         self.socket = s
         self.sendMessages: list[bytes] = []
-        self.errorFunction: callable = None
+        self.errorFunction: callable = errorFunction
 
     def registerAccount(self, account: 'Account'):
         self.account = account
@@ -120,8 +120,9 @@ class MessageTransfer:
         threading.Thread(target=handler, daemon=True).start()
 
     def registerErrorFunction(self, func: callable):
+        """Sets the function when the error occurs."""
         self.errorFunction = func
 
     def _callErrorFunc(self, error: Exception):
         if self.errorFunction is not None:
-            self.errorFunction(error)
+            self.errorFunction(error, self)

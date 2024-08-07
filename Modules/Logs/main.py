@@ -1,3 +1,10 @@
+"""
+Logs let you get information from different modules while program is running.
+It can be used to track user actions, or log important events.
+You can save information into the file.
+
+Warning: It doesn't show information that was sent before module was started.
+"""
 import tkinter as tk
 from datetime import datetime
 from functools import partial
@@ -13,7 +20,7 @@ from UI.TKinter_addons.Text_chat import ChatText
 
 class Module:
     id_ = 'v1tsW@Joi3z^+98K[p7DhMRX4f6Ngx9p]EFC=|x0h5L]uQoSXwGM%6Zefi[cd1bu'
-    version = "0.0.1"
+    version = "1.0.0"
     name = "Logs"
     author = "ArT"
     defaultNetworkAuth = False
@@ -42,29 +49,29 @@ class Module:
         # Finishing it
         api.getLogs().registerHandler(self.currentId, self.message)
         self.combobox_ids.set(self.currentId)
-        self.message("This is starting text logs.", self.currentId)
+        self.message("This is the beginning of the logs.", self.currentId)
 
         self.handleMessages()
 
         # Registering ids which weren't found
         Thread(target=self.registerIDs, daemon=True).start()
 
-    def message(self, message: str, id_: int):
-        self.messageList.append(partial(self.message_, message, id_))
+    def message(self, message: str, id_: int, time: datetime = None):
+        self.messageList.append(partial(self.message_, message, id_, time if time is not None else datetime.now()))
 
-    def message_(self, message: str, id_: int):
+    def message_(self, message: str, id_: int, time: datetime):
         if self.limit * 1.5 >= self.limit_constant:
             self.limit = 0
             self.idLog[id_].configure(state=tk.NORMAL)
             self.idLog[id_].delete("1.0", tk.END)
             self.idLog[id_].configure(state=tk.DISABLED)
-            self.message("[Logs] All messages were forcefully cleared.", id_)
+            self.message("[Logs] All messages have been forcibly deleted.", id_)
 
         self.limit += self.idLog[id_].create_message(
             {
                 'message': message
             },
-            datetime.now(),
+            time,
             '<{time}> {message}',
             {
                 'message': 'system-message'
@@ -124,7 +131,7 @@ class Module:
             with open(path, mode='w', encoding='utf-8') as file:
                 file.write(logs)
 
-        self.message("[Logs] Logs has been saved. Path: " + filePath, 0)
+        self.message("[Logs] The logs have been saved. Path: " + filePath, 0)
         Thread(target=func, args=(filePath, copy)).start()
 
     def on_combobox_selected(self, event):
@@ -146,7 +153,7 @@ class Module:
                     self.combobox_ids.configure(values=self.allIDs)
                     self.api.getLogs().registerHandler(i, self.message)
                     self.idLog[i].configure(wrap=tk.WORD, height=20, font=self.font)
-                    self.message(f"[Logs] ID {i} have been found.", i)
+                    self.message(f"[Logs] Log ID {i} have been found.", i)
 
     def _create_widgets(self):
         # Creating widgets

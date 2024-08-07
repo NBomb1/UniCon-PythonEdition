@@ -49,7 +49,7 @@ class RightSideInfo:
         self.accountPcName = tk.Label(self.frameMainInfo, font=self.font, anchor=tk.E)
         self.accountId = tk.Label(self.frameMainInfo, font=self.font, anchor=tk.E)
         self.accountTags = tk.Label(self.frameMainInfo, font=self.font, anchor=tk.E)
-        self.accountCons = tk.Label(self.frameMainInfo, font=self.font, anchor=tk.E)
+        self.accountCons = tk.Label(self.frameMainInfo, font=self.font, anchor=tk.E, justify=tk.RIGHT)
 
         self.accountKickButton = tk.Button(self.frameMainInfo, text='Kick', state=tk.DISABLED)
         self.accountKickReasonButton = tk.Button(self.frameMainInfo, text='Kick with Reason', state=tk.DISABLED)

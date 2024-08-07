@@ -77,12 +77,13 @@ class MainMenuUIFunctions:
     photoDisabled: tk.PhotoImage
     photoEnabledClient: tk.PhotoImage
     photoEnabledHost: tk.PhotoImage
+    photoConnecting: tk.PhotoImage
 
     server: ServerMainChannel | None
     client: ClientMainChannel | None
 
     def changeTitle(self, name: str):
-        self.root.title('Unicon - ' + name + " - " + settings.MainInfo.startDate)
+        self.root.title('UniCon - ' + name + " - " + settings.MainInfo.startDate)
 
     def goSettings(self):
         self.settingsFrame.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=5)
@@ -152,8 +153,8 @@ class MainMenuUIFunctions:
             )
             self.left_entry_nickname.put(nickname)
             self.lockInteraction()
-            self.triggerManager.serverStarted(self.server)
             self.pingManager.getInfo(self.accountManager, True)
+            self.triggerManager.serverStarted(self.server)
             self.left_status.configure(image=self.photoEnabledHost)
             self.root.wm_iconphoto(False, self.photoEnabledHost)
             self.left_status_label.configure(text='Host mode')
@@ -165,57 +166,65 @@ class MainMenuUIFunctions:
             raise error
 
     def startClient(self):
-        try:
-            print('Starting as client')
-            nickname = self.left_entry_nickname.get().lstrip(' ').rstrip(' ')
-            ip = self.left_entry_ip.get()
-            port = int(self.left_spinbox_port.get())
-            password = self.left_entry_password.get()
+        def thread():
+            try:
+                print('Starting as client')
+                nickname = self.left_entry_nickname.get().lstrip(' ').rstrip(' ')
+                ip = self.left_entry_ip.get()
+                port = int(self.left_spinbox_port.get())
+                password = self.left_entry_password.get()
 
-            if len(nickname) < 3 or len(nickname) > 15:
-                raise DataCollectionException.UsernameException("No nickname was given.")
-            if password != '' and (len(password) < 3 or len(password) > 50):
-                raise DataCollectionException.UsernameException("Password not in length range (from 3 to 50).")
+                if len(nickname) < 3 or len(nickname) > 15:
+                    raise DataCollectionException.UsernameException("No nickname was given.")
+                if password != '' and (len(password) < 3 or len(password) > 50):
+                    raise DataCollectionException.UsernameException("Password not in length range (from 3 to 50).")
 
-            if ip in ['', self.left_entry_ip.placeholder]:
-                ip = '127.0.0.1'
-                self.left_entry_ip.put('127.0.0.1')
+                if ip in ['', self.left_entry_ip.placeholder]:
+                    ip = '127.0.0.1'
+                    self.left_entry_ip.put('127.0.0.1')
 
-            self.accountManager.setSelfAccount(SelfAccount(nickname))
-            self.accountManager.startedAsClient()
+                self.accountManager.setSelfAccount(SelfAccount(nickname))
+                self.accountManager.startedAsClient()
 
-            self.left_entry_nickname.put(nickname)
-            self.client = ClientMainChannel(
-                self.logs,
-                self.accountManager,
-                ip,
-                port,
-                self.api.getConnectorManager(),
-                self.askPassword,
-                password if password else None,
-            )
-            # self.client.messageTransfer.registerFunction('close', self.accountManager.disconnectedFromServer)
-            self.accountManager.selfAccountDisconnectedTrigger(self.selfClientDisconnected)
-            self.triggerManager.clientConnected(self.client)
-            self.pingManager.getInfo(self.accountManager, False)
-            self.lockInteraction()
-            self.left_status.configure(image=self.photoEnabledClient)
-            self.root.wm_iconphoto(False, self.photoEnabledClient)
-            self.left_status_label.configure(text='Client mode')
-        except Exception as error:
-            self.root.bell()
-            self.logs.sendLog("Couldn't connect to the server. Reason: " + error.__str__(), -1)
-            self.logs.sendLog("Couldn't connect to the server. Reason: " + error.__str__(), 0)
-            # self.accountManager.closeConnection()
-            self.closeConnection()
-            traceback.format_exc()
-            raise error
+                self.left_entry_nickname.put(nickname)
+                self.client = ClientMainChannel(
+                    self.logs,
+                    self.accountManager,
+                    ip,
+                    port,
+                    self.api.getConnectorManager(),
+                    self.askPassword,
+                    password if password else None,
+                )
+                # self.client.messageTransfer.registerFunction('close', self.accountManager.disconnectedFromServer)
+                self.accountManager.selfAccountDisconnectedTrigger(self.selfClientDisconnected)
+                self.triggerManager.clientConnected(self.client)
+                self.pingManager.getInfo(self.accountManager, False)
+                self.lockInteraction()
+                self.left_status.configure(image=self.photoEnabledClient)
+                self.root.wm_iconphoto(False, self.photoEnabledClient)
+                self.left_status_label.configure(text='Client mode')
+            except Exception as error:
+                self.api.getAccountManager().selfAccountDisconnectedTriggerREMOVE(self.selfClientDisconnected, True)
+                self.root.bell()
+                self.logs.sendLog("Couldn't connect to the server. Reason: " + error.__str__(), -1)
+                self.logs.sendLog("Couldn't connect to the server. Reason: " + error.__str__(), 0)
+                # self.accountManager.closeConnection()
+                self.closeConnection()
+                traceback.format_exc()
+                raise error
+
+        Thread(target=thread).start()
+        self.left_status.configure(image=self.photoConnecting)
+        self.root.wm_iconphoto(False, self.photoConnecting)
+        self.left_status_label.configure(text='Connecting...')
+        self.lockInteraction(False)
 
     def askPassword(self) -> str:
         string = simpledialog.askstring("Ask String", "Wrong Password")
         return string
 
-    def lockInteraction(self):
+    def lockInteraction(self, unlockCloseConnection=True):
         self.left_entry_ip.configure(state=tk.DISABLED)
         self.left_entry_nickname.configure(state=tk.DISABLED)
         self.left_spinbox_port.configure(state=tk.DISABLED)
@@ -223,11 +232,12 @@ class MainMenuUIFunctions:
         self.left_button_create_server.configure(state=tk.DISABLED)
         self.left_button_connect.configure(state=tk.DISABLED)
         self.left_entry_password.configure(state=tk.DISABLED)
-        self.root.after(500,
-                        partial(
-                            self.left_button_create_server.configure, command=self.closeConnection,
-                            text='Close connection', state=tk.NORMAL)
-                        )
+        if unlockCloseConnection:
+            self.root.after(settings.MainMenu.switchModesDelay,
+                            partial(
+                                self.left_button_create_server.configure, command=self.closeConnection,
+                                text='Close connection', state=tk.NORMAL)
+                            )
 
     def unlockInteraction(self):
         self.left_entry_ip.configure(state=tk.NORMAL)
@@ -237,7 +247,7 @@ class MainMenuUIFunctions:
         self.left_button_create_server.configure(state=tk.DISABLED)
         self.left_button_connect.configure(state=tk.DISABLED)
         self.left_entry_password.configure(state=tk.NORMAL)
-        self.root.after(500,
+        self.root.after(settings.MainMenu.switchModesDelay,
                         partial(
                             self.left_button_create_server.configure,
                             command=self.startServer,
@@ -245,10 +255,14 @@ class MainMenuUIFunctions:
                             state=tk.NORMAL
                         )
                         )
-        self.root.after(500, partial(self.left_button_connect.configure, state=tk.NORMAL))
+        self.root.after(
+            settings.MainMenu.switchModesDelay,
+            partial(self.left_button_connect.configure, state=tk.NORMAL)
+        )
 
     def selfClientDisconnected(self, msg: dict):
-        self.api.getAccountManager().SelfDisconnectTrigger.remove(self.selfClientDisconnected)
+        # self.api.getAccountManager().SelfDisconnectTrigger.remove(self.selfClientDisconnected)
+        self.api.getAccountManager().selfAccountDisconnectedTriggerREMOVE(self.selfClientDisconnected)
         self.logs.sendLog(f'Got disconnected from server. Reason: {msg["reason"]}', -1)
         self.logs.sendLog(f'All info {msg}', -1)
         # self.unlockInteraction()
@@ -264,13 +278,14 @@ class MainMenuUIFunctions:
             self.server = None
         elif not self.accountManager.getIsServer():
             self.accountManager.closeConnection()
+            self.accountManager.selfAccountDisconnectedTriggerREMOVE(self.selfClientDisconnected, True)
             self.client = None
         self.left_status.configure(image=self.photoDisabled)
         self.root.wm_iconphoto(False, self.photoDisabled)
         self.unlockInteraction()
         self.left_status_label.configure(text='No connection')
 
-    def checkForUpdates(self):
+    def checkForUpdates(self, autoInstall=False):
         def thread():
             res = check_for_updates(
                 UpdaterInfo.URL,
@@ -285,6 +300,9 @@ class MainMenuUIFunctions:
                 False
             )
             if res.isOutdated:
+                if autoInstall:
+                    self.update_app(True)
+                    return
                 self.new_version_available = True
                 messagebox.showinfo(
                     "New update available!",
@@ -295,9 +313,9 @@ class MainMenuUIFunctions:
 
         Thread(target=thread, daemon=True).start()
 
-    def update_app(self):
-        if not messagebox.askyesno("Update", "Do you really want to update this application?\n"
-                                             "You might lose third party modules and your settings."):
+    def update_app(self, confirmed=False):
+        if not confirmed and not messagebox.askyesno("Update", "Do you really want to update this application?\n"
+                                                     "You might lose third party modules and your settings."):
             return
         self.logs.sendLog("Closing...", 0)
         try:
