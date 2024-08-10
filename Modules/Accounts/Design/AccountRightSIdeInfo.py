@@ -1,14 +1,17 @@
 import tkinter as tk
-from tkinter import simpledialog
+from tkinter import simpledialog, messagebox
 from functools import partial
 
 from Functions.ModuleHandler.moduleAPI import API
 from Functions.Network.Accounts.AccountData import Account
+from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.Accounts.SelfAccount import SelfAccount
 from Functions.Network.DataTransfer import MessageTransfer
 
 
 class RightSideInfo:
     api: API
+    accountManager: AccountManager
     frameMainInfo = None
     current: Account = None
     accountId: tk.Label = None
@@ -77,15 +80,33 @@ class RightSideInfo:
         self.updateName(account.nickname)
         self.updateTags(account.tags)
         self.updateConnections(account.extraConnections)
-        if self.api.getAccountManager().getIsServer() and account in self.api.getAccountManager().getParticipants():
-            self.accountKickButton.configure(state=tk.NORMAL, command=partial(self.kickAccount, account, False))
-            self.accountKickReasonButton.configure(state=tk.NORMAL,
-                                                   command=partial(
-                                                       self.kickAccount,
-                                                       account,
-                                                       True
-                                                   )
-                                                   )
+        if self.api.getAccountManager().getIsServer():
+            if account in self.api.getAccountManager().getParticipants():
+                self.accountKickButton.configure(
+                    state=tk.NORMAL,
+                    command=partial(self.kickAccount, account, False),
+                    text='Kick'
+                )
+                self.accountKickReasonButton.configure(state=tk.NORMAL,
+                                                       text='Kick with Reason',
+                                                       command=partial(
+                                                           self.kickAccount,
+                                                           account,
+                                                           True
+                                                       )
+                                                       )
+            elif isinstance(account, SelfAccount):
+                self.accountKickReasonButton.configure(text='Kick all with a reason',
+                                                       command=(lambda: self.kickAll(True)),
+                                                       state=tk.NORMAL
+                                                       if self.accountManager.getParticipants()
+                                                       else tk.DISABLED
+                                                       )
+                self.accountKickButton.configure(text='Kick all',
+                                                 command=(lambda: self.kickAll),
+                                                 state=tk.NORMAL if self.accountManager.getParticipants()
+                                                 else tk.DISABLED
+                                                 )
         else:
             self.accountKickReasonButton.configure(state=tk.DISABLED)
             self.accountKickButton.configure(state=tk.DISABLED)
@@ -128,8 +149,8 @@ class RightSideInfo:
         self.accountKickButton.grid(column=0, row=6, sticky=tk.NSEW, columnspan=2)
         self.accountKickReasonButton.grid(column=0, row=7, sticky=tk.NSEW, columnspan=2)
 
-    def kickAccount(self, account: Account, askReason: bool = False):
-        reason = 'You were kicked by the server.'
+    def kickAccount(self, account: Account, askReason: bool = False, text=None):
+        reason = 'You were kicked by the server.' if text is None else text
         if askReason:
             reason = simpledialog.askstring('Kick Reason', 'Enter a reason for kicking: ')
             if reason is None:
@@ -141,3 +162,16 @@ class RightSideInfo:
         )
         self.accountKickButton.configure(state=tk.DISABLED)
         self.accountKickReasonButton.configure(state=tk.DISABLED)
+
+    def kickAll(self, askReason: bool = False):
+        if not messagebox.askyesno('WARNING', 'Do really you want to kick all accounts?'):
+            return
+
+        reason = None
+        if askReason:
+            reason = simpledialog.askstring('Kick Reason', 'Enter a reason for kicking all players: ')
+            if reason is None:
+                return
+
+        for account in self.api.getAccountManager().getParticipants():
+            self.kickAccount(account, False, reason)

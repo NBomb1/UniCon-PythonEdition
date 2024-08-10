@@ -1,7 +1,7 @@
 import tkinter as tk
 
-from Functions.Tools.DataSettings.Checks import checkInteger
-from Functions.Tools.DataSettings.Widgets.Basic.EnhancedEntryWidget import EnhancedEntry
+from Functions.Checks import checkInteger
+from UI.TKinter_addons.Tools.DataSettings.Widgets.Basic.EnhancedEntryWidget import EnhancedEntry
 
 
 class IntegerEntry(EnhancedEntry):

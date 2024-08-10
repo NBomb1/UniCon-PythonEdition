@@ -2,9 +2,8 @@ from Functions.ModuleHandler.activeModule import ActiveModule
 from Functions.ModuleHandler.failedModule import FailedModule
 import tkinter as tk
 from tkinter import messagebox
-from tkinter.scrolledtext import ScrolledText
 
-from Functions.Tools.DataSettings.FileDataManager import FileDataManager
+from Functions.FileDataManager import FileDataManager
 
 
 class RightModuleInfo:
@@ -46,11 +45,11 @@ class RightModuleInfo:
         self.disableButton.pack(anchor=tk.W, fill=tk.X)
 
     def showFailedInfo(self):
-        self.disableButton.pack(anchor=tk.W, fill=tk.X)
         self.moduleName.pack(anchor=tk.W)
         self.moduleId.pack(anchor=tk.W)
         self.version.pack(anchor=tk.W)
         self.author.pack(anchor=tk.W)
+        self.disableButton.pack(anchor=tk.W, fill=tk.X)
 
     def hide_all(self):
         self.moduleName.pack_forget()

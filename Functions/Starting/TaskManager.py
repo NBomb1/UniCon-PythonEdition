@@ -1,28 +1,30 @@
 from os import getcwd
 
-from Functions.Tools.DataSettings.Widgets.checkWidget import CheckButton
+from UI.TKinter_addons.Tools.DataSettings.Widgets.checkWidget import CheckButton
 
 disable = False
+isAdmin = False
 try:
     import win32com.client
     import pyuac
-    disable = not pyuac.isUserAdmin()
+
+    isAdmin = pyuac.isUserAdmin()
 except ImportError:
     disable = True
 import sys
 from datetime import datetime
 from tkinter import messagebox
-TASK_NAME = "Unicon auto-starting. Task scheduler"
 
+TASK_NAME = "Unicon auto-starting. Task scheduler"
 
 
 def __create_task(showException=True, status=True) -> bool:
     try:
-        if not checkImport:
+        if not isAdmin:
             return False
         mainScript = '\\main.py'
         task_description = "Runs Python script."
-        script_path = f""""{getcwd() + mainScript}" --updated"""  # Полный путь к вашему скрипту
+        script_path = f""""{getcwd() + mainScript}" """  # Полный путь к вашему скрипту
 
         # Создаем объект COM
         scheduler = win32com.client.Dispatch("Schedule.Service")
@@ -112,6 +114,18 @@ def __create_task(showException=True, status=True) -> bool:
         return False
 
 
+def removeTask():
+    try:
+        scheduler = win32com.client.Dispatch("Schedule.Service")
+        scheduler.Connect()
+
+        root_folder = scheduler.GetFolder("\\")
+        root_folder.DeleteTask(TASK_NAME, 0)
+    except Exception as e:
+        messagebox.showerror('Error', f"Could not remove the task. Exception:\n{e}")
+        raise e
+
+
 def is_task_exist():
     try:
         scheduler = win32com.client.Dispatch("Schedule.Service")
@@ -144,12 +158,12 @@ def is_task_enabled():
 
 def saveTaskSettings(checkWidget: CheckButton):
     if disable:
-        if checkWidget.v.get():
+        if checkWidget.savedData:
             checkWidget.v.set(False)
             messagebox.showerror('Error', "You cannot use this option because pywin32 is not installed.")
             return
 
-    if checkWidget.v.get():
+    if checkWidget.savedData:
         try:
             if not is_task_exist():
                 try:
@@ -179,9 +193,10 @@ def saveTaskSettings(checkWidget: CheckButton):
             checkWidget.v.set(True)
 
 
-def checkImport(message: str, showMessage=True) -> bool:
+def checkImport(showMessage=True, message=None) -> bool:
     if disable:
         if showMessage:
+            assert message is not None, 'CheckImport message is required'
             messagebox.showerror('Error', message)
         return False
     return True
@@ -196,6 +211,16 @@ def setTaskStatus(state: bool):
         task.Enabled = state
     except Exception as e:
         messagebox.showerror('Error', f"Couldn't change the task status. Exception:\n{e}")
+        raise e
+
+
+def afterUpdate():
+    if not isAdmin:
+        return
+    status = is_task_enabled()
+    removeTask()
+    __create_task()
+    setTaskStatus(status)
 
 # if __name__ == '__main__':
 #     if

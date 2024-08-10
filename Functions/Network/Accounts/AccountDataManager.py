@@ -6,6 +6,7 @@ from Functions.Network.Accounts.Client.AccountDataHandler import AccountDataHand
 from Functions.Network.Accounts.Server.AccountDataTransfer import AccountDataTransfer
 from Functions.Network.Accounts.SelfAccount import SelfAccount
 from Functions.Exceptions.Account import Account as AccountExc
+from Functions.logManager import Logs
 
 
 class AccountManager(AccountDataTransfer, AccountDataHandler):
@@ -20,7 +21,7 @@ class AccountManager(AccountDataTransfer, AccountDataHandler):
     maxConnections: int
     owner: Account | SelfAccount | None = None
 
-    def __init__(self, logs):
+    def __init__(self, logs: Logs):
         self.logs = logs
 
     def startedAsServer(self):
@@ -62,7 +63,10 @@ class AccountManager(AccountDataTransfer, AccountDataHandler):
             account.addUpdatedAccount(self._sendUpdatedInfo)
             self._sendAllInfo()
         for func in self.NewAccountTrigger:
-            func(account)
+            try:
+                func(account)
+            except TypeError:
+                self.logs.sendLog(f"[AccountManager] Function has critical error! {traceback.format_exc()}", -1)
 
     def findByID(self, id_: str) -> Account | SelfAccount | None:
         """Tries to find account. If not found returns None."""
@@ -220,6 +224,10 @@ class AccountManager(AccountDataTransfer, AccountDataHandler):
 
     def serverStoppedTrigger(self, func: callable):
         self.ServerStoppedTrigger.append(func)
+
+    def serverStoppedTriggerREMOVE(self, func: callable, ignoreException=False):
+        if not ignoreException or func in self.ServerStoppedTrigger:
+            self.ServerStoppedTrigger.remove(func)
 
     def clientStoppedTrigger(self, func: callable):
         self.ClientStoppedTrigger.append(func)

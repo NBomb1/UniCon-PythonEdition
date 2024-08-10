@@ -1,10 +1,10 @@
 import tkinter as tk
 
-from Functions.Tools.DataSettings.Checks import checkInteger
-from Functions.Tools.DataSettings.Widgets.Basic.NumberRangeSpinbox import NumberRangeBasic
-from Functions.Tools.DataSettings.Widgets.Basic.SaveWidgetData import SaveWidgetData
-from Functions.Tools.DataSettings.Widgets.Basic.ShowRedFlag import ShowRedFlag
-from Functions.Tools.DataSettings.Widgets.Basic.ToolTip import ToolTip
+from Functions.Checks import checkInteger
+from UI.TKinter_addons.Tools.DataSettings.Widgets.Basic.NumberRangeSpinbox import NumberRangeBasic
+from UI.TKinter_addons.Tools.DataSettings.Widgets.Basic.SaveWidgetData import SaveWidgetData
+from UI.TKinter_addons.Tools.DataSettings.Widgets.Basic.ShowRedFlag import ShowRedFlag
+from UI.TKinter_addons.Tools.DataSettings.Widgets.Basic.ToolTip import ToolTip
 
 
 class NumberRange(tk.LabelFrame, SaveWidgetData, ShowRedFlag):

@@ -6,7 +6,7 @@ from Functions.Network.Accounts.AccountData import Account
 from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.DataTransfer import MessageTransfer
 from Functions.Network.SecurityInfo import SecurityInfo
-from Functions.Tools.logManager import Logs
+from Functions.logManager import Logs
 from Functions.Exceptions.Authentication import Client
 
 

@@ -3,7 +3,7 @@ from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.DataTransfer import MessageTransfer
 from Functions.Network.SecurityInfo import SecurityInfo
 from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager
-from Functions.Tools.logManager import Logs
+from Functions.logManager import Logs
 import socket as s
 
 
@@ -44,7 +44,7 @@ class ClientMainChannel:
         self.messageTransfer.senderHandler()
         self.accountManager.getSelfAccount().setSocket(self.messageTransfer)
 
-        self.accountManager.setMaxConnections(50)
+        self.accountManager.setMaxConnections(5000)
         Authentication(self.messageTransfer, self.logs, password, self.askPassword, account).start()
 
         self.messageTransfer.registerFunction('close', self.accountManager._disconnectedFromServer)  # it's fine

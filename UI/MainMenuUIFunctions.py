@@ -20,10 +20,11 @@ from Functions.Network.TriggerManager import TriggerManager
 from Functions.Starting.UpdateChecker import UpdaterInfo
 from Functions.Starting.UpdateChecker.Processes import run_independent_process
 from Functions.Starting.UpdateChecker.checkVersion import check_for_updates
-from Functions.Tools.DataSettings.Widgets.StringEntry import StringEntry
-from Functions.Tools.logManager import Logs
+from UI.TKinter_addons.Tools.DataSettings.Widgets.StringEntry import StringEntry
+from Functions.logManager import Logs
 from UI.ChildFrames.SettingsMenu import Settings
 from UI.Info import Info
+from UI.TKinter_addons.confirmationForButtons import functionConfirmation
 
 
 class MainMenuUIFunctions:
@@ -61,6 +62,10 @@ class MainMenuUIFunctions:
 
     # Spinbox
     left_spinbox_port: tk.Spinbox
+    left_spinbox_maxConnections: tk.Spinbox
+
+    # variables
+    maxConnections: tk.IntVar
 
     # Notebook
     right_notebook: ttk.Notebook
@@ -89,7 +94,7 @@ class MainMenuUIFunctions:
         self.settingsFrame.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=5)
         self.changeTitle("Settings")
         if self.new_version_available:
-            self.left_button_connect.configure(text='Update application', command=self.update_app)
+            self.left_button_connect.configure(text='Update application', command=self.update_app, state=tk.NORMAL)
         else:
             self.left_button_connect.pack_forget()
         self.left_button_create_server.pack_forget()
@@ -126,8 +131,11 @@ class MainMenuUIFunctions:
             ip = self.left_entry_ip.get()
             port = int(self.left_spinbox_port.get())
             password = self.left_entry_password.get()
+            maxConns = self.maxConnections.get()
 
             # Checking correctness
+            if maxConns < 0 or maxConns > 10000:
+                raise ValueError("Incorrect maximum connections value.")
             if len(nickname) < 3 or len(nickname) > 15:
                 raise DataCollectionException.UsernameException("No nickname was given.")
             if password != '' and (len(password) < 3 or len(password) > 50):
@@ -146,7 +154,7 @@ class MainMenuUIFunctions:
                 self.accountManager,
                 ip,
                 port,
-                50,
+                maxConns,
                 password if password else None,
                 self.triggerManager.beforeAuthConnection,
                 self.api.getConnectorManager()
@@ -228,6 +236,7 @@ class MainMenuUIFunctions:
         self.left_entry_ip.configure(state=tk.DISABLED)
         self.left_entry_nickname.configure(state=tk.DISABLED)
         self.left_spinbox_port.configure(state=tk.DISABLED)
+        self.left_spinbox_maxConnections.configure(state=tk.DISABLED)
         # self.left_button_create_server.configure(state=tk.DISABLED)
         self.left_button_create_server.configure(state=tk.DISABLED)
         self.left_button_connect.configure(state=tk.DISABLED)
@@ -235,7 +244,13 @@ class MainMenuUIFunctions:
         if unlockCloseConnection:
             self.root.after(settings.MainMenu.switchModesDelay,
                             partial(
-                                self.left_button_create_server.configure, command=self.closeConnection,
+                                # self.left_button_create_server.configure, command=self.closeConnection,
+                                self.left_button_create_server.configure,
+                                command=lambda: functionConfirmation(
+                                    self.left_button_create_server,
+                                    self.closeConnection,
+                                    1, 3
+                                ),
                                 text='Close connection', state=tk.NORMAL)
                             )
 
@@ -243,6 +258,7 @@ class MainMenuUIFunctions:
         self.left_entry_ip.configure(state=tk.NORMAL)
         self.left_entry_nickname.configure(state=tk.NORMAL)
         self.left_spinbox_port.configure(state=tk.NORMAL)
+        self.left_spinbox_maxConnections.configure(state=tk.NORMAL)
         # self.left_button_create_server.configure(state=tk.NORMAL)
         self.left_button_create_server.configure(state=tk.DISABLED)
         self.left_button_connect.configure(state=tk.DISABLED)
@@ -304,6 +320,9 @@ class MainMenuUIFunctions:
                     self.update_app(True)
                     return
                 self.new_version_available = True
+                if self.settingsFrame.winfo_ismapped():
+                    self.goMainFrame()
+                    self.goSettings()
                 messagebox.showinfo(
                     "New update available!",
                     "New version available: " + res.newVersion + "\n" +

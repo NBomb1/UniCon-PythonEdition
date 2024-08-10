@@ -1,8 +1,8 @@
-from Functions.Tools.DataSettings.Widgets.Basic.SaveWidgetData import SaveWidgetData
+from UI.TKinter_addons.Tools.DataSettings.Widgets.Basic.SaveWidgetData import SaveWidgetData
 import tkinter as tk
 
-from Functions.Tools.DataSettings.Widgets.Basic.ShowRedFlag import ShowRedFlag
-from Functions.Tools.DataSettings.Widgets.Basic.ToolTip import ToolTip
+from UI.TKinter_addons.Tools.DataSettings.Widgets.Basic.ShowRedFlag import ShowRedFlag
+from UI.TKinter_addons.Tools.DataSettings.Widgets.Basic.ToolTip import ToolTip
 
 
 class NumberRangeBasic(SaveWidgetData, tk.Spinbox, ToolTip, ShowRedFlag):

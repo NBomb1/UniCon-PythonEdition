@@ -6,6 +6,8 @@ class MainMenu:
     port_from = 1024
     port_to = 49151
     switchModesDelay = 500
+    max_connections_from = 1
+    max_connections_to = 25
 
 
 class SettingsMenu:

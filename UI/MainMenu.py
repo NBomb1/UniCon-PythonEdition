@@ -8,9 +8,9 @@ from Functions.Network.MainChannel.Server.main import ServerMainChannel
 from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager
 from Functions.Network.PingManager import PingManager
 from Functions.Network.TriggerManager import TriggerManager
-from Functions.Tools.DataSettings.FileDataManager import FileDataManager
-from Functions.Tools.DataSettings.Widgets.StringEntry import StringEntry
-from Functions.Tools.logManager import Logs
+from Functions.FileDataManager import FileDataManager
+from UI.TKinter_addons.Tools.DataSettings.Widgets.StringEntry import StringEntry
+from Functions.logManager import Logs
 from UI.MainMenuUIFunctions import MainMenuUIFunctions
 from UI.ChildFrames.SettingsMenu import Settings
 from UI.window.WindowCenter import center_main
@@ -30,6 +30,7 @@ class MainMenu(MainMenuUIFunctions):
         self.accountManager = AccountManager(self.logs)
         # self.root = customtkinter.CTk()
         self.root.wm_minsize(925, 450)
+        center_main(self.root)
         self.changeTitle("MainMenu")
 
         self.photoEnabledHost = tk.PhotoImage(file=getcwd() + r'\UI\Enabled-Host.gif')
@@ -64,8 +65,7 @@ class MainMenu(MainMenuUIFunctions):
                 self.root,
                 self.right_notebook,
                 self.settingsFrame,
-                self.left_frame1,
-                self.mainFrame,
+                self,
                 self.moduleLoaderError,
                 self.dataManager,
                 self.triggerManager,
@@ -80,8 +80,6 @@ class MainMenu(MainMenuUIFunctions):
             True
         )
         self.module.startLoading()
-
-        center_main(self.root)
 
         self.confirmation = dataManager.get('main').get('checkButton_autoUpdateNoUserConfirmation')
 
@@ -101,6 +99,7 @@ class MainMenu(MainMenuUIFunctions):
         self.left_entry_nickname = StringEntry(self.left_frame1, 'Type your nickname...')
         # self.left_label_port = customtkinter.CTkLabel(self.left_frame1, text='Port: ')
         self.left_label_port = tk.Label(self.left_frame1, text='Port: ')
+        self.left_label_maxConnections = tk.Label(self.left_frame1, text='Max connections: ')
         self.left_entry_password = StringEntry(self.left_frame1, 'Type password...')
         self.left_entry_password.hideInfo()
 
@@ -131,6 +130,14 @@ class MainMenu(MainMenuUIFunctions):
             textvariable=self.variable_port
         )
 
+        self.maxConnections = tk.IntVar(value=20)
+        self.left_spinbox_maxConnections = tk.Spinbox(
+            self.left_frame1,
+            from_=settings.MainMenu.max_connections_from,
+            to=settings.MainMenu.max_connections_to,
+            textvariable=self.maxConnections
+        )
+
         # Placing widgets on the left frame
         # self.left_text_status.pack(fill=tk.X, pady=(5, 10), padx=(5, 0))
         self.left_status_frame.pack(fill=tk.X, pady=(5, 10), padx=(5, 0))
@@ -140,7 +147,10 @@ class MainMenu(MainMenuUIFunctions):
         self.left_entry_ip.pack(fill=tk.X, padx=(5, 0))
         self.left_label_port.pack(fill=tk.X, padx=(5, 0))
         self.left_spinbox_port.pack(fill=tk.X, padx=(5, 0))
+        self.left_label_maxConnections.pack(fill=tk.X, padx=(5, 0))
+        self.left_spinbox_maxConnections.pack(fill=tk.X, padx=(5, 0))
         self.left_entry_password.pack(fill=tk.X, padx=(5, 0), pady=(5, 0))
+
         self.left_button_settings.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))
         self.left_button_connect.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))
         self.left_button_create_server.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))

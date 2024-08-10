@@ -5,7 +5,7 @@ from Functions.Network.DataTransfer import MessageTransfer
 from Functions.Network.SecurityInfo import SecurityInfo
 from Functions.Network.MainChannel.Server.ServerHandlers import ServerInformation
 from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager
-from Functions.Tools.logManager import Logs
+from Functions.logManager import Logs
 
 """
 1. Определение программы по уникальному сообщению +

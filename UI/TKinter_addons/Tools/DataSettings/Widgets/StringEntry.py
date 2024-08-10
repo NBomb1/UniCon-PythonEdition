@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from Functions.Tools.DataSettings.Widgets.Basic.EnhancedEntryWidget import EnhancedEntry
+from UI.TKinter_addons.Tools.DataSettings.Widgets.Basic.EnhancedEntryWidget import EnhancedEntry
 
 
 class StringEntry(EnhancedEntry):

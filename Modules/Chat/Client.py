@@ -26,8 +26,6 @@ class Client:
         time = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0)
         self.socket.send_message(type,
                                  msg=message,
-                                 nickname=self.selfAccount.nickname,
-                                 id=self.selfAccount.id,
                                  time=int(time.timestamp())
                                  )
 

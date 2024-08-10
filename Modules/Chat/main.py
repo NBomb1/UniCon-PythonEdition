@@ -55,6 +55,7 @@ class Module:
         self.unlockChat()
 
     def startedAsServerClosed(self):
+        self.api.getAccountManager().serverStoppedTriggerREMOVE(self.startedAsServerClosed)
         self.lockChat()
         self.server.stop()
         self.server = None
@@ -77,6 +78,7 @@ class Module:
         msg.registerType('sys')
 
     def inviteAccount(self, account: Account):
+        """Server function"""
         WaitingForConnectionInfo(
             self.id_,
             self.api.getConnectorManager().server.addConnectionWaiting,

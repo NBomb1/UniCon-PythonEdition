@@ -10,10 +10,11 @@ Started using AI tabnine to document some functions 2024y 7m 18d.
 Available app args:
 * "--updated" - removes versionChanger.py if it exists and shows update message.
 * "-host" - starts the server automatically.
-* "-client" - starts connecting automatically. Will not connect if it uses -host.
+* "-client" - starts connecting automatically. Doesn't work with "-host".
 * "-noUpdateCheck" - doesn't check for updates.
 * "-noAutoInstall" - disables update auto-install if enabled.
 """
+from Functions.Starting.TaskManager import afterUpdate
 
 """
 Goals:
@@ -46,8 +47,8 @@ from datetime import datetime
 from traceback import format_exc
 
 from UI.MainMenu import MainMenu
-from Functions.Tools.logManager import Logs
-from Functions.Tools.DataSettings.FileDataManager import FileDataManager
+from Functions.logManager import Logs
+from Functions.FileDataManager import FileDataManager
 from UI.ProgramStartError import ProgramStartError
 
 
@@ -83,12 +84,17 @@ def main():
 def argsCheck(mainMenu: MainMenu):
     try:
         if '--updated' in argv:
-            mainMenu.logs.sendLog('Program was updated successfully.', 0)
             try:
                 remove('versionChanger.py')
             except Exception as e:
                 print(f'Error while deleting versionChanger.py: {e}')
-                mainMenu.logs.sendLog(f'Error while deleting versionChanger.py: {e}', 0)
+                mainMenu.logs.sendLog(f'Error while deleting versionChanger.py: {format_exc()}', 0)
+            try:
+                afterUpdate()
+                mainMenu.logs.sendLog('Auto-startup task updated successfully.', 0)
+            except Exception as e:
+                mainMenu.logs.sendLog(f'Error while updating auto-startup task: {format_exc()}', 0)
+            mainMenu.logs.sendLog('Program was updated successfully.', 0)
         if '-host' in argv:
             mainMenu.logs.sendLog('[Args] Starting in host mode.', 0)
             mainMenu.startServer()

@@ -63,7 +63,6 @@ class Server:
     def getMessage(self, m):
         try:
             time = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0)
-            datetime.datetime.fromtimestamp(213, tz=datetime.timezone.utc)
             account: Account = m['_account']
             nickname = account.nickname
             id_ = account.id

@@ -48,7 +48,7 @@ class MissingModule(tk.Frame):
         def install_thread():
             try:
                 from subprocess import check_call
-                check_call([sys.executable, '-m', 'pip', 'install', self.pipName], timeout=10)
+                check_call([sys.executable, '-m', 'pip', 'install', self.pipName], timeout=45)
                 self.resultLabel.configure(text='Module installed successfully.')
             except Exception as e:
                 print(f"Error installing module '{self.moduleName}': {e}")

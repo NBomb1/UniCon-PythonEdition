@@ -1,13 +1,18 @@
 import tkinter as tk
 import tkinter.ttk as ttk
+from inspect import stack
+from os import getcwd
 
 from Functions.ModuleHandler.moduleHandler import ModuleHandler
 from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager
 from Functions.Network.TriggerManager import TriggerManager
-from Functions.Tools.DataSettings.FileDataManager import FileDataManager
-from Functions.Tools.logManager import Logs
+from Functions.FileDataManager import FileDataManager
+from Functions.logManager import Logs
 from Functions.Exceptions.APIException import APIException
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from UI.MainMenu import MainMenu
 
 
 class API:
@@ -19,8 +24,7 @@ class API:
                  root: tk.Tk,
                  right_notebook: ttk.Notebook,
                  settings_notebook: ttk.Notebook,
-                 left_frame: tk.Frame,
-                 main_frame: tk.Frame,
+                 mainMenu: 'MainMenu',
                  moduleLoaderError: tk.Label,
                  dataManager: FileDataManager,
                  triggerManager: TriggerManager,
@@ -32,14 +36,13 @@ class API:
         self.__rightNotebook = right_notebook
         self.__settingsNotebook = settings_notebook
         self.__logs = logs
-        self.__leftFrame = left_frame
-        self.__mainFrame = main_frame
+        self.__mainMenu = mainMenu
         self.__moduleLoaderError = moduleLoaderError
         self.__dataManager = dataManager
         self.__triggerManager = triggerManager
         self.__connectorManager = connectorManager
         self.__accountManager = accountManager
-        self.moduleHandler = moduleHandler
+        self.__moduleHandler = moduleHandler
 
     def getRoot(self) -> tk.Tk:
         if self.__root is None:
@@ -61,15 +64,11 @@ class API:
             raise APIException.ObjectIsNull("Logs is None")
         return self.__logs
 
-    def getLeftFrame(self) -> tk.Frame:
-        if self.__leftFrame is None:
-            raise APIException.ObjectIsNull("LeftFrame is None")
-        return self.__leftFrame
-
-    def getMainFrame(self) -> tk.Frame:
-        if self.__mainFrame is None:
-            raise APIException.ObjectIsNull("MainFrame is None")
-        return self.__mainFrame
+    def getMainMenu(self) -> 'MainMenu':
+        if self.__mainMenu is None:
+            raise APIException.ObjectIsNull("MainMenu is None")
+        self.__logs.sendLog(f"[API] Accessed MainMenu from {stack()[1].filename.replace(getcwd(), '')}", -1)
+        return self.__mainMenu
 
     def getModuleLoaderError(self) -> tk.Label:
         if self.__moduleLoaderError is None:
@@ -77,9 +76,9 @@ class API:
         return self.__moduleLoaderError
 
     def getModuleHandler(self) -> ModuleHandler:
-        if self.moduleHandler is None:
+        if self.__moduleHandler is None:
             raise APIException.ObjectIsNull("ModuleLoaderError is None")
-        return self.moduleHandler
+        return self.__moduleHandler
 
     def getDataManager(self) -> FileDataManager:
         if self.__dataManager is None:

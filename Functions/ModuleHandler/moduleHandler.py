@@ -7,14 +7,20 @@ from traceback import format_exc
 
 from Functions.ModuleHandler.failedModule import FailedModule
 from Functions.ModuleHandler.activeModule import ActiveModule
-from Functions.Tools.DataSettings.FileDataManager import FileDataManager
-from Functions.Tools.logManager import Logs
+from Functions.FileDataManager import FileDataManager
+from Functions.logManager import Logs
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from Functions.ModuleHandler.moduleAPI import API
+    from UI.MainMenu import MainMenu
 
 
 class ModuleHandler:
     failed: list[FailedModule] = []
     active: list[ActiveModule] = []
-    api = None
+    api: 'API' = None
+    mainMenu: 'MainMenu' = None
     doNotLoadList: list[str] = []
 
     def __init__(self,
@@ -35,6 +41,7 @@ class ModuleHandler:
 
     def startLoading(self):
         try:
+            self.mainMenu = self.api.getMainMenu()
             self.startModulesLoading()
         except Exception as error:
             self.showModuleLoaderError("Error:\n" + error.__str__() + '\n' + format_exc())
@@ -50,8 +57,10 @@ class ModuleHandler:
                 self.activateSingleModule(module, file)
 
         if len(list(filter(lambda x: not x.isDisabledManually, self.failed))) != 0:
-            errorText = '\n'.join(map(lambda obj: obj.path, self.failed))
-            self.showModuleLoaderError(f"Some modules ({len(self.failed)}) have internal error.\n"
+            errorText = '\n'.join(map(lambda obj: obj.path, filter(lambda x: not x.isDisabledManually, self.failed)))
+            self.showModuleLoaderError(f"Some modules ("
+                                       f"{len(list(filter(lambda x: not x.isDisabledManually, self.failed)))}"
+                                       f") have internal error.\n"
                                        f"You can get info in a text file Modules Exception.txt\n"
                                        f"{errorText}"
                                        )
@@ -132,12 +141,18 @@ class ModuleHandler:
 
     def showModuleLoaderError(self, message):
         self.root.bell()
+        self.mainMenu.left_button_create_server.configure(state=tk.DISABLED)
+        self.mainMenu.left_button_connect.configure(state=tk.DISABLED)
+        self.mainMenu.left_button_settings.configure(state=tk.DISABLED)
         self.rightNotebook.pack_forget()
         self.moduleLoaderError.configure(text=message)
         self.moduleLoaderError.pack(anchor=tk.CENTER)
 
     def hideModuleLoaderError(self):
         self.root.bell()
+        self.mainMenu.left_button_create_server.configure(state=tk.NORMAL)
+        self.mainMenu.left_button_connect.configure(state=tk.NORMAL)
+        self.mainMenu.left_button_settings.configure(state=tk.NORMAL)
         self.moduleLoaderError.pack_forget()
         self.rightNotebook.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=(2, 0))
 

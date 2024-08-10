@@ -32,6 +32,8 @@ class Module:
         self.api.getAccountManager().serverStoppedTrigger(
             lambda: self.api.getTriggerManager().accountAddedTriggerREMOVE(self.startPing)
         )
+        self.sendFakeLatency = \
+            self.api.getMainMenu().settingsFrame.pingManagerSettings.checkButton_sendFakeLatencyToServer
         # self.logs.sendLog('[PingManager] Has been loaded!', -1)
 
     def getInfo(self, accountManager: AccountManager, isServer: bool):
@@ -62,7 +64,8 @@ class Module:
             try:
                 while True:
                     msg = s.socket.recv(16)
-                    sleep(random.randint(1, 500) / 1000)  # creating random fake latency for tests
+                    if self.sendFakeLatency.savedData:
+                        sleep(random.randint(1, 500) / 1000)  # creating random fake latency for tests
                     # s.socket.send(msg.upper() if random.randint(0, 5) == 1 else msg)
                     s.socket.send(msg)
                     # s.socket.send(s.socket.recv(16))  # default
@@ -83,7 +86,11 @@ class Module:
                     socket.send(code)
                     if (recv := socket.recv(16)) == code:
                         res = int((datetime.now() - start).total_seconds() * 1000)
-                        info.account.update_ping(res)
+                        info.account.update_ping(
+                            (res + random.randint(1, 500))
+                            if self.sendFakeLatency.savedData
+                            else res
+                        )
                     else:
                         # print('closing connection!!!!', recv)
                         self.accountManager.kickAccount(

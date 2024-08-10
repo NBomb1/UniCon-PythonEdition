@@ -4,7 +4,7 @@ This module shows account information and lets you manage them.
 from Functions.ModuleHandler.moduleAPI import API
 from Functions.Network.Accounts.AccountData import Account
 from Functions.Network.MainChannel.Server.main import ServerMainChannel
-from Functions.Tools.ScrollableFrame import ScrollableFrame
+from UI.TKinter_addons.Tools.ScrollableFrame import ScrollableFrame
 import tkinter as tk
 
 from Modules.Accounts.Design.AccountLeftSideInfo import LeftSideInfo
@@ -45,6 +45,7 @@ class Module(RightSideInfo):
         self.api = api
         self.notebook = self.api.getRightNotebook()
         self.triggerManager = self.api.getTriggerManager()
+        self.accountManager = self.api.getAccountManager()
 
         self.frame = tk.Frame(self.api.getRightNotebook())
         self.frameDisabled = tk.Frame(self.frame)

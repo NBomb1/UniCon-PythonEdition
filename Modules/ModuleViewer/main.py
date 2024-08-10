@@ -7,7 +7,7 @@ from Functions.ModuleHandler.failedModule import FailedModule
 from Functions.ModuleHandler.moduleAPI import API
 import tkinter as tk
 
-from Functions.Tools.ScrollableFrame import ScrollableFrame
+from UI.TKinter_addons.Tools.ScrollableFrame import ScrollableFrame
 from Modules.ModuleViewer.leftModuleInfo import LeftSideInfo
 from Modules.ModuleViewer.rightModuleInfo import RightModuleInfo
 

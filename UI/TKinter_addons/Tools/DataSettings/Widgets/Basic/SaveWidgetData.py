@@ -1,6 +1,6 @@
 from functools import partial
 
-from Functions.Tools.DataSettings.DataFile import DataFile
+from Functions.DataFile import DataFile
 
 
 class SaveWidgetData:

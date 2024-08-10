@@ -17,7 +17,7 @@ from Functions.Network.SecurityInfo import SecurityInfo
 from Functions.Network.Accounts.AccountAuthentication.Server.PreAuthAccount import PreAccount
 from Functions.Network.Accounts.AccountData import Account
 from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager
-from Functions.Tools.logManager import Logs
+from Functions.logManager import Logs
 
 
 class Authentication:
