@@ -150,7 +150,6 @@ class UpdaterUI:
             self.root.update()
             fileDownloader.update_program(self.createMessage, downloadPath)
             self.isFinished = True
-            # TODO: Download and install the update
             self.createMessage('Update downloaded successfully!')
             self.restart_program()
         except Exception as e:
