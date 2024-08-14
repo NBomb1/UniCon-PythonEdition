@@ -67,7 +67,7 @@ class API:
     def getMainMenu(self) -> 'MainMenu':
         if self.__mainMenu is None:
             raise APIException.ObjectIsNull("MainMenu is None")
-        self.__logs.sendLog(f"[API] Accessed MainMenu from {stack()[1].filename.replace(getcwd(), '')}", -1)
+        self.__logs.sendLog(f"[API] Accessed MainMenu from {stack()[1].filename.replace(getcwd(), '')}", 0)
         return self.__mainMenu
 
     def getModuleLoaderError(self) -> tk.Label:

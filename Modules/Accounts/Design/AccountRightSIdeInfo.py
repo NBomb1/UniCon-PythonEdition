@@ -1,4 +1,5 @@
 import tkinter as tk
+from threading import Thread
 from tkinter import simpledialog, messagebox
 from functools import partial
 
@@ -103,7 +104,7 @@ class RightSideInfo:
                                                        else tk.DISABLED
                                                        )
                 self.accountKickButton.configure(text='Kick all',
-                                                 command=(lambda: self.kickAll),
+                                                 command=self.kickAll,
                                                  state=tk.NORMAL if self.accountManager.getParticipants()
                                                  else tk.DISABLED
                                                  )
@@ -162,6 +163,7 @@ class RightSideInfo:
         )
         self.accountKickButton.configure(state=tk.DISABLED)
         self.accountKickReasonButton.configure(state=tk.DISABLED)
+        self.accountKickButton.update_idletasks()
 
     def kickAll(self, askReason: bool = False):
         if not messagebox.askyesno('WARNING', 'Do really you want to kick all accounts?'):
@@ -172,6 +174,5 @@ class RightSideInfo:
             reason = simpledialog.askstring('Kick Reason', 'Enter a reason for kicking all players: ')
             if reason is None:
                 return
-
-        for account in self.api.getAccountManager().getParticipants():
+        for account in self.api.getAccountManager().getParticipants().copy():
             self.kickAccount(account, False, reason)

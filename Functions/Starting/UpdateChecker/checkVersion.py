@@ -3,12 +3,13 @@ from threading import Thread
 from urllib.request import Request, urlopen
 
 from Functions.Starting.UpdateChecker.result import UpdateCheckResult
+timeout = 20
 
 
 def github_api_request(url, token: str) -> dict:
     request = Request(url)
     request.add_header('Authorization', f'token {token}')
-    with urlopen(request) as response:
+    with urlopen(request, timeout=timeout) as response:
         return json.loads(response.read().decode())
 
 
@@ -86,7 +87,7 @@ def check_for_updates(
 def get_latest_version(url: str, gitHubToken: str, className: str, attributeName: str) -> None | str:
     request = Request(url)
     request.add_header('Authorization', f'token {gitHubToken}')
-    with urlopen(request) as response:
+    with urlopen(request, timeout=timeout) as response:
         latest_file_content = response.read().decode('utf-8')
         return extract_version_from_content(latest_file_content, className, attributeName)
 

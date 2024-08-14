@@ -4,12 +4,14 @@ from UI.TKinter_addons.Tools.DataSettings.Widgets.Basic.SaveWidgetData import Sa
 
 
 class CheckButton(tk.Checkbutton, SaveWidgetData):
-    def __init__(self, widget: tk.Widget, text: str, default=False, onSave: callable = None):
+    def __init__(self, widget: tk.Widget, text: str, default=False, onSave: callable = None, onClick=None):
         self.onSave: callable = onSave
         super().__init__(widget, text=text)
         self.v = tk.BooleanVar(self, default)
         self.configure(variable=self.v)
         self.savedData = default
+        if onClick:
+            self.bind('<Button-1>', onClick)  # Bind to left-click event
 
         self._loadFunc(self._load)
 

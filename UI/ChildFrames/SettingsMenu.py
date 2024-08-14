@@ -5,7 +5,6 @@ from time import sleep
 import settings
 import tkinter.ttk as ttk
 
-from Functions.Starting import TaskManager
 from Functions.FileDataManager import FileDataManager
 from UI.ChildFrames.Categories.ConnectionSettings import ConnectionSettings
 from typing import TYPE_CHECKING
@@ -52,13 +51,13 @@ class Settings(ttk.Notebook):
         self.settingsFrame.grid_columnconfigure(2, weight=1)
 
         self.connectionSettings = ConnectionSettings(self.settingsFrame, self.dataManager)
-        self.unsortedSettings = StartUpSettings(self.settingsFrame, self.dataManager)
+        self.startupSettings = StartUpSettings(self.settingsFrame, self.dataManager)
         self.pingManagerSettings = PingManagerSettings(self.settingsFrame, self.dataManager)
 
         self.saveButton = tk.Button(self.settingsFrame, text='save', command=self.save)
 
         self.connectionSettings.grid(row=0, column=0, sticky=tk.NSEW)
-        self.unsortedSettings.grid(row=0, column=1, sticky=tk.NSEW)
+        self.startupSettings.grid(row=0, column=1, sticky=tk.NSEW)
         self.pingManagerSettings.grid(row=0, column=2, sticky=tk.NSEW)
 
         self.saveButton.grid(row=1, columnspan=3, sticky=tk.NSEW)
@@ -66,14 +65,21 @@ class Settings(ttk.Notebook):
     def save(self):
         self.disableSaving()
 
+        # connection settings
         self.connectionSettings.checkButton_saveNickname.save()
         self.connectionSettings.checkButton_savePassword.save()
         self.connectionSettings.checkButton_saveIP.save()
         self.connectionSettings.checkButton_savePort.save()
         self.connectionSettings.checkButton_saveMaxConns.save()
-        self.unsortedSettings.checkButton_noAutoUpdateUserConfirmation.save()
-        if not TaskManager.disable:
-            self.unsortedSettings.checkButton_autoStart.save()
+
+        # startup settings
+        self.startupSettings.checkButton_noAutoUpdateUserConfirmation.save()
+        if self.startupSettings.checkButton_autoStart.cget('state') == tk.NORMAL:
+            self.startupSettings.checkButton_autoStart.save()
+        self.startupSettings.checkButton_IKnowWhatIAmDoing.save()
+        self.startupSettings.entry_startupDefaultArguments.save()
+
+        # ping manager settings
         self.pingManagerSettings.checkButton_sendFakeLatencyToServer.save()
 
         Thread(target=self.enableSaving, daemon=True).start()

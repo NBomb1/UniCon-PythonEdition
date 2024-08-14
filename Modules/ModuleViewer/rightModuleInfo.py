@@ -16,6 +16,7 @@ class RightModuleInfo:
         res = dataManager.get('main').get('doNotLoadList')
         res = res if res is not None else list()
         dataManager.get('main').put('doNotLoadList', res)
+        self.currentModule = None
         self.notToLoadModules: list[str] = res
         self.dataManager = dataManager
         self.id_ = id_
@@ -65,6 +66,11 @@ class RightModuleInfo:
         # self.description.delete('1.0', tk.END)
 
     def showExactModuleInfo(self, module: ActiveModule | FailedModule):
+        if module is self.currentModule:
+            self.hide_all()
+            self.currentModule = None
+            return
+        self.currentModule = module
         if isinstance(module, ActiveModule):
             self.hide_all()
             self.showActiveInfo()

@@ -3,6 +3,8 @@ import tkinter as tk
 import traceback
 from functools import partial
 from os import getcwd
+from subprocess import Popen
+from sys import executable
 from threading import Thread
 from tkinter import simpledialog, ttk, messagebox
 
@@ -18,7 +20,6 @@ from Functions.Network.MainChannel.Server.main import ServerMainChannel
 from Functions.Network.PingManager import PingManager
 from Functions.Network.TriggerManager import TriggerManager
 from Functions.Starting.UpdateChecker import UpdaterInfo
-from Functions.Starting.UpdateChecker.Processes import run_independent_process
 from Functions.Starting.UpdateChecker.checkVersion import check_for_updates
 from UI.TKinter_addons.Tools.DataSettings.Widgets.StringEntry import StringEntry
 from Functions.logManager import Logs
@@ -204,7 +205,6 @@ class MainMenuUIFunctions:
                     self.askPassword,
                     password if password else None,
                 )
-                # self.client.messageTransfer.registerFunction('close', self.accountManager.disconnectedFromServer)
                 self.accountManager.selfAccountDisconnectedTrigger(self.selfClientDisconnected)
                 self.triggerManager.clientConnected(self.client)
                 self.pingManager.getInfo(self.accountManager, False)
@@ -217,7 +217,6 @@ class MainMenuUIFunctions:
                 self.root.bell()
                 self.logs.sendLog("Couldn't connect to the server. Reason: " + error.__str__(), -1)
                 self.logs.sendLog("Couldn't connect to the server. Reason: " + error.__str__(), 0)
-                # self.accountManager.closeConnection()
                 self.closeConnection()
                 traceback.format_exc()
                 raise error
@@ -244,7 +243,6 @@ class MainMenuUIFunctions:
         if unlockCloseConnection:
             self.root.after(settings.MainMenu.switchModesDelay,
                             partial(
-                                # self.left_button_create_server.configure, command=self.closeConnection,
                                 self.left_button_create_server.configure,
                                 command=lambda: functionConfirmation(
                                     self.left_button_create_server,
@@ -259,7 +257,6 @@ class MainMenuUIFunctions:
         self.left_entry_nickname.configure(state=tk.NORMAL)
         self.left_spinbox_port.configure(state=tk.NORMAL)
         self.left_spinbox_maxConnections.configure(state=tk.NORMAL)
-        # self.left_button_create_server.configure(state=tk.NORMAL)
         self.left_button_create_server.configure(state=tk.DISABLED)
         self.left_button_connect.configure(state=tk.DISABLED)
         self.left_entry_password.configure(state=tk.NORMAL)
@@ -277,11 +274,9 @@ class MainMenuUIFunctions:
         )
 
     def selfClientDisconnected(self, msg: dict):
-        # self.api.getAccountManager().SelfDisconnectTrigger.remove(self.selfClientDisconnected)
         self.api.getAccountManager().selfAccountDisconnectedTriggerREMOVE(self.selfClientDisconnected)
         self.logs.sendLog(f'Got disconnected from server. Reason: {msg["reason"]}', -1)
         self.logs.sendLog(f'All info {msg}', -1)
-        # self.unlockInteraction()
         self.closeConnection()
         messagebox.showinfo(
             'Disconnected',
@@ -303,18 +298,22 @@ class MainMenuUIFunctions:
 
     def checkForUpdates(self, autoInstall=False):
         def thread():
-            res = check_for_updates(
-                UpdaterInfo.URL,
-                UpdaterInfo.GITHUB_TOKEN,
-                Info.version,
-                UpdaterInfo.CLASS_NAME,
-                UpdaterInfo.ATTRIBUTE_NAME,
-                UpdaterInfo.REPO_OWNER,
-                UpdaterInfo.REPO_NAME,
-                UpdaterInfo.BRANCH,
-                UpdaterInfo.GITHUB_API_URL,
-                False
-            )
+            try:
+                res = check_for_updates(
+                    UpdaterInfo.URL,
+                    UpdaterInfo.GITHUB_TOKEN,
+                    Info.version,
+                    UpdaterInfo.CLASS_NAME,
+                    UpdaterInfo.ATTRIBUTE_NAME,
+                    UpdaterInfo.REPO_OWNER,
+                    UpdaterInfo.REPO_NAME,
+                    UpdaterInfo.BRANCH,
+                    UpdaterInfo.GITHUB_API_URL,
+                    False
+                )
+            except Exception as e:
+                self.logs.sendLog(f"An error occurred while checking updates: {e}", 0)
+                return
             if res.isOutdated:
                 if autoInstall:
                     self.update_app(True)
@@ -338,9 +337,12 @@ class MainMenuUIFunctions:
             return
         self.logs.sendLog("Closing...", 0)
         try:
-            run_independent_process(
-                getcwd() + "\\Functions\\Starting\\UpdateChecker\\UpdaterUI.py"
+            Popen(
+                [executable, getcwd() + "\\Functions\\Starting\\UpdateChecker\\UpdaterUI.py"],
+                creationflags=0x00000008,
+                close_fds=False,
+                cwd=getcwd()
             )
-            self.root.after(1000, self.root.destroy)
+            self.root.destroy()
         except Exception as e:
             self.logs.sendLog("Error while starting update process.", 0)
