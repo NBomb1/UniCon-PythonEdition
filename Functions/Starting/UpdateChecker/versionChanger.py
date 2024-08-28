@@ -3,6 +3,7 @@ from threading import Thread
 import tkinter as tk
 
 root = tk.Tk()
+root.protocol("WM_DELETE_WINDOW", lambda: 0)
 text = tk.Text(wrap=tk.WORD)
 
 
@@ -93,7 +94,21 @@ def process(root: tk.Tk):
         root.mainloop()
 
 
-Thread(target=process, args=(root,)).start()
+def wait(thread: Thread):
+    thread.join(30)
+    if thread.is_alive():
+        root.bell()
+        thread.join(1)
+        root.bell()
+        with open('NotFinishingProcess.txt', 'w') as f:
+            f.write(f'Process did not finish after 30 seconds.\n\nLOGS:\n{text.get("1.0", tk.END)}')
+            f.write(f'\nPlease send these logs to the creator.')
+    exit()
+
+
+thread = Thread(target=process, args=(root,), daemon=True)
+thread.start()
 
 text.pack(fill=tk.BOTH, expand=True)
+Thread(target=lambda: wait(thread), daemon=True).start()
 root.mainloop()

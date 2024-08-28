@@ -13,10 +13,11 @@ class Logs:
     registeredFunctions: dict[int: list[callable]] = {}  # contains id log and functions
     registeredFileLog: dict[int: io.FileIO] = {}
     logsMessages: list[callable] = []
-    ver = "0.0.2"
+    ver = "1.0.0"
 
     def __init__(self):
         self.printFlag = False
+        self.functionWaiterFlag = False
         self.handler()
 
     def registerId(self, id_, ignoreRegistered=False):
@@ -36,6 +37,9 @@ class Logs:
                      0)
 
     def _sendLog(self, message: str, id_: int, time: datetime):
+        if self.functionWaiterFlag and not self.registeredFunctions[id_]:
+            self.logsMessages.insert(0, partial(self._sendLog, message, id_, time))
+            return 
         for i in self.registeredFunctions[id_]:
             i(message, id_, time)
         if self.registeredFileLog.get(id_) is not None:
@@ -88,3 +92,6 @@ class Logs:
 
     def showLogs(self):
         self.printFlag = True
+
+    def enableFunctionWaiter(self):
+        self.functionWaiterFlag = True

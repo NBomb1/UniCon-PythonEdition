@@ -20,7 +20,7 @@ class FileDataManager:
 
     def save(self, name: str):
         """Saves data."""
-        self.settingDict.pop(name).save()
+        self.settingDict.get(name).save()
 
     def get(self, name: str) -> DataFile:
         """Gets datafile object."""

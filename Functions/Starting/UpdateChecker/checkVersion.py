@@ -59,28 +59,32 @@ def check_for_updates(
         include: bool = False,  # Include merge commits in the comparison.
 ) -> UpdateCheckResult | None:
     output = []
-    thread = Thread(target=lambda: findChanges(
-        currentVersion,
-        urlApi,
-        owner,
-        repo_name,
-        branch,
-        gitHubToken,
-        include,
-        output
-    ),
-                    daemon=True)
-    thread.start()
-    latest_version = get_latest_version(url, gitHubToken, className, attributeName)
-    if latest_version is not None:
-        thread.join()
-        res = compare_versions(latest_version, currentVersion)
-        res = UpdateCheckResult(
-            res is True,
-            latest_version,
-            ''.join(output)
-        )
-        return res
+    try:
+        thread = Thread(target=lambda: findChanges(
+            currentVersion,
+            urlApi,
+            owner,
+            repo_name,
+            branch,
+            gitHubToken,
+            include,
+            output
+        ),
+                        daemon=True)
+        thread.start()
+        latest_version = get_latest_version(url, gitHubToken, className, attributeName)
+        if latest_version is not None:
+            thread.join()
+            res = compare_versions(latest_version, currentVersion)
+            res = UpdateCheckResult(
+                res is True,
+                latest_version,
+                ''.join(output)
+            )
+            return res
+    except Exception as e:
+        print(e)
+        print("Couldn't check for updates")
     return None
 
 
@@ -104,29 +108,32 @@ def extract_version_from_content(content, className: str, attributeName: str) ->
 
 def findChanges(currentVer: str, url: str, owner: str, repo_name: str, branch: str, token: str, include=False,
                 output: list | None = None) -> str:
-    # commits = res
-    changes = []
-    page = 1
-    while True:
-        commits = get_commits(url, owner, repo_name, branch, token, page)
-        if not commits and changes:
-            return "Could not find changes."
-        for commit in commits:
-            msg: str = commit['commit']['message'].split('\n')[0]
-            # print(msg, currentVer, msg.endswith(currentVer))
-            if msg.endswith(currentVer):
-                if include:
-                    changes.append(commit)
-                break
-            changes.append(commit)
-        else:
-            page += 1
-            continue
-        break
-
     returnStr = ''
-    for change in changes:
-        returnStr += f'Date: {change["commit"]["author"]["date"]}\n{change["commit"]["message"]}\n\n'
-    if output is not None:
-        output.append(returnStr)
+    try:
+        # commits = res
+        changes = []
+        page = 1
+        while True:
+            commits = get_commits(url, owner, repo_name, branch, token, page)
+            if not commits and changes:
+                return "Could not find changes."
+            for commit in commits:
+                msg: str = commit['commit']['message'].split('\n')[0]
+                # print(msg, currentVer, msg.endswith(currentVer))
+                if msg.endswith(currentVer):
+                    if include:
+                        changes.append(commit)
+                    break
+                changes.append(commit)
+            else:
+                page += 1
+                continue
+            break
+
+        for change in changes:
+            returnStr += f'Date: {change["commit"]["author"]["date"]}\n{change["commit"]["message"]}\n\n'
+        if output is not None:
+            output.append(returnStr)
+    except Exception as e:
+        pass
     return returnStr

@@ -11,5 +11,5 @@ class MainMenu:
 
 
 class SettingsMenu:
-    widgetsWait = 2.5
-    saveButtonWait = 2.65
+    widgetsWait = 2
+    saveButtonWait = 2.05  # has to be always more than widgetWait

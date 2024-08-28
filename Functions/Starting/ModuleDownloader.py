@@ -6,7 +6,7 @@ import tkinter as tk
 from UI.window.WindowCenter import center_main
 
 
-class CheckModules:
+class ModuleInstaller:
     """
     This class is responsible for checking if required modules are installed and displaying a warning if not.
     It also initializes the main window and sets up the GUI components.
@@ -57,11 +57,11 @@ class CheckModules:
         Creates a frame for displaying missing module information and adds a MissingModule widget to it.
         """
         self.root = tk.Tk()
-        self.root.geometry('425x175')
-        self.root.wm_minsize(425, 175)
+        self.root.geometry('525x175')
+        self.root.wm_minsize(525, 175)
         self.root.protocol("WM_DELETE_WINDOW", exit)
 
-        self.root.title('Warning: Some modules are not installed.')
+        self.root.title('Module installer')
         center_main(self.root)
         self.inactiveImage = tk.PhotoImage(file=(getcwd() + r'\UI\Disabled.gif'))
         self.root.wm_iconphoto(False, self.inactiveImage)
@@ -91,4 +91,4 @@ class CheckModules:
 
 
 def start():
-    CheckModules()
+    ModuleInstaller()

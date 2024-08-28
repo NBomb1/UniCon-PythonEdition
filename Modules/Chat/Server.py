@@ -49,12 +49,17 @@ class Server:
     def sendMessage(self, message: str, type: str):
         time = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0)
         for i in self.participants:
-            i.send_message(type,
-                           msg=message,
-                           nickname=self.selfAccount.nickname,
-                           id=self.selfAccount.id,
-                           time=int(time.timestamp())
-                           )
+            try:
+                i.send_message(type,
+                               msg=message,
+                               nickname=self.selfAccount.nickname,
+                               id=self.selfAccount.id,
+                               time=int(time.timestamp())
+                               )
+            except Exception as e:
+                self.logs.sendLog(f'[Chat] An exception occurred while sending message to {i.account.id}', -1)
+                self.logs.sendLog(f'[Chat] {i.account.id_} exception: {format_exc()}', -1)
+                self.errorOccurred(e, i)
         if type != 'sys':
             self.logMessage(self.selfAccount.nickname, self.selfAccount.id, message, time, True)
         else:
@@ -76,9 +81,10 @@ class Server:
                         time=int(time.timestamp())
                 )
             self.logMessage(account.nickname, account.id, message, time)
-        except Exception:
+        except Exception as e:
             self.logs.sendLog(f'[Chat] An exception occurred while sending message from {m["_account"].id_}', -1)
             self.logs.sendLog(f'[Chat] {m["_account"].id_} exception: {format_exc()}', -1)
+            self.errorOccurred(e, m)
 
     def stop(self):
         self.logs.sendLog('[Chat] Closing connection chat.', -1)

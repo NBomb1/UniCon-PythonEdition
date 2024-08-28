@@ -53,6 +53,7 @@ class EntryWithPlaceholder(tk.Entry):
     def disableFocus(self, mode: bool):
         self.disable_focus = mode
         if mode:
+            self.master.focus_set()
             self._foc_out()
         else:
             self._foc_in()
@@ -63,9 +64,12 @@ class EntryWithPlaceholder(tk.Entry):
     def put(self, text: str):
         if not text:
             return
+        status = self.cget('state')
+        self.configure(state=tk.NORMAL)
         self._foc_in()
         self.delete(0, tk.END)
         self.insert(0, text)
+        self.configure(state=status)  # returning it to its original state
 
     def hideInfo(self, show='*'):
         self.show = show

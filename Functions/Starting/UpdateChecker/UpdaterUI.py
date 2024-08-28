@@ -139,9 +139,11 @@ class UpdaterUI:
 
     def logsHandler(self):
         while True:
-            for message in self.messageQueue:
-                message()
-                self.messageQueue.remove(message)
+            # for message in self.messageQueue:
+            if self.messageQueue:
+                # message()
+                # self.messageQueue.remove(message)
+                self.messageQueue.pop(0)()
             sleep(0.001)
 
     def download_update(self):
@@ -190,7 +192,7 @@ class UpdaterUI:
             )
                             )
             self.root.after(8000, self.root.destroy)
-            # self.root.after(12500, self.root.destroy)
+            self.root.after(10000, exit)
         except Exception as e:
             self.createMessage(f'Error restarting program: {str(e)}')
             self.createMessage(f'Showing format exception: {format_exc()}')
@@ -212,6 +214,7 @@ class UpdaterUI:
             cwd=getcwd()
         )
                         )
+
 
 if __name__ == '__main__':
     UpdaterUI()

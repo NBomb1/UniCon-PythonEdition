@@ -4,24 +4,21 @@ Project started - 2023y 06m 12d
 
 Extra libraries:
 Yaml - saves&loads data from settings.
+PyUAC - Checks admin rights.
+win32 - Task Manager.
 
-Started using AI tabnine to document some functions 2024y 7m 18d.
+Started using AI tabnine to document some functions in 2024y 7m 18d.
 
 Available app args:
 * "--startAsAdmin" - starts application as admin.
-* "--updated" - removes versionChanger.py if it exists and shows update message.
+* "--updated" - removes versionChanger.py if it exists, updates task in task manager and shows update message.
 * "--host" - starts the server automatically.
 * "--client" - starts connecting automatically. Doesn't work with "-host".
 * "--noUpdateCheck" - doesn't check for updates.
 * "--noAutoInstall" - disables update auto-install if enabled.
-* "--doNotLoadDefaultArguments" - doesn't load default arguments that were set in program.
-"""
-
-# TODO: Remove this when pull 0.1.3 update.
-"""
-GOALS FOR 0.1.3 UPDATE:
-- add argparse library.
-- fix string entry widget.
+* "--doNotLoadDefaultArguments" - doesn't load default arguments that were set in program. Doesn't work in program.
+* "--logsWaiterFunctionFlag" - logs contains message until at least one function is registered for that id.
+* "--logsPrint" - prints logs to the console. Doesn't count as a registered function.
 """
 
 """
@@ -65,9 +62,8 @@ def main():
         dataManager.create("main", getcwd() + '\\settings.yml')
         argsDefault(dataManager)
         dataManager.get('main').put('lastStart', datetime.now().timestamp())
-        argsCheckBeforeStart()
-
         logManager = Logs()
+        argsCheckBeforeStart(logManager)
 
         logManager.registerId(0)
         logManager.registerId(-1)

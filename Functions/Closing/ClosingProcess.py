@@ -1,6 +1,6 @@
 from traceback import print_exc
 
-from Functions.Closing.AfterClose import afterClose
+from Functions.Closing.BeforeClose import beforeClose
 from UI.MainMenu import MainMenu
 from tkinter import messagebox
 
@@ -15,7 +15,7 @@ def closing(mainMenu: MainMenu):
     try:
         if mainMenu.server is not None or mainMenu.client is not None:
             mainMenu.closeConnection()
-        afterClose(mainMenu.dataManager, mainMenu)
+        beforeClose(mainMenu.dataManager, mainMenu)
     except Exception:
         print_exc()
     mainMenu.root.destroy()

@@ -5,8 +5,9 @@ from functools import partial
 from os import getcwd
 from subprocess import Popen
 from sys import executable
-from threading import Thread
+from threading import Thread, Timer
 from tkinter import simpledialog, ttk, messagebox
+import getpass
 
 import settings
 from Functions.Exceptions.Server import DataCollectionException
@@ -138,6 +139,10 @@ class MainMenuUIFunctions:
             if maxConns < 0 or maxConns > 10000:
                 raise ValueError("Incorrect maximum connections value.")
             if len(nickname) < 3 or len(nickname) > 15:
+                nickname = getpass.getuser()
+                self.left_entry_nickname.put(nickname)
+                self.logs.sendLog("[Warning] Nickname was changed to user's name because of its length.", -1)
+            if len(nickname) < 3 or len(nickname) > 15:
                 raise DataCollectionException.UsernameException("No nickname was given.")
             if password != '' and (len(password) < 3 or len(password) > 50):
                 raise DataCollectionException.UsernameException("Password not in length range (from 3 to 50).")
@@ -184,6 +189,10 @@ class MainMenuUIFunctions:
                 password = self.left_entry_password.get()
 
                 if len(nickname) < 3 or len(nickname) > 15:
+                    nickname = getpass.getuser()
+                    self.left_entry_nickname.put(nickname)
+                    self.logs.sendLog("[Warning] Nickname was changed to user's name because of its length.", -1)
+                if len(nickname) < 3 or len(nickname) > 15:
                     raise DataCollectionException.UsernameException("No nickname was given.")
                 if password != '' and (len(password) < 3 or len(password) > 50):
                     raise DataCollectionException.UsernameException("Password not in length range (from 3 to 50).")
@@ -221,7 +230,7 @@ class MainMenuUIFunctions:
                 traceback.format_exc()
                 raise error
 
-        Thread(target=thread).start()
+        Thread(target=thread, daemon=True).start()
         self.left_status.configure(image=self.photoConnecting)
         self.root.wm_iconphoto(False, self.photoConnecting)
         self.left_status_label.configure(text='Connecting...')
@@ -236,7 +245,6 @@ class MainMenuUIFunctions:
         self.left_entry_nickname.configure(state=tk.DISABLED)
         self.left_spinbox_port.configure(state=tk.DISABLED)
         self.left_spinbox_maxConnections.configure(state=tk.DISABLED)
-        # self.left_button_create_server.configure(state=tk.DISABLED)
         self.left_button_create_server.configure(state=tk.DISABLED)
         self.left_button_connect.configure(state=tk.DISABLED)
         self.left_entry_password.configure(state=tk.DISABLED)
@@ -314,6 +322,9 @@ class MainMenuUIFunctions:
             except Exception as e:
                 self.logs.sendLog(f"An error occurred while checking updates: {e}", 0)
                 return
+            if res is None:
+                self.logs.sendLog("[AutoUpdater] Couldn't check for updates.", 0)
+                return
             if res.isOutdated:
                 if autoInstall:
                     self.update_app(True)
@@ -344,5 +355,6 @@ class MainMenuUIFunctions:
                 cwd=getcwd()
             )
             self.root.destroy()
+            Timer(10, exit).start()
         except Exception as e:
             self.logs.sendLog("Error while starting update process.", 0)

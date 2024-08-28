@@ -2,7 +2,7 @@ from Functions.FileDataManager import FileDataManager
 from UI.MainMenu import MainMenu
 
 
-def afterClose(dataManager: FileDataManager, mainMenu: MainMenu):
+def beforeClose(dataManager: FileDataManager, mainMenu: MainMenu):
     if mainMenu.settingsFrame.connectionSettings.checkButton_saveNickname.savedData:
         dataManager.get('main').put('nickname', mainMenu.left_entry_nickname.get())
 

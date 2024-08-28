@@ -66,13 +66,13 @@ class EnhancedEntry(EntryWithPlaceholder, SaveWidgetData, ShowRedFlag):
         else:
             res.extend(self.checkCorrectness())
 
+        # self._foc_out()
         if not len(res):
             self.actualData = self._var.get()
             if self.dataSaver is not None:
                 self.dataSaver(self.actualData)
             self.showFlag(self, 'green')
         else:
-            # self._foc_out()
             self.bell()
             if self.get():
                 self.showFlag(self)

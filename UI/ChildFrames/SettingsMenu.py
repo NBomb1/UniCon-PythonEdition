@@ -6,6 +6,7 @@ import settings
 import tkinter.ttk as ttk
 
 from Functions.FileDataManager import FileDataManager
+from Functions.Starting import TaskManager
 from UI.ChildFrames.Categories.ConnectionSettings import ConnectionSettings
 from typing import TYPE_CHECKING
 
@@ -74,19 +75,22 @@ class Settings(ttk.Notebook):
 
         # startup settings
         self.startupSettings.checkButton_noAutoUpdateUserConfirmation.save()
-        if self.startupSettings.checkButton_autoStart.cget('state') == tk.NORMAL:
-            self.startupSettings.checkButton_autoStart.save()
         self.startupSettings.checkButton_IKnowWhatIAmDoing.save()
         self.startupSettings.entry_startupDefaultArguments.save()
+        if self.startupSettings.checkButton_autoStart.cget('state') == tk.NORMAL:
+            self.startupSettings.checkButton_autoStart_ApplyForThisUser.save()
+            self.startupSettings.checkButton_autoStart.save()
 
         # ping manager settings
         self.pingManagerSettings.checkButton_sendFakeLatencyToServer.save()
 
-        Thread(target=self.enableSaving, daemon=True).start()
+        # Thread(target=self.enableSaving, daemon=True).start()
+        self.saveButton.after(
+            int(settings.SettingsMenu.saveButtonWait * 1000),
+            lambda: self.saveButton.configure(state=tk.NORMAL)
+        )
 
-    def enableSaving(self):
-        sleep(settings.SettingsMenu.saveButtonWait)
-        self.saveButton.configure(state=tk.NORMAL)
+        self.dataManager.save('main')
 
     def disableSaving(self):
         self.saveButton.configure(state=tk.DISABLED)

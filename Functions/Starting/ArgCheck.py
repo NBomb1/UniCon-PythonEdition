@@ -6,6 +6,7 @@ import shlex
 
 from Functions.FileDataManager import FileDataManager
 from Functions.Starting import TaskManager
+from Functions.logManager import Logs
 from UI.MainMenu import MainMenu
 
 
@@ -43,32 +44,38 @@ def argsCheckAfterStart(mainMenu: MainMenu):
         mainMenu.logs.sendLog(f"Couldn't use arguments. Error: {e}", 0)
 
 
-def argsCheckBeforeStart():
+def argsCheckBeforeStart(logs: Logs):
     try:
         if '--startAsAdmin' in argv:
-
-            if TaskManager.disable or TaskManager.isAdmin:
-                return
-
-            args = [path.join(getcwd(), 'main.py'), '--startAsAdmin']
-
-            if not sys.platform.startswith('win'):
-                raise EnvironmentError("This script only works on Windows.")
-            for i in range(0, len(args)):
-                args[i] = '"' + args[i] + '"'
-
-            import win32com.shell.shell as shell
-            import win32con
-            shell.ShellExecuteEx(
-                lpVerb='runas',
-                # lpFile='"'+sys.executable + '"',
-                lpFile='"' + sys.executable + '"',
-                nShow=win32con.SW_NORMAL,
-                lpParameters=' '.join(args)
-            )
-            exit()
+            startAsAdmin()
+        if '--logsWaiterFunctionFlag' in argv:
+            logs.enableFunctionWaiter()
+        if '--logsPrint' in argv:
+            logs.showLogs()
     except Exception as e:
         print(format_exc())
+
+
+def startAsAdmin():
+    if TaskManager.disable or TaskManager.isAdmin:
+        return
+
+    args = [path.join(getcwd(), 'main.py'), '--startAsAdmin']
+    if not sys.platform.startswith('win'):
+        raise EnvironmentError("This script only works on Windows.")
+    for i in range(0, len(args)):
+        args[i] = '"' + args[i] + '"'
+
+    import win32com.shell.shell as shell
+    import win32con
+    shell.ShellExecuteEx(
+        lpVerb='runas',
+        # lpFile='"'+sys.executable + '"',
+        lpFile='"' + sys.executable + '"',
+        nShow=win32con.SW_NORMAL,
+        lpParameters=' '.join(args)
+    )
+    exit()
 
 
 def argsDefault(data: FileDataManager):
