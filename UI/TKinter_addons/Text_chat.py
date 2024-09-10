@@ -1,4 +1,6 @@
 import tkinter as tk
+from threading import Thread
+from tkinter import filedialog
 from tkinter.scrolledtext import ScrolledText
 from datetime import datetime
 from traceback import format_exc
@@ -17,6 +19,7 @@ class ChatText(ScrolledText):
         self.tag_configure("time", foreground="blue")
 
         self.configure(state=tk.DISABLED)
+        self.bind("<F1>", self.save)
 
     def create_message(self, data: dict, time: datetime, scheme: str, colorscheme: dict, new_line=True, ) -> int:
         # preparation
@@ -59,3 +62,32 @@ class ChatText(ScrolledText):
         if scroll:
             self.see(tk.END)
         return len(text)
+
+    def save(self, event=None):
+        filePath = filedialog.asksaveasfilename(
+            defaultextension=".txt",
+            initialfile=f"Text widget",
+            filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")],
+            title="Save text as"
+        )
+        if not filePath:
+            return
+
+        def func(path, logs):
+            with open(path, mode='w', encoding='utf-8') as file:
+                file.write(logs)
+            self.create_message(
+                {
+                    'text':"The text has been saved. Path: ",
+                    "path": filePath,
+                    'name': 'Text_Chat'
+                },
+                datetime.now(),
+                '[{name}]: {text}{path}',
+                {
+                    'path': 'nickname1',
+                    'name': 'time'
+                }
+            )
+
+        Thread(target=func, args=(filePath, self.get('0.0', tk.END))).start()

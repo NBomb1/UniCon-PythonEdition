@@ -13,7 +13,7 @@ class Logs:
     registeredFunctions: dict[int: list[callable]] = {}  # contains id log and functions
     registeredFileLog: dict[int: io.FileIO] = {}
     logsMessages: list[callable] = []
-    ver = "1.0.0"
+    ver = "1.0.1"
 
     def __init__(self):
         self.printFlag = False
@@ -39,7 +39,7 @@ class Logs:
     def _sendLog(self, message: str, id_: int, time: datetime):
         if self.functionWaiterFlag and not self.registeredFunctions[id_]:
             self.logsMessages.insert(0, partial(self._sendLog, message, id_, time))
-            return 
+            return
         for i in self.registeredFunctions[id_]:
             i(message, id_, time)
         if self.registeredFileLog.get(id_) is not None:
@@ -53,18 +53,23 @@ class Logs:
     def handler(self):
         def cycle():
             while True:
-                # '' if not self.logsMessages else print(self.logsMessages)
-                if self.logsMessages:
-                    self.logsMessages.pop(0)()
-                sleep(0.001)
+                try:
+                    # '' if not self.logsMessages else print(self.logsMessages)
+                    if self.logsMessages:
+                        self.logsMessages.pop(0)()
+                    sleep(0.001)
+                except ValueError:  # I/O operation on closed file
+                    pass
 
         threading.Thread(target=cycle, daemon=True).start()
 
-    def registerFileLog(self, id_):
-        if self.registeredFunctions.get(id_) is None:
+    def registerFileLog(self, id_, force=False):
+        print("Registering file log for id: " + str(id_) + "....")
+        if self.registeredFunctions.get(id_) is None and not force:
             raise ValueError("There is no registered id (" + str(id_) + ").")
 
         if self.registeredFileLog.get(id_) is None:
+            self.registerId(id_, True)
             path = getcwd() + "\\Logs\\"
             time = datetime.now().__str__().replace(":", "-")
             result = path + time + " id - " + str(id_) + ".txt"
@@ -79,6 +84,7 @@ class Logs:
             self.registeredFileLog[id_].write(
                 f"[{datetime.now().__str__()}]: [LogManager] Log file has been created. \n"
             )
+        print("Registered file log for id: " + str(id_) + " completed.")
 
     def closeFiles(self):
         for i in self.registeredFileLog.values():

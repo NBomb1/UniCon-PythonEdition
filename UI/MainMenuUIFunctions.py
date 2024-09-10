@@ -1,6 +1,5 @@
 # the idea is to move buttons and their functions there for making readable code
 import tkinter as tk
-import traceback
 from functools import partial
 from os import getcwd
 from subprocess import Popen
@@ -10,6 +9,7 @@ from tkinter import simpledialog, ttk, messagebox
 import getpass
 
 import settings
+from Functions.Checks import checkInteger
 from Functions.Exceptions.Server import DataCollectionException
 from Functions.ModuleHandler.moduleAPI import API
 from Functions.ModuleHandler.moduleHandler import ModuleHandler
@@ -179,7 +179,7 @@ class MainMenuUIFunctions:
             # self.accountManager.closeConnection()
             raise error
 
-    def startClient(self):
+    def startClient(self, bell=True):
         def thread():
             try:
                 print('Starting as client')
@@ -211,7 +211,7 @@ class MainMenuUIFunctions:
                     ip,
                     port,
                     self.api.getConnectorManager(),
-                    self.askPassword,
+                    self,
                     password if password else None,
                 )
                 self.accountManager.selfAccountDisconnectedTrigger(self.selfClientDisconnected)
@@ -223,11 +223,11 @@ class MainMenuUIFunctions:
                 self.left_status_label.configure(text='Client mode')
             except Exception as error:
                 self.api.getAccountManager().selfAccountDisconnectedTriggerREMOVE(self.selfClientDisconnected, True)
-                self.root.bell()
+                if bell:
+                    self.root.bell()
                 self.logs.sendLog("Couldn't connect to the server. Reason: " + error.__str__(), -1)
                 self.logs.sendLog("Couldn't connect to the server. Reason: " + error.__str__(), 0)
                 self.closeConnection()
-                traceback.format_exc()
                 raise error
 
         Thread(target=thread, daemon=True).start()
@@ -237,14 +237,20 @@ class MainMenuUIFunctions:
         self.lockInteraction(False)
 
     def askPassword(self) -> str:
-        string = simpledialog.askstring("Ask String", "Wrong Password")
+        # _tkinter.TclError: window ".!_querystring" was deleted before its visibility changed
+        temp = tk.Tk()
+        temp.withdraw()
+        string = simpledialog.askstring("Ask String", "Wrong Password", parent=temp)
+        temp.destroy()
         return string
 
     def lockInteraction(self, unlockCloseConnection=True):
         self.left_entry_ip.configure(state=tk.DISABLED)
         self.left_entry_nickname.configure(state=tk.DISABLED)
         self.left_spinbox_port.configure(state=tk.DISABLED)
-        self.left_spinbox_maxConnections.configure(state=tk.DISABLED)
+        self.left_spinbox_maxConnections.configure(
+            state=tk.NORMAL if self.accountManager.getIsServer() else tk.DISABLED
+        )
         self.left_button_create_server.configure(state=tk.DISABLED)
         self.left_button_connect.configure(state=tk.DISABLED)
         self.left_entry_password.configure(state=tk.DISABLED)
@@ -358,3 +364,18 @@ class MainMenuUIFunctions:
             Timer(10, exit).start()
         except Exception as e:
             self.logs.sendLog("Error while starting update process.", 0)
+
+    def autoReconnection(self, period=20):
+        if (
+                self.left_button_connect.cget('text') == 'Connect to the server'
+                and
+                self.left_button_connect.cget('state') == tk.NORMAL
+        ):
+            self.startClient(False)
+        self.root.after(period * 1000, lambda: self.autoReconnection(period))
+
+    def changeMaxConnections(self, *args):
+        if self.accountManager.getIsServer():
+            var = self.maxConnections.get()
+            if checkInteger(var):
+                self.accountManager.setMaxConnections(int(var))

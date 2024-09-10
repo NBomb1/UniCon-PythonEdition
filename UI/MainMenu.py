@@ -131,6 +131,7 @@ class MainMenu(MainMenuUIFunctions):
         )
 
         self.maxConnections = tk.IntVar(value=20)
+        self.maxConnections.trace_add('write', self.changeMaxConnections)
         self.left_spinbox_maxConnections = tk.Spinbox(
             self.left_frame1,
             from_=settings.MainMenu.max_connections_from,

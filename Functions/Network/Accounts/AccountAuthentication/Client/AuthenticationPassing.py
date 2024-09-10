@@ -8,16 +8,20 @@ from Functions.Network.DataTransfer import MessageTransfer
 from Functions.Network.SecurityInfo import SecurityInfo
 from Functions.logManager import Logs
 from Functions.Exceptions.Authentication import Client
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from UI.MainMenu import MainMenu
 
 
 class Authentication:
-    def __init__(self, messageTransfer: MessageTransfer, logs: Logs, password: str, askPassword: callable,
+    def __init__(self, messageTransfer: MessageTransfer, logs: Logs, password: str, mainMenu: 'MainMenu',
                  account: AccountManager):
         self.messageTransfer = messageTransfer
         self.socket = messageTransfer.socket
         self.logs = logs
         self.password = password
-        self.askPassword = askPassword
+        self.mainMenu = mainMenu
         self.account = account
 
     def start(self):
@@ -76,20 +80,22 @@ class Authentication:
         message = self._getMessage()
         if message is None:
             raise Client.PhaseFailedException("Server disconnected without reason.")
-        if bool(message.replace(' ', '')) and message.replace(" ", '')!= '1':
+        if bool(message.replace(' ', '')) and message.replace(" ", '') != '1':
             raise Client.PhaseFailedException(f"Authentication failed: {message.rstrip()}.")
 
+        # checking if password fitted
         if message.replace(' ', '') != '1':
             while True:
                 if message is None:
                     raise Client.PhaseFailedException("Server disconnected without reason.")
                 if bool(message.replace(' ', '')) and message.replace(" ", '') != '1':
                     raise Client.PhaseFailedException(f"Authentication failed: {message.rstrip()}.")
-                if message.replace(' ', '') == '1':
+                if message.replace(' ', '') == '1':  # success
                     return
 
                 try:
-                    self.socket.send(hashlib.sha512(salt + (self.askPassword()).encode()).hexdigest().encode())
+                    password = self.mainMenu.askPassword()
+                    self.socket.send(hashlib.sha512(salt + password.encode()).hexdigest().encode())
                     message = self._getMessage()
                 except (TypeError, AttributeError, ConnectionAbortedError):
                     self.socket.close()
@@ -108,7 +114,9 @@ class Authentication:
         self.account.getSelfAccount().setId(id)
 
         try:
-            accounts: list[dict[str:str]] = literal_eval(self._getMessage(SecurityInfo.preAuthGetAccountInfo).rstrip(' '))
+            accounts: list[dict[str:str]] = literal_eval(
+                self._getMessage(SecurityInfo.preAuthGetAccountInfo).rstrip(' ')
+            )
             for i in accounts:
                 self.logs.sendLog(f"[Authentication Client] Adding {i['nickname']} with {i['tags']}", -1)
                 account = Account(

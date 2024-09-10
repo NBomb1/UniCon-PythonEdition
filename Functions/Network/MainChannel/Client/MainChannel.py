@@ -5,6 +5,10 @@ from Functions.Network.SecurityInfo import SecurityInfo
 from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager
 from Functions.logManager import Logs
 import socket as s
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from UI.MainMenu import MainMenu
 
 
 class ClientMainChannel:
@@ -17,11 +21,11 @@ class ClientMainChannel:
             ip: str,
             port: int,
             mc: ConnectorManager,
-            askPassword: callable,
+            mainMenu: 'MainMenu',
             password: str | None,
     ):
         self.logs = logs
-        self.askPassword = askPassword
+        self.mainMenu = mainMenu
         self.accountManager = account
         self.mc = mc
         logs.sendLog(f"Connecting to server {ip}:{port}", -1)
@@ -45,7 +49,7 @@ class ClientMainChannel:
         self.accountManager.getSelfAccount().setSocket(self.messageTransfer)
 
         self.accountManager.setMaxConnections(5000)
-        Authentication(self.messageTransfer, self.logs, password, self.askPassword, account).start()
+        Authentication(self.messageTransfer, self.logs, password, self.mainMenu, account).start()
 
         self.messageTransfer.registerFunction('close', self.accountManager._disconnectedFromServer)  # it's fine
         self.messageTransfer.registerFunction('account', self.accountManager.accountHandler)
