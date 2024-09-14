@@ -1,4 +1,4 @@
-from Functions.ModuleHandler.moduleHandler import ModuleHandler
+from Functions.ModuleHandler.moduleLoader import ModuleLoader
 from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.DataTransfer import MessageTransfer
 from Functions.Network.ModuleConnector.Server.ServerModuleConnectorManager import ModuleConnectorManager
@@ -9,7 +9,7 @@ class ConnectorManager:
     server: ModuleConnectorManager = None
     client: ClientModuleConnectorManager = None
 
-    def __init__(self, moduleHandler: ModuleHandler, accountManager: AccountManager):
+    def __init__(self, moduleHandler: ModuleLoader, accountManager: AccountManager):
         self.moduleHandler = moduleHandler
         self.accountManager = accountManager
 

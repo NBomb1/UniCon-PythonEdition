@@ -60,18 +60,18 @@ class Account:
 
     def addTag(self, tag: str):
         if not tag:
-            raise ValueError(f"tag can't be empty!")
+            raise ValueError(f"Tag can't be empty!")
         if tag in self.tags:
-            raise ValueError(f"tag {tag} is already in list!\nlist: {self.tags}\ntag: '{tag}'")
+            raise ValueError(f"Tag {tag} is already in list!\nlist: {self.tags}\ntag: '{tag}'")
         if tag[0] == '_':
-            raise ValueError(f"tag {tag} can't start with '_'!")
+            raise ValueError(f"Tag {tag} can't start with '_'!")
 
         self.tags.append(tag)
         self.accountHasBeenUpdated(self.what_tag)
 
     def removeTag(self, tag: str):
         if tag not in self.tags:
-            raise ValueError(f"tag {tag} is not in list!\nlist: {self.tags}\ntag: '{tag}'")
+            raise ValueError(f"Tag {tag} is not in list!\nlist: {self.tags}\ntag: '{tag}'")
         self.tags.remove(tag)
         self.accountHasBeenUpdated(self.what_tag)
 

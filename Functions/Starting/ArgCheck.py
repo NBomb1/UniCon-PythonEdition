@@ -1,4 +1,5 @@
 import sys
+import traceback
 from os import remove, getcwd, path
 from sys import argv
 from traceback import format_exc
@@ -12,6 +13,8 @@ from Functions.logManager import Logs
 from UI.MainMenu import MainMenu
 
 args = argparse.Namespace()
+setattr(args, "_unknown_args", None)
+setattr(args, "_error", None)
 
 
 def argsCheckAfterStart(mainMenu: MainMenu):
@@ -49,17 +52,17 @@ def argsCheckAfterStart(mainMenu: MainMenu):
                                 args.autoReconnection * 1000,
                                 lambda: mainMenu.autoReconnection(args.autoReconnection)
                                 )
-        if args.error is not None:
-            messagebox.showerror('ERROR', f"An error occurred while getting program arguments.\n{args.error}")
     except Exception as e:
-        mainMenu.logs.sendLog(f"[Args] Loading arguments error: {e}", 0)
-        messagebox.showerror("ERROR", f"[Args] Loading arguments error: {e}")
+        mainMenu.logs.sendLog(f"[Args] Loading arguments error: {traceback.format_exc()}", 0)
+        args._error = e if args._error is None else args._error + f'\n{e}'
 
 
 def argsCheckAfterMainloop(mainMenu: MainMenu):
     if args._unknown_args:
         mainMenu.logs.sendLog(f'[Args] Found unknown arguments: {args._unknown_args}', 0)
         messagebox.showinfo('Warning', f'Unknown arguments found:\n{args._unknown_args}')
+    if args._error is not None:
+        messagebox.showerror('ERROR', f"An error occurred while getting program arguments.\n{args._error}")
 
 
 def argsCheckBeforeStart(logs: Logs):
@@ -70,6 +73,7 @@ def argsCheckBeforeStart(logs: Logs):
             logs.enableFunctionWaiter()
         if args.logsPrint:
             logs.showLogs()
+        print(args.exportLogs)
         for i in args.exportLogs:
             logs.registerFileLog(int(i), True)
     except Exception as e:
@@ -106,12 +110,12 @@ def argsDefault(data: FileDataManager):
         res = main.get('entry_defaultArguments').__str__()
         res = shlex.split(res)
         argv.extend(res)
-        checkArguments()
+        checkArguments(True)
         print('New arguments:', res)
         print('Now arguments:', argv)
 
 
-def checkArguments():
+def checkArguments(disableHelp=False):
     parse = argparse.ArgumentParser(
         prog='UniCon',
         description='UniCon project 2023-06-12.',
@@ -119,12 +123,13 @@ def checkArguments():
         conflict_handler='resolve',
         add_help=False
     )
-    parse.add_argument(
-        '--help',
-        '-help',
-        action='help', default=argparse.SUPPRESS,
-        help='show this help message and exit'
-    )
+    if not disableHelp:
+        parse.add_argument(
+            '--help',
+            '-help',
+            action='help', default=argparse.SUPPRESS,
+            help='show this help message and exit'
+        )
     parse.add_argument(
         "--startAsAdmin",
         help="Starts application as admin",
@@ -187,11 +192,10 @@ def checkArguments():
         help="Exports logs to files.",
         action='store',
         nargs='+',
-        type=list[int]
     )
     try:
         unknown_args = parse.parse_known_args(namespace=args)[1]
-        args.__setattr__('_unknown_args', unknown_args)
+        args._unknown_args = unknown_args
         args.error = None
     except Exception as e:
         args.error = format_exc()

@@ -12,7 +12,7 @@ import settings
 from Functions.Checks import checkInteger
 from Functions.Exceptions.Server import DataCollectionException
 from Functions.ModuleHandler.moduleAPI import API
-from Functions.ModuleHandler.moduleHandler import ModuleHandler
+from Functions.ModuleHandler.moduleLoader import ModuleLoader
 from Functions.Network.Accounts.AccountAuthentication.Server.ServerAuthentication import Authentication
 from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.Accounts.SelfAccount import SelfAccount
@@ -38,7 +38,7 @@ class MainMenuUIFunctions:
     api: API
 
     # Module Handler
-    module: ModuleHandler
+    module: ModuleLoader
 
     # accountManager
     accountManager: AccountManager

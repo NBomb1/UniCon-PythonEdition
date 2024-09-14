@@ -171,7 +171,7 @@ class RightSideInfo:
 
         reason = None
         if askReason:
-            reason = simpledialog.askstring('Kick Reason', 'Enter a reason for kicking all players: ')
+            reason = simpledialog.askstring('Kick Reason', 'Enter a reason for kicking all participants: ')
             if reason is None:
                 return
         for account in self.api.getAccountManager().getParticipants().copy():

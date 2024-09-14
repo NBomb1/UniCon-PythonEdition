@@ -3,7 +3,7 @@ import tkinter.ttk as ttk
 from inspect import stack
 from os import getcwd
 
-from Functions.ModuleHandler.moduleHandler import ModuleHandler
+from Functions.ModuleHandler.moduleLoader import ModuleLoader
 from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager
 from Functions.Network.TriggerManager import TriggerManager
@@ -29,7 +29,7 @@ class API:
                  dataManager: FileDataManager,
                  triggerManager: TriggerManager,
                  connectorManager: ConnectorManager,
-                 moduleHandler: ModuleHandler,
+                 moduleHandler: ModuleLoader,
                  accountManager: AccountManager
                  ):
         self.__root = root
@@ -75,7 +75,7 @@ class API:
             raise APIException.ObjectIsNull("ModuleLoaderError is None")
         return self.__moduleLoaderError
 
-    def getModuleHandler(self) -> ModuleHandler:
+    def getModuleHandler(self) -> ModuleLoader:
         if self.__moduleHandler is None:
             raise APIException.ObjectIsNull("ModuleLoaderError is None")
         return self.__moduleHandler

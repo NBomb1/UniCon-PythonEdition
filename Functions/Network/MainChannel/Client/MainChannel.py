@@ -39,6 +39,7 @@ class ClientMainChannel:
         self.socket = s.socket()
         self.logs.sendLog("[MainChannel Client] Connecting to the server...", -1)
         self.socket.connect((ip, port))
+        self.logs.sendLog("[MainChannel Client] Connected to the server.", -1)
         self.messageTransfer = MessageTransfer(account, self.socket)
 
         self.messageTransfer.registerType('ModuleConnector')

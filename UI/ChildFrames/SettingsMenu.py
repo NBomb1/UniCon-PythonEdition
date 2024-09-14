@@ -1,17 +1,15 @@
 import tkinter as tk
-from threading import Thread
-from time import sleep
 
 import settings
 import tkinter.ttk as ttk
 
 from Functions.FileDataManager import FileDataManager
-from Functions.Starting import TaskManager
 from UI.ChildFrames.Categories.ConnectionSettings import ConnectionSettings
 from typing import TYPE_CHECKING
 
 from UI.ChildFrames.Categories.PingManagerSettings import PingManagerSettings
 from UI.ChildFrames.Categories.StartupSettings import StartUpSettings
+from UI.Info import Info
 
 if TYPE_CHECKING:
     from UI.MainMenu import MainMenu
@@ -36,9 +34,12 @@ class Settings(ttk.Notebook):
         self.dataManager = dataManager
 
         self.settingsFrame = tk.Frame()
+        self.app_infoFrame = tk.Frame()
+
         self.grid_rowconfigure(1, weight=1)
 
         self.fill_main()
+        self.fill_info()
         self.completeCheckButton()
 
     def fill_main(self):
@@ -62,6 +63,13 @@ class Settings(ttk.Notebook):
         self.pingManagerSettings.grid(row=0, column=2, sticky=tk.NSEW)
 
         self.saveButton.grid(row=1, columnspan=3, sticky=tk.NSEW)
+
+    def fill_info(self):
+        self.add(self.app_infoFrame, text='About')
+        self.version_label = tk.Label(self.app_infoFrame, text='Version: ' + Info.version)
+        self.version_label.pack()
+        self.projectStart_label = tk.Label(self.app_infoFrame, text='Project started: ' + settings.MainInfo.startDate)
+        self.projectStart_label.pack()
 
     def save(self):
         self.disableSaving()

@@ -72,7 +72,7 @@ class MessageTransfer:
             else:
                 length = length + got
         message = '{' + self.socket.recv(length - 1).decode()
-        assert message[-1] == '}'
+        assert message[-1] == '}', "An error occurred while getting message."
         return message
 
     def handleMessages(self):
@@ -89,15 +89,16 @@ class MessageTransfer:
                     assert message['type'] in self.types, f"""Type "{message["type"]}" is not in list: {self.types}"""
 
                     if (funcList := self.registeredFunctions.get(message['type'])) is None:
-                        print(f'No functions were registered for type {message["type"]}')
+                        self.logs.sendLog(f'No functions were registered for type {message["type"]}', -1)
                         return
                     message['_socket'] = self.socket
                     message['_account'] = self.account
-                    if message['type'] == 'close':
+                    if message['type'] == 'close':  # recheck it
                         print('reg Functions', self.registeredFunctions)
                     for func in funcList:
                         func(message)
             except Exception as error:
+                self.logs.sendLog(f'[MessageTransfer] An error occurred while handling message error: {error}', -1)
                 self._callErrorFunc(error)
         threading.Thread(target=handler, daemon=True).start()
 
@@ -113,6 +114,7 @@ class MessageTransfer:
                         self._send(i)
                         self.sendMessages.remove(i)
                 except Exception as error:
+                    self.logs.sendLog(f"[MessageTransfer] An error occurred while sending message error: {error}", -1)
                     print('ERROR! - \n', error, '\ninfo: ', i, '\nlist: ', self.sendMessages)
                     print(format_exc())
                     self._callErrorFunc(error)

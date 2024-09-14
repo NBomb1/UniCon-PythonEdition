@@ -64,7 +64,7 @@ class Logs:
         threading.Thread(target=cycle, daemon=True).start()
 
     def registerFileLog(self, id_, force=False):
-        print("Registering file log for id: " + str(id_) + "....")
+        print("Registering file log for id " + str(id_) + "...")
         if self.registeredFunctions.get(id_) is None and not force:
             raise ValueError("There is no registered id (" + str(id_) + ").")
 
@@ -84,7 +84,7 @@ class Logs:
             self.registeredFileLog[id_].write(
                 f"[{datetime.now().__str__()}]: [LogManager] Log file has been created. \n"
             )
-        print("Registered file log for id: " + str(id_) + " completed.")
+        print("Registering of file log for id " + str(id_) + " completed.")
 
     def closeFiles(self):
         for i in self.registeredFileLog.values():

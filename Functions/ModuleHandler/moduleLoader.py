@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from UI.MainMenu import MainMenu
 
 
-class ModuleHandler:
+class ModuleLoader:
     failed: list[FailedModule] = []
     active: list[ActiveModule] = []
     api: 'API' = None
@@ -40,11 +40,13 @@ class ModuleHandler:
         self.doNotLoadList = res if res is not None else []
 
     def startLoading(self):
+        self.logs.sendLog('[ModuleLoader] Loading external modules...', 0)
         try:
             self.mainMenu = self.api.getMainMenu()
             self.startModulesLoading()
         except Exception as error:
             self.showModuleLoaderError("Error:\n" + error.__str__() + '\n' + format_exc())
+        self.logs.sendLog('[ModuleLoader] All modules were loaded successfully.', 0)
 
     def startModulesLoading(self):
         path1 = getcwd()  # getting path
@@ -77,7 +79,7 @@ class ModuleHandler:
 
     def loadSingleModule(self, file: str):
         load = f"Modules.{path.basename(file)}.main"  # path
-        self.logs.sendLog(f"[ModuleHandler] Module {load} is loading.", 0)  # send log
+        self.logs.sendLog(f"[ModuleLoader] Module {load} is loading.", 0)  # send log
         try:
             module = importlib.import_module(load)  # принцип: Modules/ModuleName/main.py  # loading module
             return module
@@ -85,7 +87,7 @@ class ModuleHandler:
             module = FailedModule(file, "Import error", reason, format_exc())
             self.failed.append(module)
             self.moduleStartupOrder.append(module)
-            self.logs.sendLog(f"[ModuleHandler] Couldn't import {load} module. {reason}", 0)
+            self.logs.sendLog(f"[ModuleLoader] Couldn't import {load} module. {reason}", 0)
             return None
 
     def activateSingleModule(self, module: ModuleType, file: str, isInternal: bool = False):
@@ -93,9 +95,9 @@ class ModuleHandler:
         active = None
         try:
             try:
-                self.logs.sendLog(f"[ModuleHandler] Module {format_} is initializing.", 0)  # send log
+                self.logs.sendLog(f"[ModuleLoader] Module {format_} is initializing.", 0)  # send log
                 if module.Module.id_ in self.doNotLoadList:
-                    self.logs.sendLog(f"[ModuleHandler] Module {format_} is in doNotLoadList.", 0)  # send log
+                    self.logs.sendLog(f"[ModuleLoader] Module {format_} is in doNotLoadList.", 0)  # send log
                     module = FailedModule(file,
                                           "Module was disabled by user",
                                           Exception('No exception'),
@@ -110,15 +112,15 @@ class ModuleHandler:
                     self.api
                 )
                 if module.Module.id_ is None or len(module.Module.id_) != 64:
-                    raise Exception("Id must be equal 64")
-                self.logs.sendLog(f"[ModuleHandler] Module {format_} initialized.", 0)  # send log
+                    raise Exception("Id len must be equal 64")
+                self.logs.sendLog(f"[ModuleLoader] Module {format_} initialized.", 0)  # send log
             except Exception as reason:
                 module = FailedModule(file, "Activation error", reason, format_exc())
                 self.failed.append(module)
                 self.moduleStartupOrder.append(module)
-                self.logs.sendLog(f"[ModuleHandler] Module {format_} has an internal error.", 0)
+                self.logs.sendLog(f"[ModuleLoader] Module {format_} has an internal error.", 0)
                 return
-            self.logs.sendLog(f"[ModuleHandler] Getting info from {format_}.", 0)  # send log
+            self.logs.sendLog(f"[ModuleLoader] Getting info from {format_}.", 0)  # send log
             module = ActiveModule(
                 active.id_,
                 active.name,
@@ -132,8 +134,9 @@ class ModuleHandler:
             )
             self.active.append(module)
             self.moduleStartupOrder.append(module)
+            self.logs.sendLog(f'[ModuleLoader] Module {active.name} has been loaded successfully', 0)
         except AttributeError as reason:
-            self.logs.sendLog(f"[ModuleHandler] Couldn't get info from {format_}.", 0)  # send log
+            self.logs.sendLog(f"[ModuleLoader] Couldn't get info from {format_}.", 0)  # send log
             module = FailedModule(file, "Not enough information", reason, format_exc())
             self.failed.append(module)
             self.moduleStartupOrder.append(module)

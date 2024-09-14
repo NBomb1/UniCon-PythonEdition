@@ -33,6 +33,7 @@ class AccountManager(AccountDataTransfer, AccountDataHandler):
 
     def closeConnection(self):
         """Sets isServer to None and clears manager."""
+        self.logs.sendLog("[AccountManager] Closing connection...", -1)
         if self.getIsServer() is None:
             return
 
@@ -55,6 +56,7 @@ class AccountManager(AccountDataTransfer, AccountDataHandler):
         """Adds new account. Calls trigger functions."""
         isServer = self.getIsServer()
         if isServer and len(self.participants) >= self.maxConnections:
+            self.logs.sendLog(f"[AccountManager] Can't add more than allowed connections!", -1)
             account.socket.socket.close()
             return
 

@@ -25,12 +25,22 @@ class ModuleConnectorManager:
                 self.__waitingForConnections.remove(i)
                 i.account.addExtraConnection(i.moduleId, i.socket)
                 self.accountManager.getSelfAccount().addExtraConnection(i.moduleId, i.socket)
+                self.accountManager.logs.sendLog(
+                    f"[MCM Server] Module "
+                    f"{i.moduleId[:3]}...{i.moduleId[-3:]}"
+                    f" established extra connection to client {i.account.id}.", -1
+                )
                 return True
         return False
 
     def _deleteCheckCode(self, obj: WaitingForConnectionInfo):
         try:
             self.__waitingForConnections.remove(obj)
+            self.accountManager.logs.sendLog(
+                f"[MCM Server] Module "
+                f"{obj.moduleId[:3]}...{obj.moduleId[-3:]}"
+                f"connection to client {obj.account.id} timed out.", -1
+            )
             obj.declined()
         except ValueError:
             pass

@@ -57,5 +57,3 @@ class TriggerManager:
             i(preAccount)
         if preAccount.delete:
             preAccount.socket.close()
-
-

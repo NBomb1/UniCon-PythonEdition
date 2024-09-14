@@ -2,7 +2,7 @@ import hashlib
 import socket
 from functools import partial
 
-from Functions.ModuleHandler.moduleHandler import ModuleHandler
+from Functions.ModuleHandler.moduleLoader import ModuleLoader
 from Functions.Network.Accounts.AccountData import Account
 from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.DataTransfer import MessageTransfer
@@ -10,7 +10,7 @@ from Functions.Network.ModuleConnector.Client.InviteConnectionInfo import Invite
 
 
 class ClientModuleConnectorManager:
-    def __init__(self, s: MessageTransfer, moduleHandler: ModuleHandler, accountManager: AccountManager):
+    def __init__(self, s: MessageTransfer, moduleHandler: ModuleLoader, accountManager: AccountManager):
         self.moduleHandler = moduleHandler
         self.messageTransfer = s
         self.accountManager = accountManager
@@ -27,10 +27,10 @@ class ClientModuleConnectorManager:
                     message['_account'],
                     message['id'],  # the id of module
                     None,  # the version will be None for a while,
-                    partial(self.__accept, message['specialCode'], message['id'], message['_account'])
+                    partial(self.__accept, message['specialCode'], message['id'], message['_account'], message['id'])
                 ))
 
-    def __accept(self, specialCode: bytes, id_: str, account: Account):
+    def __accept(self, specialCode: bytes, id_: str, account: Account, moduleId: str):
         checkCode = hashlib.sha256(specialCode + self.salt).hexdigest().encode()
         newSocket = socket.socket()
         newSocket.connect(self.messageTransfer.socket.getpeername())
@@ -38,4 +38,8 @@ class ClientModuleConnectorManager:
         messageTransfer = MessageTransfer(self.messageTransfer.accountManager, newSocket)
         self.accountManager.getSelfAccount().addExtraConnection(id_, messageTransfer)
         account.addExtraConnection(id_, messageTransfer)
+        self.accountManager.logs.sendLog(
+            '[MCM Client] Accepted extra connection invite for module with id ' +
+            f"{moduleId[:3]}...{moduleId[-3:]}.", -1
+        )
         return messageTransfer

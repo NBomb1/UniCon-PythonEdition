@@ -20,7 +20,7 @@ from UI.TKinter_addons.Text_chat import ChatText
 
 class Module:
     id_ = 'v1tsW@Joi3z^+98K[p7DhMRX4f6Ngx9p]EFC=|x0h5L]uQoSXwGM%6Zefi[cd1bu'
-    version = "1.0.0"
+    version = "1.0.1"
     name = "Logs"
     author = "ArT"
     defaultNetworkAuth = False
@@ -29,12 +29,14 @@ class Module:
     font = (None, 11, "normal")
     currentId: int = -1
     limit_constant = 3_000_000  # limit for check
-    limit = 0  # current number
     idLog: dict[int, ChatText] = {}
     messageList: list[callable] = []
 
     def __init__(self, api: API):
         self.api = api
+        self.api.getDataManager().create('Logs', getcwd() + '\\Modules\\Logs\\settings.yml')  # creates settings file
+
+        self.storage = self.api.getDataManager().get("Logs")  # were all changes will be containing
         self._setupParameters()
 
         self.allIDs = [self.currentId]
@@ -60,14 +62,7 @@ class Module:
         self.messageList.append(partial(self.message_, message, id_, time if time is not None else datetime.now()))
 
     def message_(self, message: str, id_: int, time: datetime):
-        if self.limit * 1.5 >= self.limit_constant:
-            self.limit = 0
-            self.idLog[id_].configure(state=tk.NORMAL)
-            self.idLog[id_].delete("1.0", tk.END)
-            self.idLog[id_].configure(state=tk.DISABLED)
-            self.message("[Logs] All messages have been forcibly deleted.", id_)
-
-        self.limit += self.idLog[id_].create_message(
+        self.idLog[id_].create_message(
             {
                 'message': message
             },
@@ -77,8 +72,6 @@ class Module:
                 'message': 'system-message'
             }
         )
-        if self.limit >= self.limit_constant:
-            pass
 
     def clearButtonConfirmation(self):
         def timer():
@@ -102,15 +95,13 @@ class Module:
     def handleMessages(self):
         def loop():
             while True:
-                for func in self.messageList:
-                    func()
-                    self.messageList.remove(func)
+                while self.messageList:
+                    self.messageList.pop(0)()
                 sleep(0.001)
         Thread(target=loop, daemon=True).start()
 
     def clearButton(self):
         self.button_clear.configure(command=self.clearButtonConfirmation, text='Clear')
-        self.limit = 0
         self.idLog[self.currentId].configure(state=tk.NORMAL)
         self.idLog[self.currentId].delete("1.0", tk.END)
         self.idLog[self.currentId].configure(state=tk.DISABLED)
@@ -141,10 +132,10 @@ class Module:
         self.idLog[currentId].pack(fill=tk.BOTH, expand=True)
         self.idLog[self.currentId].pack_forget()
         self.currentId = currentId
+        self.storage.put('currentId', self.currentId)
 
     def registerIDs(self):
         for _ in range(0, 100):
-            sleep(0.0001)
             for i in self.api.getLogs().registeredFunctions.keys():
                 if i not in self.allIDs:
                     self.allIDs.append(i)
@@ -153,7 +144,8 @@ class Module:
                     self.combobox_ids.configure(values=self.allIDs)
                     self.api.getLogs().registerHandler(i, self.message)
                     self.idLog[i].configure(wrap=tk.WORD, height=20, font=self.font)
-                    self.message(f"[Logs] Log ID {i} have been found.", i)
+                    self.message(f"[Logs] Log ID {i} has been found.", i)
+            sleep(0.1)
 
     def _create_widgets(self):
         # Creating widgets
@@ -193,8 +185,7 @@ class Module:
         self.combobox_ids.bind("<<ComboboxSelected>>", self.on_combobox_selected)
 
     def _setupParameters(self):
-        self.api.getDataManager().create('Logs', getcwd() + '\\Modules\\Logs\\settings.yml')
-        if (a := self.api.getDataManager().get("Logs").get('currentId')) is None:
-            self.api.getDataManager().get("Logs").put("currentId", self.currentId)
+        if (a := self.storage.get('currentId')) is None:
+            self.storage.put("currentId", self.currentId)
         else:
             self.currentId = a

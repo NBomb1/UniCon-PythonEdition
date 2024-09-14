@@ -45,7 +45,9 @@ class ServerMainChannel:
             self.logs.sendLog("[MainChannel] Using custom password.", -1)
 
         self.socket = s.socket(s.AF_INET, s.SOCK_STREAM)
+        self.logs.sendLog("[MainChannel] Binding server...", -1)
         self.socket.bind((ip, port))
+        self.logs.sendLog("[MainChannel] Server bound successfully.", -1)
         self.socket.listen()
         self.accountManager.setMaxConnections(maxCon)
         self.accountManager.updateAccountInfoHandler()

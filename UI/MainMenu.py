@@ -14,7 +14,7 @@ from Functions.logManager import Logs
 from UI.MainMenuUIFunctions import MainMenuUIFunctions
 from UI.ChildFrames.SettingsMenu import Settings
 from UI.window.WindowCenter import center_main
-from Functions.ModuleHandler.moduleHandler import ModuleHandler
+from Functions.ModuleHandler.moduleLoader import ModuleLoader
 from Functions.ModuleHandler.moduleAPI import API
 import settings
 
@@ -33,11 +33,14 @@ class MainMenu(MainMenuUIFunctions):
         center_main(self.root)
         self.changeTitle("MainMenu")
 
+        self.logs.sendLog('[MainMenu] Getting icons...', 0)
         self.photoEnabledHost = tk.PhotoImage(file=getcwd() + r'\UI\Enabled-Host.gif')
         self.photoEnabledClient = tk.PhotoImage(file=getcwd() + r'\UI\Enabled-Client.gif')
         self.photoDisabled = tk.PhotoImage(file=getcwd() + r'\UI\Disabled.gif')
         self.photoConnecting = tk.PhotoImage(file=getcwd() + r'\UI\Connecting.gif')
+        self.logs.sendLog('[MainMenu] Got icons.', 0)
 
+        # formatting icons
         self.photoDisabled = self.photoDisabled.subsample(3)
         self.photoEnabledClient = self.photoEnabledClient.subsample(3)
         self.photoEnabledHost = self.photoEnabledHost.subsample(3)
@@ -56,7 +59,7 @@ class MainMenu(MainMenuUIFunctions):
         # Settings frame
         self.settingsFrame = Settings(self.mainFrame, self.dataManager, self)
 
-        self.module = ModuleHandler(self.logs, self.moduleLoaderError, self.right_notebook, self.root, dataManager)
+        self.module = ModuleLoader(self.logs, self.moduleLoaderError, self.right_notebook, self.root, dataManager)
         self.triggerManager = TriggerManager(self.accountManager)
         self.mcm = ConnectorManager(self.module, self.accountManager)
 
@@ -73,7 +76,9 @@ class MainMenu(MainMenuUIFunctions):
                 self.module,
                 self.accountManager
             )
+        self.logs.sendLog('[MainMenu] API successfully created.', 0)
         self.module.api = self.api
+        self.logs.sendLog('[MainMenu] Loading PingManager...', 0)
         self.pingManager: PingManager.Module = self.module.activateSingleModule(
             PingManager,
             getcwd() + '\\Functions\\Network\\PingManager\\PingManager.py',
@@ -98,7 +103,7 @@ class MainMenu(MainMenuUIFunctions):
         self.left_entry_ip = StringEntry(self.left_frame1, 'Type ip...')
         self.left_entry_nickname = StringEntry(self.left_frame1, 'Type your nickname...')
         # self.left_label_port = customtkinter.CTkLabel(self.left_frame1, text='Port: ')
-        self.left_label_port = tk.Label(self.left_frame1, text='Port: ')
+        self.left_label_connectionProperties = tk.Label(self.left_frame1, text='Connection properties: ')
         self.left_label_maxConnections = tk.Label(self.left_frame1, text='Max connections: ')
         self.left_entry_password = StringEntry(self.left_frame1, 'Type password...')
         self.left_entry_password.hideInfo()
@@ -131,7 +136,7 @@ class MainMenu(MainMenuUIFunctions):
         )
 
         self.maxConnections = tk.IntVar(value=20)
-        self.maxConnections.trace_add('write', self.changeMaxConnections)
+        self.maxConnections.trace_add('write', self.changeMaxConnections)  #
         self.left_spinbox_maxConnections = tk.Spinbox(
             self.left_frame1,
             from_=settings.MainMenu.max_connections_from,
@@ -145,12 +150,12 @@ class MainMenu(MainMenuUIFunctions):
         self.left_status.pack(anchor=tk.E, side=tk.LEFT, expand=True)
         self.left_status_label.pack(anchor=tk.NW, side=tk.RIGHT, expand=True)
         self.left_entry_nickname.pack(fill=tk.X, padx=(5, 0))
+        self.left_label_connectionProperties.pack(fill=tk.X, padx=(5, 0))
         self.left_entry_ip.pack(fill=tk.X, padx=(5, 0))
-        self.left_label_port.pack(fill=tk.X, padx=(5, 0))
         self.left_spinbox_port.pack(fill=tk.X, padx=(5, 0))
+        self.left_entry_password.pack(fill=tk.X, padx=(5, 0))
         self.left_label_maxConnections.pack(fill=tk.X, padx=(5, 0))
         self.left_spinbox_maxConnections.pack(fill=tk.X, padx=(5, 0))
-        self.left_entry_password.pack(fill=tk.X, padx=(5, 0), pady=(5, 0))
 
         self.left_button_settings.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))
         self.left_button_connect.pack(side=tk.BOTTOM, pady=(0, 5), padx=(5, 0))

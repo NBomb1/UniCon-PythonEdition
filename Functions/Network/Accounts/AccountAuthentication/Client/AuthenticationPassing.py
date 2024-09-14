@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
 
 class Authentication:
+    """Client side authentication."""
     def __init__(self, messageTransfer: MessageTransfer, logs: Logs, password: str, mainMenu: 'MainMenu',
                  account: AccountManager):
         self.messageTransfer = messageTransfer
@@ -40,8 +41,9 @@ class Authentication:
             self._4_PhaseDataShare()
             # Phase 5 is not available now
             # Phase 6 is not available now
-            self.logs.sendLog('[Authentication Client] Connection established!', -1)
+            self.logs.sendLog('[Authentication Client] All phases has been passed!', -1)
             self.messageTransfer.handleMessages()
+            self.logs.sendLog('[Authentication Client] Starting handling messages.', -1)
         except Client.PhaseFailedException as fail:
             # self.logs.sendLog(f"[Authentication Client] Couldn't pass authentication phase. Reason: {fail}", -1)
             raise fail
@@ -62,15 +64,14 @@ class Authentication:
             return None
 
     def _1_PhaseRecognition(self):
-        self.logs.sendLog("[Authentication Client] Trying to pass 1st phase.", -1)
         self.sendMessage(SecurityInfo.unique_message, SecurityInfo.preAuthMessageLength)
+        self.logs.sendLog("[Authentication Client] First phase has been passed!", -1)
 
     def _2_PhaseBuiltInModuleCheck(self):
-        self.logs.sendLog("[Authentication Client] Trying to pass 2nd phase.", -1)
         self.sendMessage(SecurityInfo.getBuiltInModules().__str__(), SecurityInfo.preAuthMessageLength)
+        self.logs.sendLog("[Authentication Client] Second phase has been passed!", -1)
 
     def _3_PhasePasswordCheck(self):
-        self.logs.sendLog("[Authentication Client] Trying to pass 3rd phase.", -1)
         salt = self.socket.recv(SecurityInfo.preAuthMessageLength)  # receiving salt
         self.account.getSelfAccount().setSalt(salt)
 
@@ -91,6 +92,7 @@ class Authentication:
                 if bool(message.replace(' ', '')) and message.replace(" ", '') != '1':
                     raise Client.PhaseFailedException(f"Authentication failed: {message.rstrip()}.")
                 if message.replace(' ', '') == '1':  # success
+                    self.logs.sendLog("[Authentication Client] Third phase has been passed!", -1)
                     return
 
                 try:
@@ -138,6 +140,7 @@ class Authentication:
                 if 'Owner' in i['tags']:
                     self.account.owner = account
             self.messageTransfer.registerAccount(self.account.owner)
+            self.logs.sendLog("[Authentication Client] Fourth phase has been passed!", -1)
         except ValueError:
             self.logs.sendLog('[Authentication Client] Something went wrong due getting an account info.', -1)
             self.socket.close()

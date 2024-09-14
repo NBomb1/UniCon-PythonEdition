@@ -1,4 +1,4 @@
-def checkInteger(number: str) -> bool:
+def checkInteger(number: any) -> bool:
     """returns True if number is integer"""
     try:
         int(number)

@@ -3,14 +3,18 @@ from threading import Thread
 from urllib.request import Request, urlopen
 
 from Functions.Starting.UpdateChecker.result import UpdateCheckResult
-timeout = 20
+timeout = 15
 
 
 def github_api_request(url, token: str) -> dict:
     request = Request(url)
     request.add_header('Authorization', f'token {token}')
-    with urlopen(request, timeout=timeout) as response:
-        return json.loads(response.read().decode())
+    while True:
+        try:
+            with urlopen(request, timeout=timeout) as response:
+                return json.loads(response.read().decode())
+        except TimeoutError:
+            pass
 
 
 def get_commits(url: str, owner: str, repo_name: str, branch: str, token: str, page: int | None = None) -> dict:
