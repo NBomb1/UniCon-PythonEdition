@@ -14,6 +14,7 @@ class SecurityInfo:
     SecurityVersion = "0.0.1"
     PingManager = "0.0.2"
     MessageTransfer = "0.0.2"
+    FileTransfer = '0.0.1'
 
     unique_message = "ProjectSocketInterface16102023"
     preAuthMessageLength = 256
@@ -27,5 +28,6 @@ class SecurityInfo:
             "Security": SecurityInfo.SecurityVersion,
             "PingManager": SecurityInfo.PingManager,
             "MessageTransfer": SecurityInfo.MessageTransfer,
-            "UI": UIInfo.version
+            'FileTransfer': SecurityInfo.FileTransfer,
+            "UI": UIInfo.version,
         }

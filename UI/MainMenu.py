@@ -3,6 +3,7 @@ from os import getcwd
 from tkinter import ttk
 
 from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.FileTransfer.FileTransfer import FileTransfer
 from Functions.Network.MainChannel.Client.MainChannel import ClientMainChannel
 from Functions.Network.MainChannel.Server.main import ServerMainChannel
 from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager
@@ -34,16 +35,16 @@ class MainMenu(MainMenuUIFunctions):
         self.changeTitle("MainMenu")
 
         self.logs.sendLog('[MainMenu] Getting icons...', 0)
-        self.photoEnabledHost = tk.PhotoImage(file=getcwd() + r'\UI\Enabled-Host.gif')
-        self.photoEnabledClient = tk.PhotoImage(file=getcwd() + r'\UI\Enabled-Client.gif')
-        self.photoDisabled = tk.PhotoImage(file=getcwd() + r'\UI\Disabled.gif')
+        self.photoEnabledServer = tk.PhotoImage(file=getcwd() + r'\UI\Server.gif')
+        self.photoEnabledClient = tk.PhotoImage(file=getcwd() + r'\UI\Client.gif')
+        self.photoDisabled = tk.PhotoImage(file=getcwd() + r'\UI\NoConnection.gif')
         self.photoConnecting = tk.PhotoImage(file=getcwd() + r'\UI\Connecting.gif')
         self.logs.sendLog('[MainMenu] Got icons.', 0)
 
         # formatting icons
         self.photoDisabled = self.photoDisabled.subsample(3)
         self.photoEnabledClient = self.photoEnabledClient.subsample(3)
-        self.photoEnabledHost = self.photoEnabledHost.subsample(3)
+        self.photoEnabledServer = self.photoEnabledServer.subsample(3)
         self.photoConnecting = self.photoConnecting.subsample(3)
 
         self.root.wm_iconphoto(False, self.photoDisabled)
@@ -62,6 +63,7 @@ class MainMenu(MainMenuUIFunctions):
         self.module = ModuleLoader(self.logs, self.moduleLoaderError, self.right_notebook, self.root, dataManager)
         self.triggerManager = TriggerManager(self.accountManager)
         self.mcm = ConnectorManager(self.module, self.accountManager)
+        self.fileTransfer = FileTransfer()
 
         self.api = API(
                 log,
@@ -74,8 +76,12 @@ class MainMenu(MainMenuUIFunctions):
                 self.triggerManager,
                 self.mcm,
                 self.module,
-                self.accountManager
+                self.accountManager,
+                self.fileTransfer
+                # self.fileTransfer
             )
+        self.fileTransfer.getApi(self.api)
+
         self.logs.sendLog('[MainMenu] API successfully created.', 0)
         self.module.api = self.api
         self.logs.sendLog('[MainMenu] Loading PingManager...', 0)
@@ -87,6 +93,9 @@ class MainMenu(MainMenuUIFunctions):
         self.module.startLoading()
 
         self.confirmation = dataManager.get('main').get('checkButton_autoUpdateNoUserConfirmation')
+
+        self.left_status_frame.bind("<Enter>", self.showParticipants)
+        self.left_status_frame.bind("<Leave>", self.hideParticipants)
 
     def _createLeftWidgets(self):
         # Creating two frames that will contain all sorts of widgets

@@ -5,6 +5,7 @@ from types import ModuleType
 import tkinter as tk
 from traceback import format_exc
 
+from Functions.Exceptions.Modules import Modules
 from Functions.ModuleHandler.failedModule import FailedModule
 from Functions.ModuleHandler.activeModule import ActiveModule
 from Functions.FileDataManager import FileDataManager
@@ -108,11 +109,16 @@ class ModuleLoader:
                     self.failed.append(module)
                     self.moduleStartupOrder.append(module)
                     return
+                try:
+                    index = tuple(map(lambda x: x.id_, self.active)).index(module.Module.id_)
+                    raise Modules.ModuleLoader.IdConflictError(f"Module {self.active[index].name} has the same id.")
+                except ValueError:
+                    pass
                 active = module.Module(
                     self.api
                 )
                 if module.Module.id_ is None or len(module.Module.id_) != 64:
-                    raise Exception("Id len must be equal 64")
+                    raise Modules.ModuleLoader.IdFormatError("Id len must be equal 64.")
                 self.logs.sendLog(f"[ModuleLoader] Module {format_} initialized.", 0)  # send log
             except Exception as reason:
                 module = FailedModule(file, "Activation error", reason, format_exc())
@@ -134,7 +140,7 @@ class ModuleLoader:
             )
             self.active.append(module)
             self.moduleStartupOrder.append(module)
-            self.logs.sendLog(f'[ModuleLoader] Module {active.name} has been loaded successfully', 0)
+            self.logs.sendLog(f'[ModuleLoader] Module {active.name} has been loaded successfully.', 0)
         except AttributeError as reason:
             self.logs.sendLog(f"[ModuleLoader] Couldn't get info from {format_}.", 0)  # send log
             module = FailedModule(file, "Not enough information", reason, format_exc())
@@ -159,7 +165,7 @@ class ModuleLoader:
         self.moduleLoaderError.pack_forget()
         self.rightNotebook.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=(2, 0))
 
-    def findById(self, id_: str) -> ActiveModule:
+    def findById(self, id_: str) -> ActiveModule | None:
         for i in self.active:
             if i.id_ == id_:
                 return i

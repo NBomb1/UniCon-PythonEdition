@@ -34,7 +34,7 @@ class Module:
         )
         self.sendFakeLatency = \
             self.api.getMainMenu().settingsFrame.pingManagerSettings.checkButton_sendFakeLatencyToServer
-        # self.logs.sendLog('[PingManager] Has been loaded!', -1)
+        # self.logs.sendLog('[PingManager] Module has been loaded!', 0)
 
     def getInfo(self, accountManager: AccountManager, isServer: bool):
         self.logs.sendLog(f'[PingManager] Getting info! isServer={isServer}', -1)
@@ -85,14 +85,13 @@ class Module:
                     start = datetime.now()
                     socket.send(code)
                     if (recv := socket.recv(16)) == code:
-                        res = int((datetime.now() - start).total_seconds() * 1000)
+                        res = int((datetime.now() - start).total_seconds() * 1000)  # ms
                         info.account.update_ping(
                             (res + random.randint(1, 500))
                             if self.sendFakeLatency.savedData
                             else res
                         )
                     else:
-                        # print('closing connection!!!!', recv)
                         self.accountManager.kickAccount(
                             self.accountManager.getSelfAccount(),
                             info.account,
@@ -102,7 +101,6 @@ class Module:
                         return
                     sleep(2)
             except (ConnectionResetError, OSError):
-                # print('kicking an account')
                 self.accountManager.kickAccount(
                     self.accountManager.getSelfAccount(),
                     info.account,

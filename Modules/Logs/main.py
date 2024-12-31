@@ -3,7 +3,7 @@ Logs let you get information from different modules while program is running.
 It can be used to track user actions, or log important events.
 You can save information into the file.
 
-Warning: It doesn't show information that was sent before module was started.
+Warning: It doesn't show information that was sent before module started.
 """
 import tkinter as tk
 from datetime import datetime
@@ -20,16 +20,16 @@ from UI.TKinter_addons.Text_chat import ChatText
 
 class Module:
     id_ = 'v1tsW@Joi3z^+98K[p7DhMRX4f6Ngx9p]EFC=|x0h5L]uQoSXwGM%6Zefi[cd1bu'
-    version = "1.0.1"
+    version = "1.0.2"
     name = "Logs"
     author = "ArT"
     defaultNetworkAuth = False
     isUI = True
 
     font = (None, 11, "normal")
-    currentId: int = -1
+    currentId: int | str = -1
     limit_constant = 3_000_000  # limit for check
-    idLog: dict[int, ChatText] = {}
+    idLog: dict[int | str, ChatText] = {}
     messageList: list[callable] = []
 
     def __init__(self, api: API):
@@ -41,7 +41,6 @@ class Module:
 
         self.allIDs = [self.currentId]
         self.frame = tk.Frame(api.getRightNotebook())
-
         api.getRightNotebook().add(self.frame, text="Logs")
 
         self._create_widgets()
@@ -49,7 +48,10 @@ class Module:
         self._configure_widgets()
 
         # Finishing it
-        api.getLogs().registerHandler(self.currentId, self.message)
+        api.getLogs().registerHandler(
+            int(self.currentId) if self.currentId.replace('-', '').isnumeric() else self.currentId,
+            self.message
+        )
         self.combobox_ids.set(self.currentId)
         self.message("This is the beginning of the logs.", self.currentId)
 
@@ -59,7 +61,7 @@ class Module:
         Thread(target=self.registerIDs, daemon=True).start()
 
     def message(self, message: str, id_: int, time: datetime = None):
-        self.messageList.append(partial(self.message_, message, id_, time if time is not None else datetime.now()))
+        self.messageList.append(partial(self.message_, message, str(id_), time if time is not None else datetime.now()))
 
     def message_(self, message: str, id_: int, time: datetime):
         self.idLog[id_].create_message(
@@ -97,7 +99,7 @@ class Module:
             while True:
                 while self.messageList:
                     self.messageList.pop(0)()
-                sleep(0.001)
+                sleep(0.01)
         Thread(target=loop, daemon=True).start()
 
     def clearButton(self):
@@ -126,26 +128,36 @@ class Module:
         Thread(target=func, args=(filePath, copy)).start()
 
     def on_combobox_selected(self, event):
-        currentId = int(self.combobox_ids.get())
+        currentId = self.combobox_ids.get()
         if currentId == self.currentId:
             return
         self.idLog[currentId].pack(fill=tk.BOTH, expand=True)
-        self.idLog[self.currentId].pack_forget()
+        self.idLog[str(self.currentId)].pack_forget()
         self.currentId = currentId
         self.storage.put('currentId', self.currentId)
 
     def registerIDs(self):
         for _ in range(0, 100):
+            self.sortIds()
             for i in self.api.getLogs().registeredFunctions.keys():
-                if i not in self.allIDs:
-                    self.allIDs.append(i)
-                    self.idLog[i] = ChatText(self.FrameChat)
-                    self.allIDs.sort()
-                    self.combobox_ids.configure(values=self.allIDs)
+                if str(i) not in self.allIDs:
+                    self.allIDs.append(str(i))
+                    self.idLog[str(i)] = ChatText(self.FrameChat)
+                    self.sortIds()
                     self.api.getLogs().registerHandler(i, self.message)
-                    self.idLog[i].configure(wrap=tk.WORD, height=20, font=self.font)
+                    self.idLog[str(i)].configure(wrap=tk.WORD, height=20, font=self.font)
                     self.message(f"[Logs] Log ID {i} has been found.", i)
-            sleep(0.1)
+            sleep(0.1)  # 10 secs of ids searching
+        self.sortIds()
+
+    def sortIds(self):
+        temp = self.allIDs.copy()
+        if 'All ids' in temp:
+            temp.remove('All ids')
+        temp = list(map(int, temp))
+        temp.sort()
+        temp.append('All ids')
+        self.combobox_ids.configure(values=temp)
 
     def _create_widgets(self):
         # Creating widgets

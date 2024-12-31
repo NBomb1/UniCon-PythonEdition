@@ -31,7 +31,8 @@ class ScrollableFrame(tk.Frame):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
     def _on_mousewheel(self, event):
-        self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        if self.canvas.bbox("all")[3] > self.canvas.winfo_height():
+            self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
     def _on_enter(self, event):
         self.bind_all("<MouseWheel>", self._on_mousewheel)

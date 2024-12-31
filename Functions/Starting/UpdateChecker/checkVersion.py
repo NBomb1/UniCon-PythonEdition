@@ -23,7 +23,7 @@ def get_commits(url: str, owner: str, repo_name: str, branch: str, token: str, p
     return commits
 
 
-def compare_versions(current, internetVersion) -> bool:
+def compare_versions(current: str, internetVersion: str) -> bool:
     """
     Compares two version strings and returns
     True if the current version is less than the internet version,

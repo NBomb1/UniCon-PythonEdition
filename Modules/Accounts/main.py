@@ -34,7 +34,7 @@ class Module(RightSideInfo):
     connectionClosed(): Handles the connection closed event.
     """
     id_ = "Qzc2rFEcJf0s3&d#qj1kC$A7P!~lG}tUu9vWb4xLh5KgZiope^mD(R)=O*wyXT6B"
-    version = "0.0.1"
+    version = "0.0.2"
     name = "AccountManager"
     author = "ArT"
     defaultNetworkAuth = True
@@ -42,6 +42,7 @@ class Module(RightSideInfo):
     allAccounts: dict[Account, LeftSideInfo] = {}
 
     def __init__(self, api: API):
+        super().__init__(self.id_)
         self.api = api
         self.notebook = self.api.getRightNotebook()
         self.triggerManager = self.api.getTriggerManager()

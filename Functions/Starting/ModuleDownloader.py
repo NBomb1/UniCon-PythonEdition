@@ -63,7 +63,7 @@ class ModuleInstaller:
 
         self.root.title('Module installer')
         center_main(self.root)
-        self.inactiveImage = tk.PhotoImage(file=(getcwd() + r'\UI\Disabled.gif'))
+        self.inactiveImage = tk.PhotoImage(file=(getcwd() + r'\UI\NoConnection.gif'))
         self.root.wm_iconphoto(False, self.inactiveImage)
 
         label = tk.Label(self.root, text='Warning: Some modules are not installed.', font=self.textFont)

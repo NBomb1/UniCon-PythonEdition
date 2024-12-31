@@ -6,6 +6,9 @@ from Functions.Network.SecurityInfo import SecurityInfo
 from Functions.Network.MainChannel.Server.ServerHandlers import ServerInformation
 from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager
 from Functions.logManager import Logs
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from Functions.Network.FileTransfer.FileTransfer import Module
 
 """
 1. Определение программы по уникальному сообщению +
@@ -29,8 +32,11 @@ class ServerMainChannel:
                  maxCon: int,
                  password: str | None,
                  beforeAuth: callable,
-                 mcm: ConnectorManager
+                 mcm: ConnectorManager,
+                 IPv6: bool,
+                 fileTransfer: 'Module'
                  ):
+        self.fileTransfer = fileTransfer
         self.mcm = mcm
         self.beforeAuth = beforeAuth
         self.logs = logs
@@ -44,17 +50,27 @@ class ServerMainChannel:
         else:
             self.logs.sendLog("[MainChannel] Using custom password.", -1)
 
-        self.socket = s.socket(s.AF_INET, s.SOCK_STREAM)
-        self.logs.sendLog("[MainChannel] Binding server...", -1)
+        self.logs.sendLog('[MainChannel] Using ' + ('IPv6' if IPv6 else 'IPv4') + ' address.', -1)
+        self.socket = s.socket(s.AF_INET if not IPv6 else s.AF_INET6, s.SOCK_STREAM)
+        self.logs.sendLog("[MainChannel] Binding address...", -1)
         self.socket.bind((ip, port))
-        self.logs.sendLog("[MainChannel] Server bound successfully.", -1)
+        self.logs.sendLog("[MainChannel] Address bound successfully.", -1)
         self.socket.listen()
         self.accountManager.setMaxConnections(maxCon)
         self.accountManager.updateAccountInfoHandler()
-        self.manager = ServerInformation(ip, port, password, self.socket, accountManager, self.beforeAuth, self.mcm)
+        self.manager = ServerInformation(ip, port, password,
+                                         self.socket, accountManager,
+                                         self.beforeAuth,
+                                         self.mcm, self.fileTransfer)
         self.mcm.setServer()
 
-        self.accountManager.getSelfAccount().setSocket(MessageTransfer(accountManager, self.socket))
+        self.accountManager.getSelfAccount().setSocket(
+            MessageTransfer(
+                accountManager,
+                self.socket,
+                description='Server'
+            )
+        )
 
         self.logs.sendLog("[MainChannel] Creating new connection handler...", -1)
         self.manager.handler.handleIncomingConnections(logs)

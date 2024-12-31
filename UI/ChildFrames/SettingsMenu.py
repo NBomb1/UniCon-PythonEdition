@@ -7,6 +7,7 @@ from Functions.FileDataManager import FileDataManager
 from UI.ChildFrames.Categories.ConnectionSettings import ConnectionSettings
 from typing import TYPE_CHECKING
 
+from UI.ChildFrames.Categories.FileTransferSettings import FileTransferSettings
 from UI.ChildFrames.Categories.PingManagerSettings import PingManagerSettings
 from UI.ChildFrames.Categories.StartupSettings import StartUpSettings
 from UI.Info import Info
@@ -51,18 +52,21 @@ class Settings(ttk.Notebook):
         self.settingsFrame.grid_columnconfigure(0, weight=1)
         self.settingsFrame.grid_columnconfigure(1, weight=1)
         self.settingsFrame.grid_columnconfigure(2, weight=1)
+        # self.settingsFrame.grid_rowconfigure(1, weight=1)
 
         self.connectionSettings = ConnectionSettings(self.settingsFrame, self.dataManager)
         self.startupSettings = StartUpSettings(self.settingsFrame, self.dataManager)
         self.pingManagerSettings = PingManagerSettings(self.settingsFrame, self.dataManager)
+        self.fileTransferSettings = FileTransferSettings(self.settingsFrame, self.dataManager)
 
-        self.saveButton = tk.Button(self.settingsFrame, text='save', command=self.save)
+        self.saveButton = tk.Button(self.settingsFrame, text='Save', command=self.save)
 
         self.connectionSettings.grid(row=0, column=0, sticky=tk.NSEW)
         self.startupSettings.grid(row=0, column=1, sticky=tk.NSEW)
         self.pingManagerSettings.grid(row=0, column=2, sticky=tk.NSEW)
+        self.fileTransferSettings.grid(row=1, columnspan=3, sticky=tk.NSEW)
 
-        self.saveButton.grid(row=1, columnspan=3, sticky=tk.NSEW)
+        self.saveButton.grid(row=2, columnspan=3, sticky=tk.NSEW)
 
     def fill_info(self):
         self.add(self.app_infoFrame, text='About')
@@ -73,8 +77,14 @@ class Settings(ttk.Notebook):
 
     def save(self):
         self.disableSaving()
+        # FileTransfer
+        self.fileTransferSettings.checkButton_allowFileTransfer.save()
+        self.fileTransferSettings.checkButton_autoFileReceiving.save()
+        self.fileTransferSettings.checkButton_allowFileSendingFromUnknownModules_serverSide.save()
+        self.fileTransferSettings.checkButton_allowFileSendingFromUnknownModules.save()
 
         # connection settings
+        self.connectionSettings.checkButton_switchToIPv6.save()
         self.connectionSettings.checkButton_saveNickname.save()
         self.connectionSettings.checkButton_savePassword.save()
         self.connectionSettings.checkButton_saveIP.save()

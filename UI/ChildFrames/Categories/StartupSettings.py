@@ -91,10 +91,15 @@ class StartUpSettings(tk.LabelFrame):
 
     def IKnowWhatIAmDoin_OnClick(self, *event):
         self.entry_startupDefaultArguments.configure(
-            state=tk.NORMAL if
+            state=tk.DISABLED if
             not self.checkButton_IKnowWhatIAmDoing.v.get()  # value has not updated
-            else tk.DISABLED
+            else tk.NORMAL
         )
+        # self.entry_startupDefaultArguments.configure(
+        #     state=tk.NORMAL if
+        #     not self.checkButton_IKnowWhatIAmDoing.v.get()  # value has not updated
+        #     else tk.DISABLED
+        # )
 
     def checkButton_autoStart_OnClick(self, *event):
         self.checkButton_autoStart_ApplyForThisUser.configure(

@@ -16,7 +16,6 @@ class FileDataManager:
         """Saves data in all files."""
         for file in self.settingDict.values():
             file.save()
-        self.settingDict.clear()
 
     def save(self, name: str):
         """Saves data."""

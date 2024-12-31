@@ -83,35 +83,32 @@ class UpdaterUI:
 
         def check_version_thread():
             nonlocal retries
-            try:
-                res = check_for_updates(
-                    info.URL,
-                    info.GITHUB_TOKEN,
-                    Info.version,  # other file
-                    info.CLASS_NAME,
-                    info.ATTRIBUTE_NAME,
-                    info.REPO_OWNER,
-                    info.REPO_NAME,
-                    info.BRANCH,
-                    info.GITHUB_API_URL,
-                    False
-                )
-            except Exception as e:
+            res = check_for_updates(
+                info.URL,
+                info.GITHUB_TOKEN,
+                Info.version,  # other file
+                info.CLASS_NAME,
+                info.ATTRIBUTE_NAME,
+                info.REPO_OWNER,
+                info.REPO_NAME,
+                info.BRANCH,
+                info.GITHUB_API_URL,
+                False
+            )
+            if res is None:
+                self.createMessage("Couldn't check for updates. Please check your internet connection.")
+                retries -= 1
+                self.createMessage('An error occurred while checking updates.')
+                self.createMessage(f'Exception full: {traceback.format_exc()}.')
                 if retries <= 0:
                     self.createMessage('Max retries reached. Check your internet connection.')
                     self.errorWhileUpdatingProgram()
                     self.isFinished = True
                     return
-                retries -= 1
-                self.createMessage('An error occurred while checking updates.')
-                self.createMessage(f'Exception full: {traceback.format_exc()}.\n')
-                self.createMessage(f'Exception: {e}.')
                 self.createMessage(f'{retries} out of {defaultRetries} left. Next retry starts in 3 seconds.')
                 sleep(3)
                 self.createMessage('Retrying...')
                 check_version_thread()
-            if res is None:
-                self.createMessage("Couldn't check for updates. Please check your internet connection.")
                 return
             self.createMessage(f'New version: {res.newVersion}')
             if not res.isOutdated:
@@ -172,18 +169,9 @@ class UpdaterUI:
             self.root.after(4000, lambda: self.createMessage('Restarting in 2 seconds...'))
             self.root.after(5000, lambda: self.createMessage('Restarting in 1 seconds...'))
             self.root.after(6000, lambda: self.createMessage('Restarting in 0 seconds...'))
-            # self.root.after(7500, lambda: Processes.run_independent_process(
-            #     to_file,
-            #     # thisPath + '\\versionChanger.py',
-            #     pathOs.join(projectPath, 'new_version'),
-            #     projectPath,
-            #     f"{getpid()}",  # Идентификатор текущего процесса
-            #     close=False
-            # )
-            #                 )
             self.root.after(7500, lambda:
             Popen(
-                [executable, to_file, pathOs.join(projectPath, 'new_version'), projectPath],
+                (executable, to_file, pathOs.join(projectPath, 'new_version'), projectPath),
                 creationflags=0x00000008,
                 stdout=PIPE,
                 stderr=PIPE,
@@ -198,22 +186,22 @@ class UpdaterUI:
             self.createMessage(f'Showing format exception: {format_exc()}')
 
     def errorWhileUpdatingProgram(self):
+        def delayedRestart():
+            Popen(
+                (executable, to_file, "--noUpdateCheck"),
+                creationflags=0x00000008,
+                stdout=PIPE,
+                stderr=PIPE,
+                close_fds=False,
+                cwd=getcwd()
+            ).stdout.read(1)  # IDK, but it doesn't want to do anything without function
         self.root.bell()
         self.createMessage(f'Exception full: {traceback.format_exc()}.\n')
         sleep(0.01)
         self.createMessage('An error occurred while updating.')
-        self.createMessage('Program will restart in 10 seconds. This window will not close.')
+        self.createMessage('Program will restart in 5 seconds. This window will not close.')
         to_file = (projectPath + '\\main.py')
-        self.root.after(10000, lambda:
-        Popen(
-            (executable, to_file, "--noUpdateCheck"),
-            creationflags=0x00000008,
-            stdout=PIPE,
-            stderr=PIPE,
-            close_fds=False,
-            cwd=getcwd()
-        )
-                        )
+        self.root.after(5000, delayedRestart)
 
 
 if __name__ == '__main__':

@@ -32,13 +32,6 @@ def functionConfirmation(button: tk.Button, func: callable, wait_time: int, conf
                     partial(button.configure, text=f'Confirm {confirmation_time - i}', state=tk.NORMAL)
                 )
             )
-        # for i in range(wait_time // 1000 + 1):
-        #     funcDict[func]['after'].append(
-        #         button.after(
-        #             i * 1000 + wait_time,
-        #             partial(button.configure, text=f'Confirm {(wait_time//1000) - i}', state=tk.NORMAL)
-        #         )
-        #     )
         funcDict[func]['after'].append(
             button.after((wait_time + confirmation_time) * 1000,
                          lambda: None if funcDict.get(func) is None else button.configure(
@@ -46,7 +39,6 @@ def functionConfirmation(button: tk.Button, func: callable, wait_time: int, conf
                              state=stateBeforeConfirmation
                             )
                          )
-
         )
         funcDict[func]['after'].append(
             button.after((wait_time + confirmation_time) * 1000,

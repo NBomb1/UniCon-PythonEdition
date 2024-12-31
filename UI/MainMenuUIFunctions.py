@@ -1,4 +1,5 @@
 # the idea is to move buttons and their functions there for making readable code
+import socket
 import tkinter as tk
 from functools import partial
 from os import getcwd
@@ -16,6 +17,8 @@ from Functions.ModuleHandler.moduleLoader import ModuleLoader
 from Functions.Network.Accounts.AccountAuthentication.Server.ServerAuthentication import Authentication
 from Functions.Network.Accounts.AccountDataManager import AccountManager
 from Functions.Network.Accounts.SelfAccount import SelfAccount
+from Functions.Network.FileTransfer.FileTransfer import FileTransfer
+# from Functions.Network.FileTransfer import FileTransfer
 from Functions.Network.MainChannel.Client.MainChannel import ClientMainChannel
 from Functions.Network.MainChannel.Server.main import ServerMainChannel
 from Functions.Network.PingManager import PingManager
@@ -33,9 +36,13 @@ class MainMenuUIFunctions:
     new_version_available: bool = False
     # pingManager
     pingManager: PingManager.Module
+    # fileTransfer: FileTransfer.FileTransfer
 
     # api
     api: API
+
+    # FileTransfer
+    fileTransfer: FileTransfer
 
     # Module Handler
     module: ModuleLoader
@@ -83,14 +90,14 @@ class MainMenuUIFunctions:
     # Photos
     photoDisabled: tk.PhotoImage
     photoEnabledClient: tk.PhotoImage
-    photoEnabledHost: tk.PhotoImage
+    photoEnabledServer: tk.PhotoImage
     photoConnecting: tk.PhotoImage
 
     server: ServerMainChannel | None
     client: ClientMainChannel | None
 
     def changeTitle(self, name: str):
-        self.root.title('UniCon - ' + name + " - " + settings.MainInfo.startDate)
+        self.root.title('UniCon - ' + name)
 
     def goSettings(self):
         self.settingsFrame.pack(expand=tk.YES, fill=tk.BOTH, anchor=tk.NW, padx=5)
@@ -163,15 +170,17 @@ class MainMenuUIFunctions:
                 maxConns,
                 password if password else None,
                 self.triggerManager.beforeAuthConnection,
-                self.api.getConnectorManager()
+                self.api.getConnectorManager(),
+                self.settingsFrame.connectionSettings.checkButton_switchToIPv6.savedData,
+                self.fileTransfer
             )
             self.left_entry_nickname.put(nickname)
             self.lockInteraction()
             self.pingManager.getInfo(self.accountManager, True)
             self.triggerManager.serverStarted(self.server)
-            self.left_status.configure(image=self.photoEnabledHost)
-            self.root.wm_iconphoto(False, self.photoEnabledHost)
-            self.left_status_label.configure(text='Host mode')
+            self.left_status.configure(image=self.photoEnabledServer)
+            self.root.wm_iconphoto(False, self.photoEnabledServer)
+            self.left_status_label.configure(text='Server mode')
         except Exception as error:
             self.root.bell()
             self.logs.sendLog("Couldn't start the server. Reason: " + error.__str__(), -1)
@@ -213,6 +222,7 @@ class MainMenuUIFunctions:
                     self.api.getConnectorManager(),
                     self,
                     password if password else None,
+                    self.settingsFrame.connectionSettings.checkButton_switchToIPv6.savedData
                 )
                 self.accountManager.selfAccountDisconnectedTrigger(self.selfClientDisconnected)
                 self.triggerManager.clientConnected(self.client)
@@ -298,13 +308,13 @@ class MainMenuUIFunctions:
         )
 
     def closeConnection(self):
-        if self.accountManager.getIsServer():
-            self.accountManager.closeConnection()
-            self.server = None
-        elif not self.accountManager.getIsServer():
-            self.accountManager.closeConnection()
+        if self.accountManager.getIsServer() is None:
+            return
+        self.accountManager.closeConnection()
+        self.server = None
+        self.client = None
+        if not self.accountManager.getIsServer():
             self.accountManager.selfAccountDisconnectedTriggerREMOVE(self.selfClientDisconnected, True)
-            self.client = None
         self.left_status.configure(image=self.photoDisabled)
         self.root.wm_iconphoto(False, self.photoDisabled)
         self.unlockInteraction()
@@ -350,7 +360,7 @@ class MainMenuUIFunctions:
 
     def update_app(self, confirmed=False):
         if not confirmed and not messagebox.askyesno("Update", "Do you really want to update this application?\n"
-                                                     "You might lose third party modules and your settings."):
+                                                               "You might lose third party modules and your settings."):
             return
         self.logs.sendLog("Closing...", 0)
         try:
@@ -379,3 +389,32 @@ class MainMenuUIFunctions:
             var = self.maxConnections.get()
             if checkInteger(var):
                 self.accountManager.setMaxConnections(int(var))
+
+    def showParticipants(self, event=None):
+        # TODO: Finish it
+
+        # l2.bind("<<B1-Enter>>", on_enter)
+        # l2.bind("<<B1-Leave>>", on_leave)
+        owner = self.accountManager.getOwner()
+        if owner is not None:
+            self.left_status_label.configure(
+                text=f'{len(self.accountManager.getParticipants())}' +
+                     (f'/{self.accountManager.getMaxConnections()}' if isinstance(owner, SelfAccount) else '') +
+                     f' participant(s)'
+            )
+            # self.left_status.pack_forget()
+            self.left_status_label.pack(anchor=tk.W)
+
+    def hideParticipants(self, event=None):
+        if self.left_entry_ip.cget('state') == tk.DISABLED:
+            owner = self.accountManager.getOwner()
+            if owner is None:
+                self.left_status_label.configure(text='Connecting...')
+            elif isinstance(owner, SelfAccount):
+                self.left_status_label.configure(text='Server mode')
+            else:
+                self.left_status_label.configure(text='Client mode')
+        else:
+            self.left_status_label.configure(text='No connection')
+        # self.left_status.pack(anchor=tk.E, side=tk.LEFT, expand=True)
+        self.left_status_label.pack(anchor=tk.NW, side=tk.RIGHT, expand=True)

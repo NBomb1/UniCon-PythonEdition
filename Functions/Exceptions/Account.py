@@ -10,3 +10,7 @@ class Account(Exception):
     class KickingException(Exception):
         def __init__(self, *args, **kwargs):  # real signature unknown
             pass
+
+    class AccountDoesNotExistsException(Exception):
+        def __init__(self, *args, **kwargs):  # real signature unknown
+            pass

@@ -56,6 +56,8 @@ class EnhancedEntry(EntryWithPlaceholder, SaveWidgetData, ShowRedFlag):
         """
         :return: list of refuse reasons.
         """
+        if self.cget('state') == tk.DISABLED:
+            return []
         res = []
         if (
                 (self.get() == self.placeholder and self.cget('fg') == self.placeholder_color)

@@ -13,7 +13,7 @@ class AccountDataHandler:
     findByID: callable
     _disconnectAccount: callable
 
-    def accountHandler(self, msg: dict[str: str]):
+    def accountHandler(self, msg: dict[str, str]):
         if msg.get('_all') is None:
             account: Account = self.findByID(msg['id'])
             if account is None:  # if account is not present we create one

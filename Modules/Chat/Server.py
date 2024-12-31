@@ -12,9 +12,8 @@ if TYPE_CHECKING:
 
 
 class Server:
-    participants: list[MessageTransfer] = []
-
     def __init__(self, api: API, module: 'Module'):
+        self.participants: list[MessageTransfer] = []
         self.ModuleId = module.id_
         self.module: 'Module' = module
         self.api = api
@@ -33,6 +32,7 @@ class Server:
         except ValueError:
             pass
         self.sendMessage(f'Client {account.nickname} - {account.id} disconnected from the chat.', 'sys')
+        self.update_participants()
 
     def add(self, participant: MessageTransfer):
         self.participants.append(participant)
@@ -45,6 +45,7 @@ class Server:
             f'Client {participant.account.nickname} - {participant.account.id} connected to the chat.',
             'sys'
         )
+        self.update_participants()
 
     def sendMessage(self, message: str, type: str):
         time = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0)
@@ -96,6 +97,7 @@ class Server:
             i.account.removeExtraConnectionExact(self.ModuleId, i)
         self.participants.clear()
         self.logs.sendLog('[Chat] Chat closed successfully.', -1)
+        self.update_participants()
 
     def logMessage(self, nickname: str, id: str, message: str, time: datetime.datetime, markGreen=False):
         try:
@@ -115,3 +117,17 @@ class Server:
             self.stop()
 
     # def sendMessage(self, type: str, id_: str, msg: str, nickname: str, time: datetime):
+
+    def update_participants(self):
+        self.module.listbox.delete(0, 'end')
+        # Add to participants "you"?
+        self.module.listbox.insert(0, self.selfAccount.id + ' - ' + self.selfAccount.nickname)
+        self.module.listbox.insert(
+            1,
+            *tuple(
+                map(
+                    lambda x: x.account.id + ' - ' + x.account.nickname,
+                    self.participants
+                )
+            )
+        )

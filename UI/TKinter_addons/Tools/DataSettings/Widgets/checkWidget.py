@@ -10,10 +10,22 @@ class CheckButton(tk.Checkbutton, SaveWidgetData):
         self.v = tk.BooleanVar(self, default)
         self.configure(variable=self.v)
         self.savedData = default
+        self.onClick = onClick
         if onClick:
-            self.bind('<Button-1>', onClick)  # Bind to left-click event
+            self.bind('<ButtonRelease>', lambda x: self.after(0, self.trigger))  # Bind to left-click event
 
         self._loadFunc(self._load)
+        self._previous_data = self.v.get()
+
+    def trigger(self):
+        if self._previous_data == self.v.get():
+            return
+        # focusing on the root. It doesn't fix all problems, so it will be deleted soon
+        self.tk.call('focus', '.')
+        self.update()
+
+        self._previous_data = self.v.get()
+        self.onClick()
 
     def _load(self, data):
         self.v.set(data)

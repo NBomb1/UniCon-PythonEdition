@@ -1,5 +1,5 @@
 from os import getcwd
-from sys import version_info, executable
+from sys import version_info
 import tkinter as tk
 
 from UI.window.WindowCenter import center_main
@@ -20,25 +20,26 @@ class VersionChecker:
     """
     pythonVersion = f"{version_info.major}.{version_info.minor}.{version_info.micro}"
     text = f'You are using python {pythonVersion}\n' \
-           f'Which is not recommended to run this app.\n' \
-           'I recommend use 3.10 or any version above it.'
+           f'which is not recommended to run this app.\n' \
+           f'Program is incompatible with versions below 3.10.'
     textFont = (None, 15, 'bold')
     buttonFont = (None, 10, 'bold')
 
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title('Wrong python version!')
+        self.root.title('Incompatible python version!')
         self.root.geometry('550x200')
         self.root.wm_resizable(False, False)
         self.root.protocol("WM_DELETE_WINDOW", exit)
 
         center_main(self.root)
 
-        self.inactiveImage = tk.PhotoImage(file=getcwd() + r'.\UI\Disabled.gif')
+        self.inactiveImage = tk.PhotoImage(file=getcwd() + r'\UI\NoConnection.gif')
         self.root.wm_iconphoto(False, self.inactiveImage)
 
         self.label = tk.Label(self.root, text=self.text, font=self.textFont)
-        self.buttonContinue = tk.Button(self.root, text='Continue anyway', command=self.root.destroy, font=self.buttonFont)
+        self.buttonContinue = tk.Button(self.root, text='Continue anyway', command=self.root.destroy,
+                                        font=self.buttonFont)
         self.buttonClose = tk.Button(self.root, text='Close the app', command=exit, font=self.buttonFont)
 
         self.label.pack(fill=tk.BOTH, anchor=tk.CENTER, expand=True)

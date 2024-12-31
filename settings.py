@@ -1,3 +1,6 @@
+# You are not supposed to be there.
+# You can make some changes in case you know what are you doing.
+
 class MainInfo:
     startDate = '12 06 2023'
 
@@ -13,4 +16,12 @@ class MainMenu:
 
 class SettingsMenu:
     widgetsWait = 2
-    saveButtonWait = 2.05  # has always to be more than widgetWait
+    saveButtonWait = 2.05  # must be more than widgetWait
+
+
+class LogManager:
+    messageDelay = 0.0005  # sec
+
+
+class FileDataManager:
+    auto_save_interval = 30  # sec

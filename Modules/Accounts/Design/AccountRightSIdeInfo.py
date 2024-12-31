@@ -1,5 +1,6 @@
 import tkinter as tk
 from threading import Thread
+from tkinter import filedialog
 from tkinter import simpledialog, messagebox
 from functools import partial
 
@@ -29,8 +30,13 @@ class RightSideInfo:
     accountConsLabel: tk.Label = None
     accountKickButton: tk.Button = None
     accountKickReasonButton: tk.Button = None
+    sendAFile: tk.Button = None
     font = (None, 13)
     isShowing = False
+    moduleID: str = None
+
+    def __init__(self, id_: str):
+        self.moduleID = id_
 
     def createWidgets(self, root: tk.Widget):
         self.frameMainInfo = tk.Frame(root)
@@ -57,6 +63,9 @@ class RightSideInfo:
 
         self.accountKickButton = tk.Button(self.frameMainInfo, text='Kick', state=tk.DISABLED)
         self.accountKickReasonButton = tk.Button(self.frameMainInfo, text='Kick with Reason', state=tk.DISABLED)
+        self.sendAFile = tk.Button(self.frameMainInfo, text='Send file(s) (Under development)', state=tk.DISABLED,
+                                   command=self.sendFile
+                                   )
 
     def updateName(self, name: str):
         self.accountName.configure(text=name)
@@ -71,7 +80,7 @@ class RightSideInfo:
     def updateConnections(self, obj: dict[str, list[MessageTransfer]]):
         text = ''
         for i in obj:
-            text += self.api.getModuleHandler().findById(i).name + f' - {len(obj[i])}\n'
+            text += self.api.getModuleLoader().findById(i).name + f' - {len(obj[i])}\n'
         self.accountCons.configure(text=text.rstrip('\n') if text else 'None')
 
     def triggeredUpdate(self, account: Account, what: str):
@@ -81,6 +90,11 @@ class RightSideInfo:
         self.updateName(account.nickname)
         self.updateTags(account.tags)
         self.updateConnections(account.extraConnections)
+        self.sendAFile.configure(
+            state=tk.DISABLED
+            if account == self.accountManager.getSelfAccount() or account not in self.accountManager.getParticipants()
+            else tk.NORMAL
+        )
         if self.api.getAccountManager().getIsServer():
             if account in self.api.getAccountManager().getParticipants():
                 self.accountKickButton.configure(
@@ -149,6 +163,7 @@ class RightSideInfo:
         self.accountCons.grid(column=1, row=5, sticky=tk.E)
         self.accountKickButton.grid(column=0, row=6, sticky=tk.NSEW, columnspan=2)
         self.accountKickReasonButton.grid(column=0, row=7, sticky=tk.NSEW, columnspan=2)
+        self.sendAFile.grid(column=0, row=8, sticky=tk.NSEW, columnspan=2)
 
     def kickAccount(self, account: Account, askReason: bool = False, text=None):
         reason = 'You were kicked by the server.' if text is None else text
@@ -176,3 +191,12 @@ class RightSideInfo:
                 return
         for account in self.api.getAccountManager().getParticipants().copy():
             self.kickAccount(account, False, reason)
+
+    # TODO: Remove if not used
+    def sendFile(self):
+        path = filedialog.askopenfilenames(
+            defaultextension='*',
+            title='Choose file(s) to send'
+        )
+        if path:
+            Thread(target=self.api.getFileTransfer().create, args=(self.moduleID, path, self.current)).start()

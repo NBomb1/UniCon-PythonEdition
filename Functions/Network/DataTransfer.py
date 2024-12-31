@@ -1,5 +1,6 @@
 import socket
 import threading
+import traceback
 from traceback import format_exc
 from ast import literal_eval
 from time import sleep
@@ -7,6 +8,8 @@ from time import sleep
 from Functions.Exceptions.DataTransfer import DataTransfer
 from typing import TYPE_CHECKING
 
+from Functions.Network.FileTransfer.Data.Actions import Actions
+from Functions.Network.FileTransfer.Data.States import RequestStates
 
 if TYPE_CHECKING:
     from Functions.Network.Accounts.AccountData import Account
@@ -15,7 +18,12 @@ if TYPE_CHECKING:
 
 class MessageTransfer:
 
-    def __init__(self, accountManager: 'AccountManager', s: socket.socket | None, errorFunction=None):
+    def __init__(self,
+                 accountManager: 'AccountManager',
+                 s: socket.socket | None,
+                 errorFunction=None,
+                 description: str | None = None
+                 ):
         self.types = []
         self.registeredFunctions: dict[str, list[callable]] = {}
         self.account = None  # the problem is right here
@@ -24,6 +32,8 @@ class MessageTransfer:
         self.socket = s
         self.sendMessages: list[bytes] = []
         self.errorFunction: callable = errorFunction
+        self.isSending = False  # IDK but theoretically it should prevent sending mixed data
+        self.description = description
 
     def registerAccount(self, account: 'Account'):
         self.account = account
@@ -42,7 +52,11 @@ class MessageTransfer:
     def _send(self, text: bytes) -> bool:
         """Returns true if message was sent successfully"""
         try:
+            while self.isSending:
+                sleep(0.0001)
+            self.isSending = True
             self.socket.send(text)
+            self.isSending = False
             return True
         except Exception as error:
             self._callErrorFunc(error)
@@ -53,10 +67,17 @@ class MessageTransfer:
             "The socket is None. You can't send anything if socket is not registered."
 
         if type_ not in self.types:
-            raise DataTransfer.TypeDoesntExistError(f"Type {type_} doesn't exists.")
+            raise DataTransfer.TypeDoesntExistError(f"Type {type_} doesn't exists.", self.types)
         kwargs['type'] = type_
         message = len(kwargs.__str__().encode()).__str__() + kwargs.__str__()
 
+        if type_ == 'FileTransfer':
+            # print("sending: " + kwargs.__str__())
+            kwargs['action'] = Actions.actions_dict_int_to_str.get(kwargs['action'])
+            kwargs['state'] = RequestStates.states_dict_int_to_str.get(kwargs['state'])
+            print(f"Sending: {kwargs}")  # TODO: DELETE IT
+            kwargs['action'] = Actions.actions_dict_str_to_int.get(kwargs['action'])
+            kwargs['state'] = RequestStates.states_dict_str_to_int.get(kwargs['state'])
         if thread:
             self.sendMessages.append(message.encode())
         else:
@@ -95,10 +116,13 @@ class MessageTransfer:
                     message['_account'] = self.account
                     if message['type'] == 'close':  # recheck it
                         print('reg Functions', self.registeredFunctions)
+                    elif message['type'] == 'FileTransfer':  # TODO: DELETE IT
+                        self.logs.sendLog(f'got: {message}, {funcList}', -2)
                     for func in funcList:
                         func(message)
             except Exception as error:
                 self.logs.sendLog(f'[MessageTransfer] An error occurred while handling message error: {error}', -1)
+                self.logs.sendLog(f'[MessageTransfer] Details: {traceback.format_exc()}', -1)
                 self._callErrorFunc(error)
         threading.Thread(target=handler, daemon=True).start()
 
@@ -115,8 +139,8 @@ class MessageTransfer:
                         self.sendMessages.remove(i)
                 except Exception as error:
                     self.logs.sendLog(f"[MessageTransfer] An error occurred while sending message error: {error}", -1)
-                    print('ERROR! - \n', error, '\ninfo: ', i, '\nlist: ', self.sendMessages)
                     print(format_exc())
+                    print('ERROR! - \n', error, '\ninfo: ', i, '\nlist: ', self.sendMessages)
                     self._callErrorFunc(error)
                 sleep(0.001)
         threading.Thread(target=handler, daemon=True).start()

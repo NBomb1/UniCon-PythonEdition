@@ -2,6 +2,7 @@ import hashlib
 from os import urandom
 import socket
 
+from typing import TYPE_CHECKING
 from random import randint
 
 # Importing authentication phases
@@ -23,6 +24,9 @@ from Functions.Network.Accounts.AccountAuthentication.Server.PreAuthAccount impo
 from Functions.Network.Accounts.AccountData import Account
 from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager
 from Functions.logManager import Logs
+
+if TYPE_CHECKING:
+    from Functions.Network.FileTransfer.FileTransfer import FileTransfer
 
 
 class Authentication:
@@ -47,10 +51,10 @@ class Authentication:
 
     @staticmethod
     def authentication(account: PreAccount, password: str, s: socket.socket, logs: Logs,
-                       accountManager: AccountManager, mcm: ConnectorManager) -> None:
+                       accountManager: AccountManager, mcm: ConnectorManager, fileTransfer: 'FileTransfer') -> None:
 
         # Checking for special code
-        if _1_PhaseRecognition(account, mcm, logs, Authentication):  # Определение
+        if _1_PhaseRecognition(account, mcm, logs, Authentication, fileTransfer):  # Определение
             return
 
         #  checking if the server is full
@@ -79,7 +83,11 @@ class Authentication:
 
             # Creating account
             account = Account(
-                socket=MessageTransfer(accountManager, account.socket),
+                socket=MessageTransfer(
+                    accountManager,
+                    account.socket,
+                    description='Client main channel (server side)'
+                ),
                 ip=account.ip,
                 port=account.port,
                 nickname=data['nickname'],
@@ -89,15 +97,20 @@ class Authentication:
             )
             # registering types
             account.socket.registerType('account')
+            account.socket.registerType('FileTransfer')
             account.socket.registerType('ModuleConnector')
             account.socket.registerType('close')
+
+            # account.socket.registerFunction('FileTransfer', fileTransfer.mainChannelResponses)
+            account.socket.registerFunction('close', accountManager._clientClosesConnectionWithReason)
 
             account.socket.senderHandler()
             account.socket.handleMessages()
 
             accountManager.add(account)
             logs.sendLog(f"[MainChannel] Authentication from "
-                         f"{s.getpeername()[0]}:{s.getpeername()[1]} went successfully", -1)
+                         f"{s.getpeername()[0]}:{s.getpeername()[1]} went successfully -> "
+                         f"{account.nickname} | {account.id}", -1)
 
     @staticmethod
     def _passInfo(s: socket.socket) -> bool:

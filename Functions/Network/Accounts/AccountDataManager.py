@@ -83,6 +83,10 @@ class AccountManager(AccountDataTransfer, AccountDataHandler):
         """Gets Self Account. Info of your account."""
         return self.selfAccount
 
+    def getOwner(self) -> Account:
+        """Gets owner account."""
+        return self.owner
+
     def addNewAccountFunction(self, func: callable):
         """Adds function to trigger list."""
         self.NewAccountTrigger.append(func)
@@ -198,7 +202,6 @@ class AccountManager(AccountDataTransfer, AccountDataHandler):
             self.SelfDisconnectTrigger.remove(func)
 
     def _disconnectedFromServer(self, msg: dict[str, str]):
-        # def disconnectedFromServer(self, *args, **kwargs):
         """
         Calls all trigger functions if YOU disconnected from server.
         Do not use it.
@@ -207,8 +210,8 @@ class AccountManager(AccountDataTransfer, AccountDataHandler):
             func(msg)
 
     def getIsServer(self) -> bool | None:
-        """Returns bool is AccountManager is active."""
-        return (self.selfAccount == self.owner) if self.selfAccount is not None else None
+        """Returns bool when AccountManager is active."""
+        return (self.selfAccount is self.owner) if self.selfAccount is not None else None
 
     def clientStopped(self):
         for func in self.ClientStoppedTrigger:
@@ -233,3 +236,14 @@ class AccountManager(AccountDataTransfer, AccountDataHandler):
 
     def clientStoppedTrigger(self, func: callable):
         self.ClientStoppedTrigger.append(func)
+
+    def _clientClosesConnectionWithReason(self, msg: dict):
+        """Do not use this function."""
+        account: Account = msg['_account']
+        try:
+            reason = msg['reason']
+            nickname = account.nickname
+            id_ = account.id
+            self.logs.sendLog(f'[AccountManager] Client {nickname}<{id_}> closed connection with reason: {reason}', -1)
+        finally:
+            self._disconnectAccount(account)

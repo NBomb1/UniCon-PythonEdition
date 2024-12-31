@@ -18,7 +18,7 @@ class ModuleConnectorManager:
     def checkSpecialCode(self, specialCode: str, s: socket.socket):
         for i in self.__waitingForConnections:
             if i.specialCode.decode() == specialCode:
-                socket = MessageTransfer(self.accountManager, s)
+                socket = MessageTransfer(self.accountManager, s, description=f"Module: {i.moduleId}")
                 socket.account = i.account
                 i.setMessageTransfer(socket)
                 i.func(i)
@@ -27,8 +27,8 @@ class ModuleConnectorManager:
                 self.accountManager.getSelfAccount().addExtraConnection(i.moduleId, i.socket)
                 self.accountManager.logs.sendLog(
                     f"[MCM Server] Module "
-                    f"{i.moduleId[:3]}...{i.moduleId[-3:]}"
-                    f" established extra connection to client {i.account.id}.", -1
+                    f"{i.moduleId[:3]}...{i.moduleId[-3:]} "
+                    f"established extra connection to client {i.account.id}.", -1
                 )
                 return True
         return False
@@ -44,4 +44,3 @@ class ModuleConnectorManager:
             obj.declined()
         except ValueError:
             pass
-

@@ -31,8 +31,8 @@ def argsCheckAfterStart(mainMenu: MainMenu):
             except Exception as e:
                 mainMenu.logs.sendLog(f'Error while updating auto-startup task: {format_exc()}', 0)
             mainMenu.logs.sendLog('Program was updated successfully.', 0)
-        if args.host:
-            mainMenu.logs.sendLog('[Args] Starting in host mode.', 0)
+        if args.server:
+            mainMenu.logs.sendLog('[Args] Starting in server mode.', 0)
             mainMenu.startServer()
         elif args.client:
             mainMenu.logs.sendLog('[Args] Starting in client mode.', 0)
@@ -141,8 +141,8 @@ def checkArguments(disableHelp=False):
         action='store_true'
     )
     parse.add_argument(
-        '-h',
-        '--host',
+        '-s',
+        '--server',
         help='Starts the server automatically.',
         action='store_true'
     )

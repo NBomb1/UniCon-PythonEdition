@@ -23,12 +23,13 @@ class ClientMainChannel:
             mc: ConnectorManager,
             mainMenu: 'MainMenu',
             password: str | None,
+            IPv6: bool,
     ):
         self.logs = logs
         self.mainMenu = mainMenu
         self.accountManager = account
         self.mc = mc
-        logs.sendLog(f"Connecting to server {ip}:{port}", -1)
+        self.logs.sendLog(f"[MainChannel] Connecting to server {ip}:{port}", -1)
 
         if password is None:
             password = SecurityInfo.defaultPassword
@@ -36,13 +37,15 @@ class ClientMainChannel:
         else:
             self.logs.sendLog("[MainChannel Client] Using custom password.", -1)
 
-        self.socket = s.socket()
+        self.logs.sendLog('[MainChannel] Using ' + ('IPv6' if IPv6 else 'IPv4') + ' address.', -1)
+        self.socket = s.socket(s.AF_INET if not IPv6 else s.AF_INET6, s.SOCK_STREAM)
         self.logs.sendLog("[MainChannel Client] Connecting to the server...", -1)
         self.socket.connect((ip, port))
         self.logs.sendLog("[MainChannel Client] Connected to the server.", -1)
-        self.messageTransfer = MessageTransfer(account, self.socket)
+        self.messageTransfer = MessageTransfer(account, self.socket, description='Client main channel')
 
         self.messageTransfer.registerType('ModuleConnector')
+        self.messageTransfer.registerType('FileTransfer')
         self.messageTransfer.registerType('close')
         self.messageTransfer.registerType('account')
 
@@ -54,5 +57,6 @@ class ClientMainChannel:
 
         self.messageTransfer.registerFunction('close', self.accountManager._disconnectedFromServer)  # it's fine
         self.messageTransfer.registerFunction('account', self.accountManager.accountHandler)
+        # self.messageTransfer.registerFunction('FileTransfer', self.mainMenu.fileTransfer.mainChannelResponses)
 
         mc.setClient(self.messageTransfer)

@@ -103,6 +103,7 @@ class Authentication:
                     self.socket.close()
                     self.logs.sendLog("[Authentication Client] Connection closed.", -1)
                     raise Client.PhaseFailedException("Authentication failed due to incorrect password.")
+        self.logs.sendLog("[Authentication Client] Third phase has been passed!", -1)
 
     def _4_PhaseDataShare(self):
         # sending nickname and pc name
@@ -124,7 +125,7 @@ class Authentication:
                 account = Account(
 
                     # creating a new MessageTransfer if it is not owner
-                    MessageTransfer(self.messageTransfer.accountManager, None)
+                    MessageTransfer(self.messageTransfer.accountManager, None, description='Client (client side)')
                     if 'Owner' not in i['tags']
                     else self.messageTransfer,
 

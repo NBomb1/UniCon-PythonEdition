@@ -8,12 +8,14 @@ from time import sleep
 
 import _tkinter
 
+import settings
+
 
 class Logs:
     registeredFunctions: dict[int: list[callable]] = {}  # contains id log and functions
     registeredFileLog: dict[int: io.FileIO] = {}
     logsMessages: list[callable] = []
-    ver = "1.0.1"
+    ver = "1.0.2"
 
     def __init__(self):
         self.printFlag = False
@@ -44,11 +46,16 @@ class Logs:
             i(message, id_, time)
         if self.registeredFileLog.get(id_) is not None:
             self.registeredFileLog[id_].write(f"[{time.__str__()}]: " + message + "\n")
-        if self.printFlag:
+        if id_ == 'All ids' and self.printFlag:
             print(f"[{time.__str__()}]: " + message)
 
     def sendLog(self, message: str, id_: int):
         self.logsMessages.append(partial(self._sendLog, message, id_, datetime.now()))
+        self.logsMessages.append(partial(self._sendLog, f"{id_} " + message, 'All ids', datetime.now()))
+
+    def sendAll(self, message: str):
+        for i in self.registeredFunctions.keys():
+            self.logsMessages.append(partial(self._sendLog, message, i, datetime.now()))
 
     def handler(self):
         def cycle():
@@ -57,7 +64,7 @@ class Logs:
                     # '' if not self.logsMessages else print(self.logsMessages)
                     if self.logsMessages:
                         self.logsMessages.pop(0)()
-                    sleep(0.001)
+                    sleep(settings.LogManager.messageDelay)
                 except ValueError:  # I/O operation on closed file
                     pass
 

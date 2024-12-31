@@ -13,6 +13,7 @@ from Functions.Exceptions.APIException import APIException
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from UI.MainMenu import MainMenu
+    from Functions.Network.FileTransfer.FileTransfer import FileTransfer
 
 
 class API:
@@ -29,8 +30,9 @@ class API:
                  dataManager: FileDataManager,
                  triggerManager: TriggerManager,
                  connectorManager: ConnectorManager,
-                 moduleHandler: ModuleLoader,
-                 accountManager: AccountManager
+                 moduleLoader: ModuleLoader,
+                 accountManager: AccountManager,
+                 fileTransfer: 'FileTransfer'
                  ):
         self.__root = root
         self.__rightNotebook = right_notebook
@@ -42,7 +44,8 @@ class API:
         self.__triggerManager = triggerManager
         self.__connectorManager = connectorManager
         self.__accountManager = accountManager
-        self.__moduleHandler = moduleHandler
+        self.__moduleLoader = moduleLoader
+        self.__fileTransfer = fileTransfer
 
     def getRoot(self) -> tk.Tk:
         if self.__root is None:
@@ -75,10 +78,10 @@ class API:
             raise APIException.ObjectIsNull("ModuleLoaderError is None")
         return self.__moduleLoaderError
 
-    def getModuleHandler(self) -> ModuleLoader:
-        if self.__moduleHandler is None:
-            raise APIException.ObjectIsNull("ModuleLoaderError is None")
-        return self.__moduleHandler
+    def getModuleLoader(self) -> ModuleLoader:
+        if self.__moduleLoader is None:
+            raise APIException.ObjectIsNull("ModuleLoader is None")
+        return self.__moduleLoader
 
     def getDataManager(self) -> FileDataManager:
         if self.__dataManager is None:
@@ -99,3 +102,8 @@ class API:
         if self.__accountManager is None:
             raise APIException.ObjectIsNull("AccountManager is None")
         return self.__accountManager
+
+    def getFileTransfer(self) -> 'FileTransfer':
+        if self.__fileTransfer is None:
+            raise APIException.ObjectIsNull("FileTransfer is None")
+        return self.__fileTransfer

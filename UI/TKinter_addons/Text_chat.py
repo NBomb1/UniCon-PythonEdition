@@ -20,6 +20,7 @@ class ChatText(ScrolledText):
 
         self.configure(state=tk.DISABLED)
         self.bind("<F1>", self.save)
+        # self.bind("<ButtonRelease-3>", self.options)
 
     def create_message(self, data: dict, time: datetime, scheme: str, colorscheme: dict, new_line=True, ) -> int:
         # preparation
@@ -45,10 +46,10 @@ class ChatText(ScrolledText):
         for i in range(len(colorscheme)):
             try:
                 self.tag_add(
-                    list(colorscheme.values())[i],
-                    f"{index}.{text.find(data.get(list(colorscheme.keys())[i]))}",
+                    tuple(colorscheme.values())[i],
+                    f"{index}.{text.find(data.get(tuple(colorscheme.keys())[i]))}",
                     f"{index}."
-                    f"{text.find(data.get(list(colorscheme.keys())[i])) + len(data.get(list(colorscheme.keys())[i]))}"
+                    f"{text.find(data.get(tuple(colorscheme.keys())[i])) + len(data.get(tuple(colorscheme.keys())[i]))}"
                 )
             except TypeError as error:
                 print(format_exc())
@@ -91,3 +92,15 @@ class ChatText(ScrolledText):
             )
 
         Thread(target=func, args=(filePath, self.get('0.0', tk.END))).start()
+
+    # TODO: May be used in future updates
+
+    # def options(self, event: tk.Event):
+    #     temp = tk.Toplevel(self.master)
+    #     temp.wm_overrideredirect(True)
+    #     temp.focus_force()
+    #     button = tk.Button(temp, text='Copy', command=lambda: temp.destroy())
+    #     button.pack(ipadx=15)
+    #     temp.update_idletasks()
+    #     temp.geometry(f"{temp.winfo_width()}x{temp.winfo_height()}+{event.x_root}+{event.y_root}")
+    #     temp.bind('<FocusOut>', lambda x: temp.destroy())

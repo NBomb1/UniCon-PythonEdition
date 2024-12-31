@@ -63,7 +63,7 @@ class Module:
         self.api.getRoot().after(10000, self.update_modules)
 
     def update_modules(self):
-        for module in self.api.getModuleHandler().moduleStartupOrder:
+        for module in self.api.getModuleLoader().moduleStartupOrder:
             if module in self.foundModules:  # if not already added to the list, add it now
                 return
             self.foundModules.append(module)

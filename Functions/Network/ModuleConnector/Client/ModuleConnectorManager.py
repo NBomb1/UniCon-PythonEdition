@@ -32,10 +32,10 @@ class ClientModuleConnectorManager:
 
     def __accept(self, specialCode: bytes, id_: str, account: Account, moduleId: str):
         checkCode = hashlib.sha256(specialCode + self.salt).hexdigest().encode()
-        newSocket = socket.socket()
+        newSocket = socket.socket(account.socket.socket.family, account.socket.socket.type)
         newSocket.connect(self.messageTransfer.socket.getpeername())
         newSocket.send(checkCode)
-        messageTransfer = MessageTransfer(self.messageTransfer.accountManager, newSocket)
+        messageTransfer = MessageTransfer(self.messageTransfer.accountManager, newSocket, description=f'Module: {id_}')
         self.accountManager.getSelfAccount().addExtraConnection(id_, messageTransfer)
         account.addExtraConnection(id_, messageTransfer)
         self.accountManager.logs.sendLog(
