@@ -8,7 +8,7 @@ class AccountDataHandler:
     participants: list[Account] = []
     selfAccount: SelfAccount
 
-    #  Functions/Network/Accounts/AccountDataManager.py
+    #  Functions/Network/Accounts/AccountManager.py
     add: callable
     findByID: callable
     _disconnectAccount: callable

@@ -41,3 +41,9 @@ class SendingInfo(list[SendFileInfo]):
     def closeAll(self):
         for i in self:
             i.file.close()
+
+    def calculate_bytes_sent(self) -> int:
+        return sum(tuple(map(lambda x: x.sentSize, self)))
+
+    def calculate_bytes(self) -> int:
+        return sum(tuple(map(lambda x: x.fullSize, self)))

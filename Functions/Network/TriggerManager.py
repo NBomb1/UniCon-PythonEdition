@@ -1,5 +1,5 @@
 from Functions.Network.Accounts.AccountAuthentication.Server.PreAuthAccount import PreAccount
-from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.Accounts.AccountManager import AccountManager
 from Functions.Network.MainChannel.Client.MainChannel import ClientMainChannel
 from Functions.Network.MainChannel.Server.main import ServerMainChannel
 

@@ -52,4 +52,3 @@ class LeftSideInfo(tk.Frame):
     def on_click(self, event):
         self.rightWidgets.showExactModuleInfo(self.module)
     #     self.updateFunc(self.account)
-

@@ -7,6 +7,7 @@ from Functions.ModuleHandler.moduleAPI import API
 import tkinter as tk
 
 from Functions.Network.Accounts.AccountData import Account
+from Functions.Network.Accounts.SelfAccount import SelfAccount
 from Functions.Network.DataTransfer import MessageTransfer
 from Functions.Network.MainChannel.Server.main import ServerMainChannel
 from Functions.Network.ModuleConnector.Client.InviteConnectionInfo import InviteConnectionInfo
@@ -19,7 +20,7 @@ from UI.TKinter_addons.Text_chat import ChatText
 
 class Module:
     id_ = "GyUB7vkoB@7Vdv14dA%QLYs4kwmS99FygnTGSxo3CDIjR2r2IS06aBb6ZBmZIFl5"
-    version = "0.1.0"
+    version = "0.1.1"
     name = "Chat"
     author = "ArT"
     defaultNetworkAuth = True
@@ -34,6 +35,7 @@ class Module:
     def __init__(self, api: API):
         self.api = api
         self.logs = api.getLogs()
+        self.accountManager = self.api.getAccountManager()
         self.server: Server | None = None
         self.client: Client | None = None
         self.notebook = self.api.getRightNotebook()
@@ -57,17 +59,12 @@ class Module:
         self.api.getAccountManager().serverStoppedTrigger(self.startedAsServerClosed)
         self.unlockChat()
 
-        self.leftFrame.pack_forget()
-        self.listbox.pack(side=tk.RIGHT, fill=tk.BOTH, expand=False, ipadx=10)
-        self.leftFrame.pack(fill=tk.BOTH, expand=True)  # TODO: Finish this
-
     def startedAsServerClosed(self):
         self.api.getTriggerManager().accountAddedTriggerREMOVE(self.inviteAccount)
         self.api.getAccountManager().serverStoppedTriggerREMOVE(self.startedAsServerClosed)
         self.lockChat()
         self.server.stop()
         self.server = None
-        self.listbox.pack_forget()
 
     def startedAsClientDisconnected(self):
         self.lockChat()
@@ -80,6 +77,7 @@ class Module:
     def lockChat(self):
         self.entry_message.configure(state=tk.DISABLED)
         self.button_send.configure(state=tk.DISABLED)
+        self.frame.after(0, lambda: self.listbox.delete(0, tk.END))
 
     def setTypes(self, msg: MessageTransfer):
         msg.registerType('chat')
@@ -90,7 +88,7 @@ class Module:
         """Server function"""
         WaitingForConnectionInfo(
             self.id_,
-            self.api.getConnectorManager().server.addConnectionWaiting,
+            self.mcm.server.addConnectionWaiting,
             account,
             self.clientConnected,
             15,
@@ -115,8 +113,9 @@ class Module:
         self.entry_message.pack(side=tk.LEFT, anchor=tk.N, fill=tk.X, expand=tk.YES, ipady=3, pady=(4, 3))
         self.button_send.pack(ipadx=10, pady=(4, 3))
         # self.listbox.pack(side=tk.RIGHT, fill=tk.BOTH, expand=False, ipadx=10)
+        self.listbox.pack(side=tk.RIGHT, fill=tk.BOTH, expand=False, ipadx=10)
         self.leftFrame.pack(fill=tk.BOTH, expand=True)
-        self.log('This is the start of chat.')
+        self.log('This is the start of the chat.')
 
         # setting by defaults
         self.entry_message.configure(state=tk.DISABLED)
@@ -207,3 +206,23 @@ class Module:
     def isConnected(self):
         """Returns True if server or client class is initialized."""
         return self.server or self.client
+
+    def update_participants(self, participants: list[Account] | list[MessageTransfer], selfAccount: SelfAccount):
+        if participants and isinstance(participants[0], MessageTransfer):
+            participants = tuple(map(lambda x: x.account, participants))
+        self.listbox.delete(0, tk.END)
+        if self.accountManager.getIsServer():
+            self.listbox.insert(0, selfAccount.id + ' - ' + selfAccount.nickname)
+        self.listbox.insert(
+            1,
+            *tuple(
+                map(
+                    lambda x: x.id + ' - ' + x.nickname,
+                    participants
+                )
+            )
+        )
+
+        temp = self.listbox.get(0, 'end')
+        if len(set(temp)) != len(temp):
+            self.update_participants(participants, selfAccount)

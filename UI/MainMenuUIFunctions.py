@@ -1,5 +1,5 @@
 # the idea is to move buttons and their functions there for making readable code
-import socket
+import getpass
 import tkinter as tk
 from functools import partial
 from os import getcwd
@@ -7,7 +7,6 @@ from subprocess import Popen
 from sys import executable
 from threading import Thread, Timer
 from tkinter import simpledialog, ttk, messagebox
-import getpass
 
 import settings
 from Functions.Checks import checkInteger
@@ -15,20 +14,19 @@ from Functions.Exceptions.Server import DataCollectionException
 from Functions.ModuleHandler.moduleAPI import API
 from Functions.ModuleHandler.moduleLoader import ModuleLoader
 from Functions.Network.Accounts.AccountAuthentication.Server.ServerAuthentication import Authentication
-from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.Accounts.AccountManager import AccountManager
 from Functions.Network.Accounts.SelfAccount import SelfAccount
 from Functions.Network.FileTransfer.FileTransfer import FileTransfer
-# from Functions.Network.FileTransfer import FileTransfer
 from Functions.Network.MainChannel.Client.MainChannel import ClientMainChannel
 from Functions.Network.MainChannel.Server.main import ServerMainChannel
 from Functions.Network.PingManager import PingManager
 from Functions.Network.TriggerManager import TriggerManager
 from Functions.Starting.UpdateChecker import UpdaterInfo
 from Functions.Starting.UpdateChecker.checkVersion import check_for_updates
-from UI.TKinter_addons.Tools.DataSettings.Widgets.StringEntry import StringEntry
 from Functions.logManager import Logs
 from UI.ChildFrames.SettingsMenu import Settings
 from UI.Info import Info
+from UI.TKinter_addons.Tools.DataSettings.Widgets.StringEntry import StringEntry
 from UI.TKinter_addons.confirmationForButtons import functionConfirmation
 
 
@@ -147,7 +145,7 @@ class MainMenuUIFunctions:
                 raise ValueError("Incorrect maximum connections value.")
             if len(nickname) < 3 or len(nickname) > 15:
                 nickname = getpass.getuser()
-                self.left_entry_nickname.put(nickname)
+                self.left_entry_nickname.replace(nickname)
                 self.logs.sendLog("[Warning] Nickname was changed to user's name because of its length.", -1)
             if len(nickname) < 3 or len(nickname) > 15:
                 raise DataCollectionException.UsernameException("No nickname was given.")
@@ -155,7 +153,12 @@ class MainMenuUIFunctions:
                 raise DataCollectionException.UsernameException("Password not in length range (from 3 to 50).")
             if ip in ['', self.left_entry_ip.placeholder]:
                 ip = '127.0.0.1'
-                self.left_entry_ip.put('127.0.0.1')
+                self.left_entry_ip.replace('127.0.0.1')
+            while '  ' in nickname:
+                nickname = nickname.replace('  ', ' ')
+            if nickname != self.left_entry_nickname.get():
+                self.logs.sendLog("[Warning] The nickname was changed.", -1)
+                self.left_entry_nickname.replace(nickname)
 
             self.accountManager.setSelfAccount(SelfAccount(nickname))
             self.accountManager.startedAsServer()
@@ -174,7 +177,7 @@ class MainMenuUIFunctions:
                 self.settingsFrame.connectionSettings.checkButton_switchToIPv6.savedData,
                 self.fileTransfer
             )
-            self.left_entry_nickname.put(nickname)
+            self.left_entry_nickname.replace(nickname)
             self.lockInteraction()
             self.pingManager.getInfo(self.accountManager, True)
             self.triggerManager.serverStarted(self.server)
@@ -197,23 +200,27 @@ class MainMenuUIFunctions:
                 port = int(self.left_spinbox_port.get())
                 password = self.left_entry_password.get()
 
+                while '  ' in nickname:
+                    nickname = nickname.replace('  ', ' ')
                 if len(nickname) < 3 or len(nickname) > 15:
                     nickname = getpass.getuser()
-                    self.left_entry_nickname.put(nickname)
+                    self.left_entry_nickname.replace(nickname)
                     self.logs.sendLog("[Warning] Nickname was changed to user's name because of its length.", -1)
+                elif nickname != self.left_entry_nickname.get():
+                    self.logs.sendLog("[Warning] Your nickname has been changed.", -1)
+                    self.left_entry_nickname.replace(nickname)
                 if len(nickname) < 3 or len(nickname) > 15:
                     raise DataCollectionException.UsernameException("No nickname was given.")
                 if password != '' and (len(password) < 3 or len(password) > 50):
                     raise DataCollectionException.UsernameException("Password not in length range (from 3 to 50).")
-
                 if ip in ['', self.left_entry_ip.placeholder]:
                     ip = '127.0.0.1'
-                    self.left_entry_ip.put('127.0.0.1')
+                    self.left_entry_ip.replace('127.0.0.1')
 
                 self.accountManager.setSelfAccount(SelfAccount(nickname))
                 self.accountManager.startedAsClient()
 
-                self.left_entry_nickname.put(nickname)
+                self.left_entry_nickname.replace(nickname)
                 self.client = ClientMainChannel(
                     self.logs,
                     self.accountManager,
@@ -308,9 +315,10 @@ class MainMenuUIFunctions:
         )
 
     def closeConnection(self):
-        if self.accountManager.getIsServer() is None:
-            return
-        self.accountManager.closeConnection()
+        if self.accountManager.getIsServer() is not None:
+            self.accountManager.closeConnection()
+
+    def connection_closed(self):
         self.server = None
         self.client = None
         if not self.accountManager.getIsServer():
@@ -416,5 +424,4 @@ class MainMenuUIFunctions:
                 self.left_status_label.configure(text='Client mode')
         else:
             self.left_status_label.configure(text='No connection')
-        # self.left_status.pack(anchor=tk.E, side=tk.LEFT, expand=True)
         self.left_status_label.pack(anchor=tk.NW, side=tk.RIGHT, expand=True)

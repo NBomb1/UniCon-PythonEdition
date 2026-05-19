@@ -60,6 +60,12 @@ class ServerHandler(Actions, RequestRegistering):
                 state=state,
                 reason=request.error_text
             )
+
+            # calling functions if request is finished
+            for function in self.fileTransfer.trigger_requestRemoved:
+                function(request)
+            if self.all_requests.get(request.code):
+                self.all_requests.pop(request.code)
         elif state == self.state_sending:
             s.socket.send_message(
                 'FileTransfer',
@@ -168,8 +174,6 @@ class ServerHandler(Actions, RequestRegistering):
                     )
 
                     self.all_requests[code] = request
-                    self.receivingRequests[code] = request
-                    # request.updateState(self.state_serverAccepted)
                 elif isinstance(receiver, Account):
                     request = ClientToClient(
                         sender,
@@ -183,12 +187,17 @@ class ServerHandler(Actions, RequestRegistering):
                     )
 
                     self.all_requests[code] = request
-                    self.clientToClientRequests[code] = request
+
+                    self.all_requests.pop(request.code)
                 else:
                     return
                 request.updateState(self.state_serverAccepted, call_function=True)
 
                 self.checking_requests()
+
+                # calling function when request is created
+                for function in self.fileTransfer.trigger_requestAdded:
+                    function(request)
                 return
 
             request = self.all_requests.get(code)
@@ -216,13 +225,11 @@ class ServerHandler(Actions, RequestRegistering):
                     request.error_text = reason
                 request.is_finished = True
                 request.updateState(state)
-                self.all_requests.pop(request.code)
 
-                (
-                    self.receivingRequests if isinstance(request, SelfReceiver) else
-                    self.sendingRequests if isinstance(request, SelfSender) else
-                    self.clientToClientRequests
-                ).pop(request.code)  # Bruh
+                for function in self.fileTransfer.trigger_requestRemoved:
+                    function(request)
+                if self.all_requests.get(request.code):
+                    self.all_requests.pop(request.code)
         except Exception as e:
             self.sendError(code, sender.socket, e.__str__())
             print(format_exc())

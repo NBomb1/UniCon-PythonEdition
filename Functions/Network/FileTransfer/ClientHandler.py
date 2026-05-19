@@ -4,7 +4,7 @@ from traceback import format_exc
 from typing import TYPE_CHECKING
 
 from Functions.Network.Accounts.AccountData import Account
-from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.Accounts.AccountManager import AccountManager
 from Functions.Network.Accounts.SelfAccount import SelfAccount
 from Functions.Network.DataTransfer import MessageTransfer
 from Functions.Network.FileTransfer.Data.Actions import Actions
@@ -19,11 +19,6 @@ if TYPE_CHECKING:
 
 
 class ClientHandler(Actions, RequestRegistering):
-    # all_requests: dict[bytes, SelfSender | SelfReceiver] = {}  # TODO: New classes must be added
-    # sendingRequests: dict[bytes, SelfSender] = {}
-    # receivingRequests: dict[bytes, SelfReceiver] = {}
-    # otherRequests: dict = {}
-
     def __init__(self, accountManager: AccountManager, logs: Logs, fileTransfer: 'FileTransfer'):
         self.accountManager = accountManager
         self.logs = logs
@@ -52,18 +47,15 @@ class ClientHandler(Actions, RequestRegistering):
                 state=state,
                 reason=request.error_text
             )
+            request.is_finished = True
+
+            # calling functions if request is finished
+            for function in self.fileTransfer.trigger_requestRemoved:
+                function(request)
+            if request.code in self.all_requests:
+                self.all_requests.pop(request.code)
         elif state in (self.state_clientAccepted, self.state_serverAccepted):
             request.connect()
-            # if isinstance(request, SelfReceiver):
-            #     request.connect()
-            # elif isinstance(request, SelfSender):
-
-            # request.receiver.socket.send_message(
-            #     'FileTransfer',
-            #     code=code,
-            #     action=self.action_update,
-            #     state=self.state_sending
-            # )
         elif state == self.state_sending:
             if isinstance(request, SelfReceiver):
                 request.start_receiving()
@@ -134,13 +126,16 @@ class ClientHandler(Actions, RequestRegistering):
                     )
 
                     self.all_requests[code] = request
-                    self.receivingRequests[code] = request
                     request.updateState(self.state_clientAccepted, call_function=True, update_state=False)
                 else:
                     self.sendDecline(code, sender.socket, "Unsupportable.")
                     return
 
                 self.checking_requests()
+
+                # calling function when request is created
+                for function in self.fileTransfer.trigger_requestAdded:
+                    function(request)
                 return
 
             request = self.all_requests.get(code)
@@ -170,7 +165,6 @@ class ClientHandler(Actions, RequestRegistering):
                 request.updateState(state)
                 if self.all_requests.get(request.code):
                     self.all_requests.pop(request.code)
-                    self.receivingRequests.pop(request.code)
         except Exception as e:
             self.sendError(code, sender.socket, e.__str__())
             print(format_exc())

@@ -1,7 +1,7 @@
 import socket
 import threading
 
-from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.Accounts.AccountManager import AccountManager
 from Functions.Network.DataTransfer import MessageTransfer
 from Functions.Network.ModuleConnector.WaitingForConnectionInfo import WaitingForConnectionInfo
 

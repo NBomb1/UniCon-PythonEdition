@@ -17,7 +17,7 @@ from Functions.Network.Accounts.AccountAuthentication.Server.AuthenticationPhase
 from Functions.Network.Accounts.AccountAuthentication.Server.AuthenticationPhases._PhaseVerification import \
     _PhaseVerification
 
-from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.Accounts.AccountManager import AccountManager
 from Functions.Network.DataTransfer import MessageTransfer
 from Functions.Network.SecurityInfo import SecurityInfo
 from Functions.Network.Accounts.AccountAuthentication.Server.PreAuthAccount import PreAccount

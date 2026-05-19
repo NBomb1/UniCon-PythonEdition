@@ -13,7 +13,7 @@ from Functions.Network.FileTransfer.Data.States import RequestStates
 
 if TYPE_CHECKING:
     from Functions.Network.Accounts.AccountData import Account
-    from Functions.Network.Accounts.AccountDataManager import AccountManager
+    from Functions.Network.Accounts.AccountManager import AccountManager
 
 
 class MessageTransfer:
@@ -24,7 +24,6 @@ class MessageTransfer:
                  errorFunction=None,
                  description: str | None = None
                  ):
-        self.types = []
         self.registeredFunctions: dict[str, list[callable]] = {}
         self.account = None  # the problem is right here
         self.accountManager = accountManager
@@ -32,15 +31,14 @@ class MessageTransfer:
         self.socket = s
         self.sendMessages: list[bytes] = []
         self.errorFunction: callable = errorFunction
-        self.isSending = False  # IDK but theoretically it should prevent sending mixed data
         self.description = description
 
     def registerAccount(self, account: 'Account'):
         self.account = account
 
     def registerType(self, type_: str):
-        if type_ not in self.types:
-            self.types.append(type_)
+        if self.registeredFunctions.get(type_) is None:
+            self.registeredFunctions[type_] = []
 
     def registerFunction(self, type_: str, func: callable):
         """This will return to registered function a dictionary with all the data in message"""
@@ -52,11 +50,7 @@ class MessageTransfer:
     def _send(self, text: bytes) -> bool:
         """Returns true if message was sent successfully"""
         try:
-            while self.isSending:
-                sleep(0.0001)
-            self.isSending = True
             self.socket.send(text)
-            self.isSending = False
             return True
         except Exception as error:
             self._callErrorFunc(error)
@@ -66,13 +60,13 @@ class MessageTransfer:
         assert self.socket is not None, \
             "The socket is None. You can't send anything if socket is not registered."
 
-        if type_ not in self.types:
-            raise DataTransfer.TypeDoesntExistError(f"Type {type_} doesn't exists.", self.types)
+        if self.registeredFunctions.get(type_) is None:
+            raise DataTransfer.TypeDoesntExistError(f"Type {type_} doesn't exists.",
+                                                    self.registeredFunctions)
         kwargs['type'] = type_
         message = len(kwargs.__str__().encode()).__str__() + kwargs.__str__()
 
         if type_ == 'FileTransfer':
-            # print("sending: " + kwargs.__str__())
             kwargs['action'] = Actions.actions_dict_int_to_str.get(kwargs['action'])
             kwargs['state'] = RequestStates.states_dict_int_to_str.get(kwargs['state'])
             print(f"Sending: {kwargs}")  # TODO: DELETE IT
@@ -84,12 +78,19 @@ class MessageTransfer:
             return self._send(message.encode())
 
     def _receiveMessage(self):
+        """
+        Basically, recv() will make thread wait until it will get any data.
+        If the data is empty, it means that buffer is empty and socket is shut down.
+        So it will just close it after all messages will be handled.
+        """
         length = ''
         while True:
             got = self.socket.recv(1).decode()
             if got == '{':
                 length = int(length)
                 break
+            elif got == '':
+                self.socket.close()
             else:
                 length = length + got
         message = '{' + self.socket.recv(length - 1).decode()
@@ -100,14 +101,16 @@ class MessageTransfer:
         assert self.socket is not None, \
             "The socket is None. You can't send anything if socket is not registered."
 
-        def handler():
+        def message_handler():
             try:
                 while True:
                     message = self._receiveMessage()
                     message = literal_eval(message)
 
                     assert message['type'] is not None, 'Type cant be None'
-                    assert message['type'] in self.types, f"""Type "{message["type"]}" is not in list: {self.types}"""
+                    assert self.registeredFunctions.get(message['type']) is not None, \
+                        f"""Type "{message["type"]}" is not in list: {tuple(self.registeredFunctions.values())}. """ + \
+                        f"""{self.description}"""
 
                     if (funcList := self.registeredFunctions.get(message['type'])) is None:
                         self.logs.sendLog(f'No functions were registered for type {message["type"]}', -1)
@@ -124,13 +127,13 @@ class MessageTransfer:
                 self.logs.sendLog(f'[MessageTransfer] An error occurred while handling message error: {error}', -1)
                 self.logs.sendLog(f'[MessageTransfer] Details: {traceback.format_exc()}', -1)
                 self._callErrorFunc(error)
-        threading.Thread(target=handler, daemon=True).start()
+        threading.Thread(target=message_handler, daemon=True).start()
 
     def senderHandler(self):
         assert self.socket is not None, \
             "The socket is None. You can't send anything if socket is not registered."
 
-        def handler():
+        def sender_handler():
             while True:
                 try:
                     for i in self.sendMessages:
@@ -143,7 +146,7 @@ class MessageTransfer:
                     print('ERROR! - \n', error, '\ninfo: ', i, '\nlist: ', self.sendMessages)
                     self._callErrorFunc(error)
                 sleep(0.001)
-        threading.Thread(target=handler, daemon=True).start()
+        threading.Thread(target=sender_handler, daemon=True).start()
 
     def registerErrorFunction(self, func: callable):
         """Sets the function when the error occurs."""

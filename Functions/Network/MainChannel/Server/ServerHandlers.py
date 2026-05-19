@@ -1,7 +1,7 @@
 import socket
 import threading
 
-from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.Accounts.AccountManager import AccountManager
 from Functions.Network.Accounts.AccountAuthentication.Server.PreAuthAccount import PreAccount
 from Functions.Network.Accounts.AccountAuthentication.Server.ServerAuthentication import Authentication
 from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager

@@ -61,7 +61,7 @@ class EntryWithPlaceholder(tk.Entry):
     def get(self) -> str:
         return super().get() if self.placeholder != super().get() else ''
 
-    def put(self, text: str):
+    def replace(self, text: str):
         if not text:
             return
         status = self.cget('state')

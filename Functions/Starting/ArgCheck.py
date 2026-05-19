@@ -75,7 +75,7 @@ def argsCheckBeforeStart(logs: Logs):
             logs.showLogs()
         print(args.exportLogs)
         for i in args.exportLogs:
-            logs.registerFileLog(int(i), True)
+            logs.registerFileLog(i, True)
     except Exception as e:
         print(format_exc())
 

@@ -1,4 +1,7 @@
 import tkinter as tk
+import threading
+from os import getcwd
+from time import sleep
 
 import settings
 import tkinter.ttk as ttk
@@ -6,6 +9,7 @@ import tkinter.ttk as ttk
 from Functions.FileDataManager import FileDataManager
 from UI.ChildFrames.Categories.ConnectionSettings import ConnectionSettings
 from typing import TYPE_CHECKING
+from inspect import getfile
 
 from UI.ChildFrames.Categories.FileTransferSettings import FileTransferSettings
 from UI.ChildFrames.Categories.PingManagerSettings import PingManagerSettings
@@ -24,6 +28,7 @@ class Settings(ttk.Notebook):
                  dataManager: FileDataManager,
                  mainMenu: 'MainMenu'
                  ):
+        self.main_menu = mainMenu
         self.nicknameWidget = mainMenu.left_entry_nickname
         self.ipWidget = mainMenu.left_entry_ip
         self.portWidget = mainMenu.variable_port
@@ -42,6 +47,11 @@ class Settings(ttk.Notebook):
         self.fill_main()
         self.fill_info()
         self.completeCheckButton()
+
+        self.allThreads_label.bind("<Enter>", self.on_enter)
+        self.allThreads_label.bind("<Leave>", lambda x: self.allThreads_label.configure(
+            text=f'Threads count: {threading.active_count()}')
+                                   )
 
     def fill_main(self):
         self.add(self.settingsFrame, text="Main Settings")
@@ -70,10 +80,16 @@ class Settings(ttk.Notebook):
 
     def fill_info(self):
         self.add(self.app_infoFrame, text='About')
-        self.version_label = tk.Label(self.app_infoFrame, text='Version: ' + Info.version)
-        self.version_label.pack()
+
+        self.name_label = tk.Label(self.app_infoFrame, text='UniCon - v' + Info.version)
+        self.name_label.pack()
         self.projectStart_label = tk.Label(self.app_infoFrame, text='Project started: ' + settings.MainInfo.startDate)
         self.projectStart_label.pack()
+        self.allWidgets_label = tk.Label(self.app_infoFrame)
+        self.allWidgets_label.pack()
+        self.allThreads_label = tk.Label(self.app_infoFrame)
+        self.allThreads_label.pack()
+        threading.Thread(target=self.checking_widgets, daemon=True).start()
 
     def save(self):
         self.disableSaving()
@@ -117,17 +133,17 @@ class Settings(ttk.Notebook):
         if self.connectionSettings.checkButton_saveNickname.savedData:
             nickname = self.dataManager.get('main').get('nickname')
             if nickname:
-                self.nicknameWidget.put(nickname.__str__())
+                self.nicknameWidget.replace(nickname.__str__())
 
         if self.connectionSettings.checkButton_saveIP.savedData:
             ip = self.dataManager.get('main').get('ip')
             if ip:
-                self.ipWidget.put(ip.__str__())
+                self.ipWidget.replace(ip.__str__())
 
         if self.connectionSettings.checkButton_savePassword.savedData:
             password = self.dataManager.get('main').get('password')
             if password:
-                self.passwordWidget.put(password.__str__())
+                self.passwordWidget.replace(password.__str__())
 
         if self.connectionSettings.checkButton_savePort.savedData:
             port = self.dataManager.get('main').get('port')
@@ -138,3 +154,28 @@ class Settings(ttk.Notebook):
             maxConns = self.dataManager.get('main').get('maxConnections')
             if maxConns:
                 self.maxConnections.set(maxConns.__str__())
+
+    def checking_widgets(self):
+        def count(widget: tk.Widget | tk.Tk) -> int:
+            t = 1
+            for i in widget.children:
+                t+=count(widget.nametowidget(i))
+            return t
+
+        self.allThreads_label.configure(text=f'Threads count: {threading.active_count()}')
+        while True:
+            self.allWidgets_label.configure(text=f'Widgets count: {count(self.main_menu.root)}')
+            if self.allThreads_label.cget('text').startswith('Th'):
+                self.allThreads_label.configure(text=f'Threads count: {threading.active_count()}')
+            else:
+                self.on_enter()
+
+            sleep(0.5)
+
+    def on_enter(self, event=None):
+        l = threading.enumerate()
+        text = ''
+        for i in range(len(l)):
+            text += f"{i + 1}. {l[i].name} - " \
+                    f"{getfile(l[i]._target).replace(getcwd(), '') if l[i]._target is not None else None}\n"
+        self.allThreads_label.configure(text=text)

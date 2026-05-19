@@ -105,11 +105,9 @@ class Module(RightSideInfo):
             res.updateInfo()
 
     def clientDisconnected(self, account: Account):
-        # print('deleting', account)
         if (res := self.allAccounts.get(account)) is not None:
             res.destroy()
             self.allAccounts.pop(account)
-            # del res.mainFrame
 
     def connectionClosed(self):
         for i in self.allAccounts.keys():

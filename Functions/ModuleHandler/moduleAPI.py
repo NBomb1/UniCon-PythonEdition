@@ -4,7 +4,7 @@ from inspect import stack
 from os import getcwd
 
 from Functions.ModuleHandler.moduleLoader import ModuleLoader
-from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.Accounts.AccountManager import AccountManager
 from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager
 from Functions.Network.TriggerManager import TriggerManager
 from Functions.FileDataManager import FileDataManager

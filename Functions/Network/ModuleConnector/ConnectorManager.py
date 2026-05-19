@@ -1,5 +1,5 @@
 from Functions.ModuleHandler.moduleLoader import ModuleLoader
-from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.Accounts.AccountManager import AccountManager
 from Functions.Network.DataTransfer import MessageTransfer
 from Functions.Network.ModuleConnector.Server.ServerModuleConnectorManager import ModuleConnectorManager
 from Functions.Network.ModuleConnector.Client.ModuleConnectorManager import ClientModuleConnectorManager

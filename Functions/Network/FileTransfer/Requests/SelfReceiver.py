@@ -3,11 +3,12 @@ from hashlib import sha256
 from traceback import format_exc
 
 from Functions.Network.Accounts.AccountData import Account
-from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.Accounts.AccountManager import AccountManager
 from Functions.Network.FileTransfer.Data.Actions import Actions
 from Functions.Network.FileTransfer.Data.StatesHistory import StatesHistory
 from Functions.Network.FileTransfer.Files.Receiving import ReceivingFileInfo
 from Functions.Network.FileTransfer.Files.Receiving.FileReceivingContainer import ReceivingContainer
+from Functions.Network.FileTransfer.Files.Receiving.ReceivingFileInfo import ReceiveFileInfo
 from Functions.logManager import Logs
 
 
@@ -35,6 +36,7 @@ class SelfReceiver(StatesHistory, Actions):
         self.transfer_socket: None | socket.socket = None
 
         self.is_server = accountManager.getIsServer()
+        self.current: ReceiveFileInfo | None = None
 
     def set_socket(self, s: socket.socket):
         self.transfer_socket = s
@@ -60,6 +62,7 @@ class SelfReceiver(StatesHistory, Actions):
         """
         Helper method to receive a single file.
         """
+        self.current = file
         try:
             while True:
 

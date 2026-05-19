@@ -25,3 +25,6 @@ class ClientToClientContainer(list[ClientToClientFileInfo]):
 
     def calculate_bytes(self) -> int:
         return sum(self.files.values())
+
+    def calculate_bytes_sent(self) -> int:
+        return sum(tuple(map(lambda x: x.receivedSize, self.files)))

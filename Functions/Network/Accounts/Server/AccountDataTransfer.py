@@ -9,7 +9,6 @@ class AccountDataTransfer:
     # specially for server side
     participants: list[Account] = []
     selfAccount: SelfAccount
-    _updateAccountsFlag = False
     rights = {
         '_all': [
             Account.what_pc_name,
@@ -29,9 +28,8 @@ class AccountDataTransfer:
                 informationToGet.extend(self.rights.get(tag))
         informationToGet = set(informationToGet)
 
-        tempAccountList = []
+        tempAccountList = [self.selfAccount]
         tempAccountList.extend(self.participants)
-        tempAccountList.append(self.selfAccount)
 
         for i in tempAccountList:
             put = {}
@@ -42,11 +40,11 @@ class AccountDataTransfer:
         return send
 
     def updateAccountInfoHandler(self):
-        self._updateAccountsFlag = True
         self.accountDisconnectedTrigger(self._accountDisconnection)
 
         def handler1():
-            while self._updateAccountsFlag:
+            self_account = self.getSelfAccount()
+            while self.getSelfAccount() is self_account:
                 self._sendAllInfo()
                 sleep(60)
 

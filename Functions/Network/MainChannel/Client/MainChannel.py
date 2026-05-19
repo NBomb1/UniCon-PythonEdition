@@ -1,5 +1,5 @@
 from Functions.Network.Accounts.AccountAuthentication.Client.AuthenticationPassing import Authentication
-from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.Accounts.AccountManager import AccountManager
 from Functions.Network.DataTransfer import MessageTransfer
 from Functions.Network.SecurityInfo import SecurityInfo
 from Functions.Network.ModuleConnector.ConnectorManager import ConnectorManager

@@ -61,7 +61,6 @@ class Logs:
         def cycle():
             while True:
                 try:
-                    # '' if not self.logsMessages else print(self.logsMessages)
                     if self.logsMessages:
                         self.logsMessages.pop(0)()
                     sleep(settings.LogManager.messageDelay)

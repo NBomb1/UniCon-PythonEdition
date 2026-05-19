@@ -1,7 +1,7 @@
 import socket
 from typing import TYPE_CHECKING
 
-from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.Accounts.AccountManager import AccountManager
 from Functions.Network.SecurityInfo import SecurityInfo
 from Functions.logManager import Logs
 

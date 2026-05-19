@@ -6,7 +6,7 @@ from functools import partial
 
 from Functions.ModuleHandler.moduleAPI import API
 from Functions.Network.Accounts.AccountData import Account
-from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.Accounts.AccountManager import AccountManager
 from Functions.Network.Accounts.SelfAccount import SelfAccount
 from Functions.Network.DataTransfer import MessageTransfer
 

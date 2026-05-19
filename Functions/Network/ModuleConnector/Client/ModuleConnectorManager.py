@@ -4,7 +4,7 @@ from functools import partial
 
 from Functions.ModuleHandler.moduleLoader import ModuleLoader
 from Functions.Network.Accounts.AccountData import Account
-from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.Accounts.AccountManager import AccountManager
 from Functions.Network.DataTransfer import MessageTransfer
 from Functions.Network.ModuleConnector.Client.InviteConnectionInfo import InviteConnectionInfo
 

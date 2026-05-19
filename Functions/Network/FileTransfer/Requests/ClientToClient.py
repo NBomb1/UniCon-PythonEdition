@@ -1,7 +1,7 @@
 import socket
 
 from Functions.Network.Accounts.AccountData import Account
-from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.Accounts.AccountManager import AccountManager
 from Functions.Network.DataTransfer import MessageTransfer
 from Functions.Network.FileTransfer.Data.Actions import Actions
 from Functions.Network.FileTransfer.Data.StatesHistory import StatesHistory
@@ -36,6 +36,7 @@ class ClientToClient(StatesHistory, Actions):
         self.transfer_socket_sender: socket.socket | None = None
 
         self.is_server = accountManager.getIsServer()
+        self.current = 0
 
     def add_connection(self, s: socket.socket, is_sender: bool):
         if is_sender:
@@ -72,6 +73,7 @@ class ClientToClient(StatesHistory, Actions):
                     1024 if all_bytes - received_bytes > 1024 else all_bytes - received_bytes
                 )
             )
+            self.current = all_bytes / received_bytes
         self.send_finish(self.receiver.socket)
         self.send_finish(self.sender.socket)
         self.updateState(self.state_completed, call_function=True)

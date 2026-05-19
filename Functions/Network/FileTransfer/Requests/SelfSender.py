@@ -3,10 +3,11 @@ from hashlib import sha256
 from traceback import format_exc
 
 from Functions.Network.Accounts.AccountData import Account
-from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.Accounts.AccountManager import AccountManager
 from Functions.Network.FileTransfer.Data.Actions import Actions
 from Functions.Network.FileTransfer.Data.StatesHistory import StatesHistory
 from Functions.Network.FileTransfer.Files.Sending.FileSendingContainer import SendingInfo
+from Functions.Network.FileTransfer.Files.Sending.SendingFileInfo import SendFileInfo
 from Functions.logManager import Logs
 
 
@@ -35,6 +36,7 @@ class SelfSender(StatesHistory, Actions):
 
         self.is_server = accountManager.getIsServer()
         self.account_manager = accountManager
+        self.current: SendFileInfo | None = None
 
     def set_socket(self, s: socket.socket):
         self.transfer_socket = s
@@ -61,6 +63,7 @@ class SelfSender(StatesHistory, Actions):
 
         try:
             for file in self.file_container:
+                self.current = file
                 while file.fullSize != file.sentSize:
                     file.updateSentSize(
                         self.transfer_socket.send(
@@ -68,7 +71,7 @@ class SelfSender(StatesHistory, Actions):
                                 1024
                                 if file.fullSize - file.sentSize > 1024
                                 else file.fullSize - file.sentSize
-                                )
+                            )
                         )
                     )
         except Exception as e:

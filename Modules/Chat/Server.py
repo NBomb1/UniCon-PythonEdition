@@ -19,6 +19,7 @@ class Server:
         self.api = api
         self.logs = api.getLogs()
         self.selfAccount: SelfAccount = api.getAccountManager().getSelfAccount()
+        self.module.update_participants(self.participants, self.selfAccount)
 
     def errorOccurred(self, exception: Exception, m: MessageTransfer):
         self.logs.sendLog(f'[Chat] An error occurred in {m.account.id}: {exception}', -1)
@@ -26,45 +27,69 @@ class Server:
 
     def clientDisconnected(self, m):
         account = m.account
-        self.logs.sendLog(f'Client {account.nickname} - {account.id} disconnected from the chat.', -1)
         try:
             self.participants.remove(m)
         except ValueError:
             pass
-        self.sendMessage(f'Client {account.nickname} - {account.id} disconnected from the chat.', 'sys')
-        self.update_participants()
+        self.module.update_participants(self.participants, self.selfAccount)
+        self.sendMessage(str(account.id), 'rem')
+        self.module.log(f'{account.nickname} - {account.id} disconnected from the chat.', datetime.datetime.now()
+                        .replace(microsecond=0))
 
     def add(self, participant: MessageTransfer):
+        participant.registerErrorFunction(self.errorOccurred)
+        participant.registerFunction('chat', self.getMessage)
+        participant.registerFunction('close', self.getMessage)
+        participant.registerType('add')
+        participant.registerType('add-m')
+        participant.registerType('rem')
+
+        temp = list(map(lambda x: x.account.id, self.participants))
+        temp.insert(0, self.selfAccount.id)
+        temp.append(participant.account.id)
+
+        participant.send_message(
+            'add-m',
+            msg=temp
+        )
+        self.sendMessage(
+            participant.account.id,
+            'add'
+        )
         self.participants.append(participant)
         participant.handleMessages()
         participant.senderHandler()
-        participant.registerErrorFunction(self.errorOccurred)
-        participant.registerFunction('chat', self.getMessage)
-        participant.registerFunction('close', self.clientDisconnected)
-        self.sendMessage(
-            f'Client {participant.account.nickname} - {participant.account.id} connected to the chat.',
-            'sys'
-        )
-        self.update_participants()
+        self.module.update_participants(self.participants, self.selfAccount)
+
+        account = participant.account
+        self.module.log(f'{account.nickname} - {account.id} connected to the chat.', datetime.datetime.now()
+                        .replace(microsecond=0))
 
     def sendMessage(self, message: str, type: str):
         time = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0)
+        is_chat = type == 'chat'
         for i in self.participants:
             try:
-                i.send_message(type,
-                               msg=message,
-                               nickname=self.selfAccount.nickname,
-                               id=self.selfAccount.id,
-                               time=int(time.timestamp())
-                               )
+                if is_chat:
+                    i.send_message(type,
+                                   msg=message,
+                                   nickname=self.selfAccount.nickname,
+                                   id=self.selfAccount.id,
+                                   time=int(time.timestamp())
+                                   )
+                else:
+                    i.send_message(type,
+                                   msg=message,
+                                   time=int(time.timestamp())
+                                   )
             except Exception as e:
                 self.logs.sendLog(f'[Chat] An exception occurred while sending message to {i.account.id}', -1)
-                self.logs.sendLog(f'[Chat] {i.account.id_} exception: {format_exc()}', -1)
+                self.logs.sendLog(f'[Chat] {i.account.id} exception: {format_exc()}', -1)
                 self.errorOccurred(e, i)
-        if type != 'sys':
+        if type == 'chat':
             self.logMessage(self.selfAccount.nickname, self.selfAccount.id, message, time, True)
-        else:
-            self.module.log(message, time)
+        # else:
+        #     self.module.log(message, time)
 
     def getMessage(self, m):
         try:
@@ -88,7 +113,6 @@ class Server:
             self.errorOccurred(e, m)
 
     def stop(self):
-        self.logs.sendLog('[Chat] Closing connection chat.', -1)
         for i in self.participants:
             i.send_message(
                 'close',
@@ -96,8 +120,7 @@ class Server:
             )
             i.account.removeExtraConnectionExact(self.ModuleId, i)
         self.participants.clear()
-        self.logs.sendLog('[Chat] Chat closed successfully.', -1)
-        self.update_participants()
+        self.module.update_participants(self.participants, self.selfAccount)
 
     def logMessage(self, nickname: str, id: str, message: str, time: datetime.datetime, markGreen=False):
         try:
@@ -115,19 +138,3 @@ class Server:
                 )
         except AttributeError:
             self.stop()
-
-    # def sendMessage(self, type: str, id_: str, msg: str, nickname: str, time: datetime):
-
-    def update_participants(self):
-        self.module.listbox.delete(0, 'end')
-        # Add to participants "you"?
-        self.module.listbox.insert(0, self.selfAccount.id + ' - ' + self.selfAccount.nickname)
-        self.module.listbox.insert(
-            1,
-            *tuple(
-                map(
-                    lambda x: x.account.id + ' - ' + x.account.nickname,
-                    self.participants
-                )
-            )
-        )

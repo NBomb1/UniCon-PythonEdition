@@ -1,6 +1,6 @@
 import socket as s
 
-from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.Accounts.AccountManager import AccountManager
 from Functions.Network.DataTransfer import MessageTransfer
 from Functions.Network.SecurityInfo import SecurityInfo
 from Functions.Network.MainChannel.Server.ServerHandlers import ServerInformation

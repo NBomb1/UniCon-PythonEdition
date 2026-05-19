@@ -2,7 +2,7 @@ import tkinter as tk
 from os import getcwd
 from tkinter import ttk
 
-from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.Accounts.AccountManager import AccountManager
 from Functions.Network.FileTransfer.FileTransfer import FileTransfer
 from Functions.Network.MainChannel.Client.MainChannel import ClientMainChannel
 from Functions.Network.MainChannel.Server.main import ServerMainChannel
@@ -63,7 +63,7 @@ class MainMenu(MainMenuUIFunctions):
         self.module = ModuleLoader(self.logs, self.moduleLoaderError, self.right_notebook, self.root, dataManager)
         self.triggerManager = TriggerManager(self.accountManager)
         self.mcm = ConnectorManager(self.module, self.accountManager)
-        self.fileTransfer = FileTransfer()
+        self.fileTransfer = FileTransfer(self.accountManager)
 
         self.api = API(
                 log,
@@ -96,6 +96,9 @@ class MainMenu(MainMenuUIFunctions):
 
         self.left_status_frame.bind("<Enter>", self.showParticipants)
         self.left_status_frame.bind("<Leave>", self.hideParticipants)
+
+        self.accountManager.serverStoppedTrigger(self.connection_closed)
+        self.accountManager.clientStoppedTrigger(self.connection_closed)
 
     def _createLeftWidgets(self):
         # Creating two frames that will contain all sorts of widgets

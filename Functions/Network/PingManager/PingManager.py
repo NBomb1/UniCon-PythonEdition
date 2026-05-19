@@ -9,7 +9,7 @@ from time import sleep
 
 from Functions.ModuleHandler.moduleAPI import API
 from Functions.Network.Accounts.AccountData import Account
-from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.Accounts.AccountManager import AccountManager
 from Functions.Network.DataTransfer import MessageTransfer
 from Functions.Network.ModuleConnector.Client.InviteConnectionInfo import InviteConnectionInfo
 from Functions.Network.ModuleConnector.WaitingForConnectionInfo import WaitingForConnectionInfo
@@ -32,6 +32,7 @@ class Module:
         self.api.getAccountManager().serverStoppedTrigger(
             lambda: self.api.getTriggerManager().accountAddedTriggerREMOVE(self.startPing)
         )
+        self.pingSize = 2
         self.sendFakeLatency = \
             self.api.getMainMenu().settingsFrame.pingManagerSettings.checkButton_sendFakeLatencyToServer
         # self.logs.sendLog('[PingManager] Module has been loaded!', 0)
@@ -63,12 +64,12 @@ class Module:
         def echo():
             try:
                 while True:
-                    msg = s.socket.recv(16)
+                    msg = s.socket.recv(self.pingSize)
                     if self.sendFakeLatency.savedData:
                         sleep(random.randint(1, 500) / 1000)  # creating random fake latency for tests
                     # s.socket.send(msg.upper() if random.randint(0, 5) == 1 else msg)
                     s.socket.send(msg)
-                    # s.socket.send(s.socket.recv(16))  # default
+                    # s.socket.send(s.socket.recv(self.pingSize))  # default
             except (ConnectionAbortedError, OSError):
                 self.api.getTriggerManager().accountManager.closeConnection()
 
@@ -81,10 +82,10 @@ class Module:
         def pingHandler():
             try:
                 while True:
-                    code = urandom(16)
+                    code = urandom(self.pingSize)
                     start = datetime.now()
                     socket.send(code)
-                    if (recv := socket.recv(16)) == code:
+                    if (recv := socket.recv(self.pingSize)) == code:
                         res = int((datetime.now() - start).total_seconds() * 1000)  # ms
                         info.account.update_ping(
                             (res + random.randint(1, 500))

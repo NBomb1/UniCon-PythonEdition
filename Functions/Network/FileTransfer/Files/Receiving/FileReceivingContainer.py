@@ -61,5 +61,11 @@ class ReceivingContainer(list[ReceivingFileInfo]):
     def sending_information_format(self) -> dict:
         text = {}
         for i in self:
-            text[i.fullPath.split('/')[-1]] = i.fullSize
+            text[i.fullPath.split('\\')[-1]] = i.fullSize
         return text
+
+    def calculate_bytes_sent(self) -> int:
+        return sum(tuple(map(lambda x: x.receivedSize, self)))
+
+    def calculate_bytes(self) -> int:
+        return sum(self.files.values())

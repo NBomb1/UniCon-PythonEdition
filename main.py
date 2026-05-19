@@ -7,9 +7,10 @@ PyUAC - Checks admin rights.
 win32 - Task Manager.
 
 Available app args:
+
 * "--startAsAdmin" - starts application as admin.
 * "--updated" - removes versionChanger.py if it exists, updates task in task manager and shows update message.
-* "--host", "-h" - starts the server automatically.
+* "--server", "-s" - starts the server automatically.
 * "--client", "-c" - starts connecting automatically. Doesn't work with "-host".
 * "--autoReconnection" - Creates a loop that tries to connect to the server after a period of time (20 sec by default).
 * "--noUpdateCheck" - doesn't check for updates.
@@ -19,6 +20,47 @@ Available app args:
 * "--logsPrint" - prints logs to the console. Doesn't count as a registered function.
 * "--exportLogs" - exports program logs to Logs folder.
 
+UPDATE 0.1.7
+
+- NEW: Added module FileTransfer.
+- NEW: Clients can see connected chat participants in module Chat.
+- NEW: Added extra info in tab "About" such as widget count and threads info.
+- NEW: Added exception for modules with same id. (It was originally added in 0.1.6, but I forgot to mention it)
+
+- FIXED: Inability to get data if connection was closed. -- not finished
+- FIXED: Incorrect order of accounts.
+- FIXED: Incorrect account disconnection while closing connection.
+- FIXED: "--exportLogs" wasn't working.
+- FIXED: A thread that sends info to participants 1 time per minute wasn't terminating after closing the server.
+
+- CHANGES: Reduced the size of ping data from 16 to 2 symbols.
+- CHANGED: Enhancement of network code.
+- CHANGED: Improved MessageTransfer.
+- CHANGED: Added additional info in tab "About".
+"""
+
+"""
+
+UPDATE 0.1.7 - GOALS.
+1. Finish the FileTransfer module.
+2. Create new auto-update system.
+3. No more than 1 space in nickname. 
+4. The server cant be closed after messaging.
+5. highlight participant's id and nickname in chat (connected & disconnected).
+6. Freeze when saving log data in module logs by button.
+
+UPDATE 0.2.0 - GOALS.
+1. File transfer module and system.
+3. Simplify file transfer system.
+4. API key expire message.
+5. Add trigger to entry disabling event.
+6. Fix server sending file and being not able client see the kick
+7. Bug: enabled default arguments checkbutton doesn't disable entry if it was enabled by the start.
+8. Recheck the task manager module and fix issues. (can be ignored till next update)
+9. Connection timeout settings.
+11. Add settings widgets to API.
+12. Rewrite code.
+13. Use Pyqt5.
 """
 
 from UI.Info import Info
@@ -67,6 +109,7 @@ Update plan (Might change at any moment):
 10. Enhance widgets.
 11. Reserve modules ids and make conflict message.
 12. Module Logs sendLog update.
+13. Move to Rust.
 """
 
 from os import getcwd, chdir
@@ -105,9 +148,9 @@ def main():
         argsDefault(dataManager)
         dataManager.get('main').put('lastStart', datetime.now().timestamp())
         logManager = Logs()  # Creating log manager
+        logManager.registerId(0)
         argsCheckBeforeStart(logManager)
 
-        logManager.registerId(0)
         logManager.registerId(-1)
         logManager.registerId(-2)
         logManager.registerId(-3)

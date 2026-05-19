@@ -3,7 +3,7 @@ import socket as s
 from ast import literal_eval
 
 from Functions.Network.Accounts.AccountData import Account
-from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.Accounts.AccountManager import AccountManager
 from Functions.Network.DataTransfer import MessageTransfer
 from Functions.Network.SecurityInfo import SecurityInfo
 from Functions.logManager import Logs

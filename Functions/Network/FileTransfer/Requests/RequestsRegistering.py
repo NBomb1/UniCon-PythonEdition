@@ -4,7 +4,7 @@ from os import urandom
 from typing import TYPE_CHECKING
 
 from Functions.Network.Accounts.AccountData import Account
-from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.Accounts.AccountManager import AccountManager
 from Functions.Network.FileTransfer.Data.States import RequestStates
 from Functions.Network.FileTransfer.Files.Receiving.FileReceivingContainer import ReceivingContainer
 from Functions.Network.FileTransfer.Files.Sending.FileSendingContainer import SendingInfo
@@ -19,9 +19,6 @@ if TYPE_CHECKING:
 
 class RequestRegistering(RequestStates):
     all_requests: dict[bytes, SelfSender | SelfReceiver | ClientToClient] = {}
-    sendingRequests: dict[bytes, SelfSender] = {}
-    receivingRequests: dict[bytes, SelfReceiver] = {}
-    clientToClientRequests: dict[bytes, ClientToClient] = {}
 
     accountManager: AccountManager
     logs: Logs
@@ -50,9 +47,12 @@ class RequestRegistering(RequestStates):
         request.invite()
 
         self.all_requests[code] = request
-        self.sendingRequests[code] = request
 
         self.checking_requests()
+
+        # calling function when request is created
+        for function in self.fileTransfer.trigger_requestAdded:
+            function(request)
         return request
 
     def __registerSelfReceivingRequest(self, receiver: Account, file_container: ReceivingContainer, moduleID: str,
@@ -73,7 +73,6 @@ class RequestRegistering(RequestStates):
         request.updateState(self.state_serverAccepted)
 
         self.all_requests[code] = request
-        self.receivingRequests[code] = request
 
         self.checking_requests()
         return request
@@ -83,9 +82,18 @@ class RequestRegistering(RequestStates):
             f"""------Checking-requests-info--------\n\n"""
             f"""=============Count==================\n"""
             f"""All requests: {len(self.all_requests)}\n"""
-            f"""Sending requests: {len(self.sendingRequests)}\n"""
-            f"""Receiving requests: {len(self.receivingRequests)}\n"""
-            f"""Other requests: {len(self.clientToClientRequests)}\n"""
+            f"""Sending requests: {len(tuple(filter(
+                lambda x: isinstance(x, SelfSender),
+                self.all_requests
+            )))}\n"""
+            f"""Receiving requests: {len(tuple(filter(
+                lambda x: isinstance(x, SelfReceiver),
+                self.all_requests
+            )))}\n"""
+            f"""Other requests: {len(tuple(filter(
+                lambda x: isinstance(x, ClientToClient),
+                self.all_requests
+            )))}\n"""
             f"""=====================================\n\n"""
             f"""================Info================\n"""
         )

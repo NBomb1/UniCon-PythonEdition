@@ -2,7 +2,7 @@ from Functions.Network.FileTransfer.ClientHandler import ClientHandler
 from Functions.Network.FileTransfer.Data.Actions import Actions
 from Functions.logManager import Logs
 from Functions.ModuleHandler.moduleAPI import API
-from Functions.Network.Accounts.AccountDataManager import AccountManager
+from Functions.Network.Accounts.AccountManager import AccountManager
 from Functions.Network.Accounts.AccountData import Account
 from Functions.Network.FileTransfer.Data.States import RequestStates
 from Functions.Network.FileTransfer.Files.Sending.FileSendingContainer import SendingInfo
@@ -21,11 +21,14 @@ if TYPE_CHECKING:
 
 
 class FileTransfer(RequestStates):
-    def __init__(self):
-        self.accountManager: AccountManager | None = None
+    def __init__(self, accountManager: AccountManager):
+        self.accountManager: AccountManager = accountManager
         self.api: None | API = None
         self.logs: None | Logs = None
-        self.requestsHandler: None | ServerHandler = None
+        self.requestsHandler: None | ServerHandler | ClientHandler = None
+
+        self.trigger_requestRemoved = []
+        self.trigger_requestAdded = []
 
         self.__mainMenu: None | 'MainMenu' = None
         self.settings: None | FileTransferSettings = None
@@ -34,6 +37,9 @@ class FileTransfer(RequestStates):
         self.auto_receiving: None | CheckButton = None
         self.allowUnknownModules_serverSide: None | CheckButton = None
         self.allowUnknownModules: None | CheckButton = None
+
+        self.accountManager.serverStoppedTrigger(self.connection_closed)
+        self.accountManager.clientStoppedTrigger(self.connection_closed)
 
     def getApi(self, api: API) -> None:
         """Инициализация API и AccountManager."""
@@ -108,3 +114,12 @@ class FileTransfer(RequestStates):
             self.accountManager.getOwner().socket.registerFunction(
                 'FileTransfer', self._main_response_handler
             )
+
+    def connection_closed(self):
+        self.requestsHandler = None
+
+    def request_added_Trigger(self, func: callable):
+        self.trigger_requestAdded.append(func)
+
+    def request_removed_Trigger(self, func: callable):
+        self.trigger_requestRemoved.append(func)
