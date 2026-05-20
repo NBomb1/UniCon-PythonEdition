@@ -2,6 +2,7 @@
 
 ### What is UniCon?
 UniCon is a modular, multifunctional networking program designed for flexibility and reliability.
+<img width="1390" height="723" alt="image" src="https://github.com/user-attachments/assets/b1ad0e16-1711-471d-a3ae-c13a42e48829" />
 
 > **Note:** This Python version is a prototype. Its architectural concepts are currently being rewritten in a different language with a refactored architecture to get better performance and memory safety.
 
