@@ -10,7 +10,7 @@ UniCon is a modular, multifunctional networking program designed for flexibility
 UniCon includes several modules:
 * **AccountManager**
 * **Chat**
-* **FileTransfer (v0.1.7)**
+* **FileTransfer**
 * **PingManager** & **ModuleViewer**
 * **Logging System**
 
